@@ -102,7 +102,6 @@ TODO
 
 ## Roadmap to Publish
 
-* Update all licenses
 * Remove all todo 0 and 1s
 * Settings for binaries?
 * Browser package.json update versions?
