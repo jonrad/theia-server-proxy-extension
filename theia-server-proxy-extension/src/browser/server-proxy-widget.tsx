@@ -20,7 +20,6 @@ import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { CommandRegistry } from '@theia/core/lib/common';
 import { ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxyRequest } from './server-proxy-request';
-import { BUSY_CLASS } from '@theia/core/lib/browser';
 import { ServerProxyContentStyle } from './server-proxy-content-style';
 
 @injectable()
