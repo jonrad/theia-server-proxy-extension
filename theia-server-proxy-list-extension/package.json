@@ -1,21 +1,21 @@
 {
-  "name": "theia-server-proxy-extension",
+  "name": "theia-server-proxy-list-extension",
   "keywords": [
     "theia-extension"
   ],
   "version": "0.0.0",
   "files": [
     "lib",
-    "src"
+    "src",
+    "styles/*"
   ],
   "dependencies": {
     "@theia/core": "latest",
     "@theia/filesystem": "latest",
-    "@theia/mini-browser": "latest",
     "@theia/keymaps": "latest",
     "@theia/workspace": "latest",
     "@theia/plugin-ext": "latest",
-    "theia-server-proxy-iframe-extension": "0.0.0",
+    "theia-server-proxy-extension": "0.0.0",
     "get-port": "^5.1.1",
     "http-proxy-middleware": "^1.0.6"
   },
@@ -31,8 +31,7 @@
   },
   "theiaExtensions": [
     {
-      "frontend": "lib/browser/server-proxy-frontend-module",
-      "backend": "lib/node/server-proxy-backend-module"
+      "frontend": "lib/browser/server-proxy-list-frontend-module"
     }
   ]
 }

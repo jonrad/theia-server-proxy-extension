@@ -14,7 +14,9 @@
     "@theia/process": "latest",
     "@theia/terminal": "latest",
     "@theia/workspace": "latest",
-    "theia-server-proxy-extension": "0.0.0"
+    "theia-server-proxy-list-extension": "0.0.0",
+    "theia-jupyter-extension": "0.0.0",
+    "theia-rstudio-extension": "0.0.0"
   },
   "devDependencies": {
     "@theia/cli": "latest"

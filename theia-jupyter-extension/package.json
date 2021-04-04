@@ -1,22 +1,19 @@
 {
-  "name": "theia-server-proxy-extension",
+  "name": "theia-jupyter-extension",
   "keywords": [
     "theia-extension"
   ],
   "version": "0.0.0",
   "files": [
     "lib",
-    "src"
+    "src",
+    "assets"
   ],
   "dependencies": {
     "@theia/core": "latest",
-    "@theia/filesystem": "latest",
-    "@theia/mini-browser": "latest",
-    "@theia/keymaps": "latest",
-    "@theia/workspace": "latest",
-    "@theia/plugin-ext": "latest",
+    "@theia/navigator": "latest",
+    "theia-server-proxy-extension": "0.0.0",
     "theia-server-proxy-iframe-extension": "0.0.0",
-    "get-port": "^5.1.1",
     "http-proxy-middleware": "^1.0.6"
   },
   "devDependencies": {
@@ -31,8 +28,8 @@
   },
   "theiaExtensions": [
     {
-      "frontend": "lib/browser/server-proxy-frontend-module",
-      "backend": "lib/node/server-proxy-backend-module"
+      "frontend": "lib/browser/jupyter-frontend-module",
+      "backend": "lib/node/jupyter-backend-module"
     }
   ]
 }

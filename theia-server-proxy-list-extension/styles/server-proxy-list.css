@@ -1,0 +1,69 @@
+/**
+ * Copyright (c) 2020 Gitpod GmbH. All rights reserved.
+ * Licensed under the GNU Affero General Public License (AGPL).
+ * See License-AGPL.txt in the project root for license information.
+ */
+
+.server-proxy-list .row {
+    width:  100%;
+    padding: var(--theia-ui-padding) 0 var(--theia-ui-padding) 0;
+    display: flex;
+    align-items: center;
+    min-height: 21px;
+}
+
+.server-proxy-list .row:hover {
+    cursor: pointer;
+    background: var(--theia-list-hoverBackground);
+    color: var(--theia-list-hoverForeground);
+}
+
+.server-proxy-list .cell {
+    min-width: 20%;
+    display:  inline-block;
+}
+
+.server-proxy-list .status-started {
+    color: var(--theia-notificationsInfoIcon-foreground);
+}
+.server-proxy-list .status-started:before {
+    content: "\f111";
+}
+.server-proxy-list .status-loading {
+    color: var(--theia-notificationsWarningIcon-foreground);
+}
+.server-proxy-list .status-loading:before {
+    content: "\f1db";
+}
+.server-proxy-list .status-stopped {
+    color: var(--theia-notificationsErrorIcon-foreground);
+}
+.server-proxy-list .status-stopped:before {
+    content: "\f05e";
+}
+
+.server-proxy-list .indicator {
+    margin-left: var(--theia-ui-padding);
+}
+
+.server-proxy-list .number {
+    margin-left: var(--theia-ui-padding);
+}
+
+.server-proxy-list .name {
+    margin-left: var(--theia-ui-padding);
+    color: var(--theia-descriptionForeground);
+}
+
+.server-proxy-list .actions {
+    flex: 1;
+    justify-self:  flex-end;
+    display: flex;
+    justify-content: flex-end;
+    align-content:  center;
+    margin-right: var(--theia-ui-padding);
+}
+
+.server-proxy-list .actions i {
+    margin-left:  5px;
+}

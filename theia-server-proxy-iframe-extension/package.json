@@ -1,5 +1,5 @@
 {
-  "name": "theia-server-proxy-extension",
+  "name": "theia-server-proxy-iframe-extension",
   "keywords": [
     "theia-extension"
   ],
@@ -11,13 +11,10 @@
   "dependencies": {
     "@theia/core": "latest",
     "@theia/filesystem": "latest",
-    "@theia/mini-browser": "latest",
     "@theia/keymaps": "latest",
+    "@theia/mini-browser": "latest",
     "@theia/workspace": "latest",
-    "@theia/plugin-ext": "latest",
-    "theia-server-proxy-iframe-extension": "0.0.0",
-    "get-port": "^5.1.1",
-    "http-proxy-middleware": "^1.0.6"
+    "@theia/plugin-ext": "latest"
   },
   "devDependencies": {
     "rimraf": "latest",
@@ -31,8 +28,7 @@
   },
   "theiaExtensions": [
     {
-      "frontend": "lib/browser/server-proxy-frontend-module",
-      "backend": "lib/node/server-proxy-backend-module"
+      "frontend": "lib/browser/iframe-frontend-module"
     }
   ]
 }
