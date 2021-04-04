@@ -19,7 +19,7 @@ import { injectable, inject } from 'inversify';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { CommandRegistry } from '@theia/core/lib/common';
 import { ServerProxyRpcServer } from '../common/rpc';
-import { ServerProxyRequest } from './server-proxy-request';
+import { ServerProxyWidgetContext } from './server-proxy-widget-context';
 import { ServerProxyContentStyle } from './server-proxy-content-style';
 
 @injectable()
@@ -37,53 +37,50 @@ export class ServerProxyWidget extends ReactWidget {
 
     private appId: number | undefined = undefined;
 
-    private serverProxyRequest: ServerProxyRequest;
+    private context: ServerProxyWidgetContext;
 
     constructor() {
         super();
     }
 
-    public async init(request: ServerProxyRequest): Promise<void> {
-        // TODO 2 this is very wrong
-        this.id = request.serverProxy.id;
+    public async init(context: ServerProxyWidgetContext): Promise<void> {
+        this.id = context.id;
 
-        this.serverProxyRequest = request;
+        this.context = context;
 
-        this.title.label = this.serverProxyRequest.serverProxy.name;
-        this.title.caption = this.serverProxyRequest.serverProxy.name;
+        this.title.label = this.context.serverProxy.name;
+        this.title.caption = this.context.serverProxy.name;
         this.title.closable = true;
 
-        // TODO 0 get this out of here
-        const promise = this.serverProxyRpcServer.startApp(
-            this.serverProxyRequest.serverProxy.id,
-            this.serverProxyRequest.path.toString()
-        );
+        const promise = context.appPromise;
 
         this.update();
 
-        const appId = await promise;
+        promise.then((appId: number | undefined) => {
+          if (!appId) {
+              // TODO some information
+              this.dispose();
+              return;
+          }
 
-        if (!appId) {
-            this.dispose();
-            return;
-        }
-
-        this.appId = appId;
-        this.ready = true;
-        this.update();
+          this.appId = appId;
+          this.ready = true;
+          this.update();
+        })
     }
 
     public dispose(): void {
-        if (this.appId) {
-            this.serverProxyRpcServer.stopApp(this.appId);
-        }
+        this.context.appPromise.then(p => {
+          this.context.stop();
+        });
+
         super.dispose();
     }
 
     protected render(): React.ReactNode {
         if (this.ready) {
             // TODO use function for uri
-            return <iframe src={`/server-proxy/${this.serverProxyRequest.serverProxy.id}/${this.appId}/`} style={{
+            return <iframe src={`/server-proxy/${this.context.serverProxy.id}/${this.appId}/`} style={{
                 width: '100%',
                 height: '100%'
             }}></iframe>;

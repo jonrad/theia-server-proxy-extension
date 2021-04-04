@@ -17,7 +17,7 @@
 import { Widget, WidgetFactory } from '@theia/core/lib/browser';
 import { injectable, inject } from 'inversify';
 import { ServerProxyWidget } from './server-proxy-widget';
-import { ServerProxyRequest } from './server-proxy-request';
+import { ServerProxyWidgetContext } from './server-proxy-widget-context';
 
 @injectable()
 export class ServerProxyWidgetFactory implements WidgetFactory {
@@ -28,9 +28,9 @@ export class ServerProxyWidgetFactory implements WidgetFactory {
     ) {
     }
 
-    async createWidget(serverProxyRequest: ServerProxyRequest): Promise<Widget> {
+    async createWidget(widgetContext: ServerProxyWidgetContext): Promise<Widget> {
         const widget = this.serverProxyWidgetFactory();
-        widget.init(serverProxyRequest);
+        widget.init(widgetContext);
 
         return widget;
     }

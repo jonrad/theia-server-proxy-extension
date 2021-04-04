@@ -104,15 +104,14 @@ TODO
 
 * Update all licenses
 * Remove all todo 0 and 1s
-* Figure out how to publish default rstudio/jupyter conf files
 * Settings for binaries?
 * Browser package.json update versions?
 * Handle error on load
-* Update "Waiting" to something... reasonable
-* Make widget not load the actual app!
 * Make sure can open in multiple workspaces
 * Debug command output
 * Test with different port/url
+* Fix spacing !@#$
+* widget context should have instance of app
 
 ## Roadmap of nice to haves
 
@@ -120,3 +119,4 @@ TODO
 * Fading of loading logo
 * Jupyter open files via theia
 * Do we really need to include src in the files?
+* Add cancellation to stop widget

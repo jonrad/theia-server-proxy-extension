@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2018 Ericsson and others.
+ * Copyright (C) 2021 Jon Radchenko and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -16,7 +16,20 @@
 
 import { ServerProxy } from '../common/server-proxy';
 
-export interface ServerProxyRequest {
-    serverProxy: ServerProxy;
-    path: string;
+export class ServerProxyWidgetContext {
+    constructor(
+      public readonly id: string,
+      public readonly serverProxy: ServerProxy,
+      public readonly path: string,
+      public readonly appPromise: Promise<number | undefined>,
+      private readonly doStop: (id: number) => void //TODO this is silly
+    ) { }
+
+    public stop(): void {
+      this.appPromise.then(p => {
+        if (p) {
+          this.doStop(p);
+        }
+      });
+    }
 }

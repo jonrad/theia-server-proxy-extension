@@ -18,8 +18,9 @@ import { injectable, inject } from 'inversify';
 import { WidgetOpenHandler, WidgetOpenerOptions } from '@theia/core/lib/browser';
 import { ServerProxyWidget } from './server-proxy-widget';
 import URI from '@theia/core/lib/common/uri';
-import { ServerProxyRequest } from './server-proxy-request';
+import { ServerProxyWidgetContext } from './server-proxy-widget-context';
 import { ServerProxyManager } from './server-proxy-manager';
+import { ServerProxyRpcServer } from '../common/rpc';
 
 @injectable()
 export class ServerProxyWidgetOpenHandler extends WidgetOpenHandler<ServerProxyWidget> {
@@ -30,6 +31,9 @@ export class ServerProxyWidgetOpenHandler extends WidgetOpenHandler<ServerProxyW
 
   @inject(ServerProxyManager)
   protected readonly serverProxyManager: ServerProxyManager;
+
+  @inject(ServerProxyRpcServer)
+  protected readonly serverProxyRpcServer: ServerProxyRpcServer;
 
   async canHandle(uri: URI, options?: WidgetOpenerOptions): Promise<number> {
     if (uri.scheme != ServerProxyWidgetOpenHandler.uriScheme) {
@@ -48,7 +52,7 @@ export class ServerProxyWidgetOpenHandler extends WidgetOpenHandler<ServerProxyW
     return 100;
   }
 
-  protected createWidgetOptions(uri: URI, options?: WidgetOpenerOptions): ServerProxyRequest {
+  protected createWidgetOptions(uri: URI, options?: WidgetOpenerOptions): ServerProxyWidgetContext {
     const serverProxyId = uri.authority;
     const path = uri.path;
 
@@ -58,9 +62,18 @@ export class ServerProxyWidgetOpenHandler extends WidgetOpenHandler<ServerProxyW
       throw Error(`Unknown server proxy id: ${serverProxyId}`);
     }
 
-    return {
-      path: path.toString(),
-      serverProxy: serverProxy
-    };
+    // TODO app starter or something
+    const promise = this.serverProxyRpcServer.startApp(
+      serverProxy.id,
+      path.toString()
+    );
+
+    return new ServerProxyWidgetContext(
+      uri.toString(),
+      serverProxy,
+      path.toString(),
+      promise,
+      this.serverProxyRpcServer.stopApp
+    );
   }
 }
