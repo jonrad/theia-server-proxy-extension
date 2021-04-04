@@ -109,7 +109,6 @@ TODO
 * Make sure can open in multiple workspaces
 * Debug command output
 * Test with different port/url
-* Fix spacing !@#$
 * widget context should have instance of app
 
 ## Roadmap of nice to haves
