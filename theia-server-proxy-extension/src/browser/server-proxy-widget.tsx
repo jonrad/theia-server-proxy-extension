@@ -87,7 +87,7 @@ export class ServerProxyWidget extends ReactWidget {
                 height: '100%'
             }}></iframe>;
         } else {
-          return <div className={ServerProxyContentStyle.PRE_LOAD}></div>;
+          return <div className={ServerProxyContentStyle.LOADING}></div>;
         }
     }
 }
