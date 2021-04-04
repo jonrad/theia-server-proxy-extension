@@ -1,5 +1,9 @@
-# theia-server-proxy-extension
-The example of how to build the Theia-based applications with the theia-server-proxy-extension.
+# Theia Server Proxy Extension Monorepo
+
+Monorepo containing:
+* [Theia Server Proxy Extension](./theia-server-proxy-extension) - Library enabling third party applications to be served via Theia
+* [Theia Jupyter Extension](./theia-jupyter-extension) - Jupyter Notebook extension for Theia
+* [Theia RStudio Extension](./theia-rstudio-extension) - RStudio extension for Theia
 
 ## Getting started
 
@@ -41,6 +45,7 @@ Open http://localhost:3000 in the browser.
     yarn start
 
 *or:* launch `Start Electron Backend` configuration from VS code.
+
 ## Developing with the browser example
 
 Start watching all packages, including `browser-app`, of your application with
@@ -58,6 +63,7 @@ and the browser example.
     yarn watch
 
 Run the example as [described above](#Running-the-browser-example)
+
 ## Developing with the Electron example
 
 Start watching all packages, including `electron-app`, of your application with
@@ -85,3 +91,22 @@ Create a npm user and login to the npm registry, [more on npm publishing](https:
 Publish packages with lerna to update versions properly across local packages, [more on publishing with lerna](https://github.com/lerna/lerna#publish).
 
     npx lerna publish
+
+## Publishing theia-jupyter-extension
+
+TODO
+
+## Publishing theia-rstudio-extension
+
+TODO
+
+## Roadmap to Publish
+
+* Update all licenses
+* Remove all todo 0 and 1s
+* Figure out how to publish default rstudio/jupyter conf files
+* Settings for binaries?
+* Browser package.json update versions?
+* Handle error on load
+* Update "Waiting" to something... reasonable
+* Make widget not load the actual app!

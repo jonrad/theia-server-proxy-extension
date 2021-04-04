@@ -1,4 +1,5 @@
 {
+  "private": true,
   "scripts": {
     "prepare": "lerna run prepare",
     "rebuild:browser": "theia rebuild:browser",
@@ -12,6 +13,8 @@
   },
   "workspaces": [
     "theia-server-proxy-extension",
+    "theia-jupyter-extension",
+    "theia-rstudio-extension",
     "browser-app",
     "electron-app"
   ],
