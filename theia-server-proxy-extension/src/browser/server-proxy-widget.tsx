@@ -44,7 +44,9 @@ export class ServerProxyWidget extends ReactWidget {
     }
 
     public async init(request: ServerProxyRequest): Promise<void> {
+        // TODO 2 this is very wrong
         this.id = request.serverProxy.id;
+
         this.serverProxyRequest = request;
 
         this.title.label = this.serverProxyRequest.serverProxy.name;

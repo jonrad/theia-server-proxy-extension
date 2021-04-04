@@ -110,9 +110,12 @@ TODO
 * Handle error on load
 * Update "Waiting" to something... reasonable
 * Make widget not load the actual app!
+* Make sure can open in multiple workspaces
+* Debug command output
 
 ## Roadmap of nice to haves
 
 * Customizable loading logo
 * Fading of loading logo
 * Jupyter open files via theia
+* Do we really need to include src in the files?

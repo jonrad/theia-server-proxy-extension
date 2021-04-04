@@ -16,6 +16,7 @@
 
 import { injectable } from 'inversify';
 import { ServerProxyCommandContext, ServerProxyContribution } from 'theia-server-proxy-extension/lib/node/server-proxy-contribution';
+import * as path from 'path';
 
 @injectable()
 export class JupyterServerProxyContribution implements ServerProxyContribution {
@@ -24,6 +25,8 @@ export class JupyterServerProxyContribution implements ServerProxyContribution {
     name: string = "Jupyter";
 
     getCommand(context: ServerProxyCommandContext): string[] {
+        const settingsPath = path.join(__dirname, "../../assets/.jupyter");
+
         return [
             "docker",
             "run",
@@ -31,12 +34,15 @@ export class JupyterServerProxyContribution implements ServerProxyContribution {
             "-p",
             `${context.port}:8888`,
             "-v",
-            "/Users/jonradchenko/projects/theia/jupyter/.jupyter:/home/jovyan/.jupyter",
+            `${settingsPath}:/home/jovyan/.jupyter`,
             "-v",
             `${context.workspacePath}:/mnt`,
             "jupyter/minimal-notebook:latest",
             "start-notebook.sh",
-            `--NotebookApp.base_url=${context.relativeUrl}`
+            `--NotebookApp.base_url=${context.relativeUrl}`,
+            `--NotebookApp.token=''`,
+            `--NotebookApp.notebook_dir='/mnt'`,
+            `--NotebookApp.tornado_settings={'headers': {'Content-Security-Policy': "frame-ancestors * 'self' "}}`,
         ]
     }
 }
