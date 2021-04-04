@@ -23,48 +23,48 @@ import { buildUri } from './server-proxy-uri';
 
 @injectable()
 export class ServerProxyCommandContribution implements CommandContribution {
-  // TODO 1: should we use the url handler here instead?
-  @inject(ServerProxyWidgetOpenHandler)
-  protected readonly serverProxyWidgetManager: ServerProxyWidgetOpenHandler;
+    // TODO 1: should we use the url handler here instead?
+    @inject(ServerProxyWidgetOpenHandler)
+    protected readonly serverProxyWidgetManager: ServerProxyWidgetOpenHandler;
 
-  @inject(ServerProxyRpcServer)
-  protected readonly serverProxyServer: ServerProxyRpcServer;
+    @inject(ServerProxyRpcServer)
+    protected readonly serverProxyServer: ServerProxyRpcServer;
 
-  @inject(WorkspaceService)
-  protected readonly workspaceService: WorkspaceService;
+    @inject(WorkspaceService)
+    protected readonly workspaceService: WorkspaceService;
 
-  // TODO 1: this isn't async...
-  registerCommands(registry: CommandRegistry): void {
-    this.serverProxyServer.getServerProxies().then(proxies =>
-      proxies.forEach(s => {
-        // TODO 2 icons and such?
-        registry.registerCommand({
-          id: s.id,
-          label: `Open For Current Workspace`,
-          category: s.name
-        }, {
-          execute: async () => {
-            const roots = await this.workspaceService.roots;
-            if (!roots) {
-              // TODO 1 show error
-              return;
-            }
+    // TODO 1: this isn't async...
+    registerCommands(registry: CommandRegistry): void {
+        this.serverProxyServer.getServerProxies().then(proxies =>
+            proxies.forEach(s => {
+                // TODO 2 icons and such?
+                registry.registerCommand({
+                    id: s.id,
+                    label: `Open For Current Workspace`,
+                    category: s.name
+                }, {
+                    execute: async () => {
+                        const roots = await this.workspaceService.roots;
+                        if (!roots) {
+                            // TODO 1 show error
+                            return;
+                        }
 
-            if (roots.length != 1) {
-              // TODO 1 handle better
-              return;
-            }
+                        if (roots.length != 1) {
+                            // TODO 1 handle better
+                            return;
+                        }
 
-            const workspacePath = roots[0].resource.path;
-            const uri = buildUri(
-              s.id,
-              workspacePath.toString()
-            )
+                        const workspacePath = roots[0].resource.path;
+                        const uri = buildUri(
+                            s.id,
+                            workspacePath.toString()
+                        )
 
-            await this.serverProxyWidgetManager.open(uri);
-          }
-        });
-      })
-    );
-  }
+                        await this.serverProxyWidgetManager.open(uri);
+                    }
+                });
+            })
+        );
+    }
 }

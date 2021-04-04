@@ -20,26 +20,26 @@ export const scheme: string = "server-proxy";
 
 // TODO 1 is this the right way?
 export const buildUri = (serverProxyId: string, path: string) =>
-  new URI()
-    .withScheme(scheme)
-    .withAuthority(serverProxyId)
-    .withPath(path);
+    new URI()
+        .withScheme(scheme)
+        .withAuthority(serverProxyId)
+        .withPath(path);
 
 export const parseUri = (uri: URI) => {
-  if (uri.scheme != scheme) {
-    return undefined;
-  }
+    if (uri.scheme != scheme) {
+        return undefined;
+    }
 
-  const serverProxyId = uri.authority;
+    const serverProxyId = uri.authority;
 
-  const path = uri.path.toString();
+    const path = uri.path.toString();
 
-  if (!serverProxyId || !path) {
-    return undefined;
-  }
+    if (!serverProxyId || !path) {
+        return undefined;
+    }
 
-  return {
-    serverProxyId,
-    path
-  };
+    return {
+        serverProxyId,
+        path
+    };
 };

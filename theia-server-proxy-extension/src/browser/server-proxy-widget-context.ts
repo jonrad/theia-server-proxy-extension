@@ -18,18 +18,18 @@ import { ServerProxy } from '../common/server-proxy';
 
 export class ServerProxyWidgetContext {
     constructor(
-      public readonly id: string,
-      public readonly serverProxy: ServerProxy,
-      public readonly path: string,
-      public readonly appPromise: Promise<number | undefined>,
-      private readonly doStop: (id: number) => void //TODO this is silly
+        public readonly id: string,
+        public readonly serverProxy: ServerProxy,
+        public readonly path: string,
+        public readonly appPromise: Promise<number | undefined>,
+        private readonly doStop: (id: number) => void //TODO this is silly
     ) { }
 
     public stop(): void {
-      this.appPromise.then(p => {
-        if (p) {
-          this.doStop(p);
-        }
-      });
+        this.appPromise.then(p => {
+            if (p) {
+                this.doStop(p);
+            }
+        });
     }
 }

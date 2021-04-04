@@ -57,21 +57,21 @@ export class ServerProxyWidget extends ReactWidget {
         this.update();
 
         promise.then((appId: number | undefined) => {
-          if (!appId) {
-              // TODO some information
-              this.dispose();
-              return;
-          }
+            if (!appId) {
+                // TODO some information
+                this.dispose();
+                return;
+            }
 
-          this.appId = appId;
-          this.ready = true;
-          this.update();
+            this.appId = appId;
+            this.ready = true;
+            this.update();
         })
     }
 
     public dispose(): void {
         this.context.appPromise.then(p => {
-          this.context.stop();
+            this.context.stop();
         });
 
         super.dispose();
@@ -85,7 +85,7 @@ export class ServerProxyWidget extends ReactWidget {
                 height: '100%'
             }}></iframe>;
         } else {
-          return <div className={ServerProxyContentStyle.LOADING}></div>;
+            return <div className={ServerProxyContentStyle.LOADING}></div>;
         }
     }
 }

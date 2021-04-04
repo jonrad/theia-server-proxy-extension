@@ -24,56 +24,56 @@ import { ServerProxyRpcServer } from '../common/rpc';
 
 @injectable()
 export class ServerProxyWidgetOpenHandler extends WidgetOpenHandler<ServerProxyWidget> {
-  // TODO 1 move
-  public static readonly uriScheme: string = "server-proxy"
+    // TODO 1 move
+    public static readonly uriScheme: string = "server-proxy"
 
-  readonly id = ServerProxyWidget.ID;
+    readonly id = ServerProxyWidget.ID;
 
-  @inject(ServerProxyManager)
-  protected readonly serverProxyManager: ServerProxyManager;
+    @inject(ServerProxyManager)
+    protected readonly serverProxyManager: ServerProxyManager;
 
-  @inject(ServerProxyRpcServer)
-  protected readonly serverProxyRpcServer: ServerProxyRpcServer;
+    @inject(ServerProxyRpcServer)
+    protected readonly serverProxyRpcServer: ServerProxyRpcServer;
 
-  async canHandle(uri: URI, options?: WidgetOpenerOptions): Promise<number> {
-    if (uri.scheme != ServerProxyWidgetOpenHandler.uriScheme) {
-      return 0;
+    async canHandle(uri: URI, options?: WidgetOpenerOptions): Promise<number> {
+        if (uri.scheme != ServerProxyWidgetOpenHandler.uriScheme) {
+            return 0;
+        }
+
+        if (!this.serverProxyManager.getById(uri.authority)) {
+            return 0;
+        }
+
+        // TODO 2 is this possible?
+        if (!uri.path) {
+            return 0;
+        }
+
+        return 100;
     }
 
-    if (!this.serverProxyManager.getById(uri.authority)) {
-      return 0;
+    protected createWidgetOptions(uri: URI, options?: WidgetOpenerOptions): ServerProxyWidgetContext {
+        const serverProxyId = uri.authority;
+        const path = uri.path;
+
+        const serverProxy = this.serverProxyManager.getById(serverProxyId);
+
+        if (!serverProxy) {
+            throw Error(`Unknown server proxy id: ${serverProxyId}`);
+        }
+
+        // TODO app starter or something
+        const promise = this.serverProxyRpcServer.startApp(
+            serverProxy.id,
+            path.toString()
+        );
+
+        return new ServerProxyWidgetContext(
+            uri.toString(),
+            serverProxy,
+            path.toString(),
+            promise,
+            this.serverProxyRpcServer.stopApp
+        );
     }
-
-    // TODO 2 is this possible?
-    if (!uri.path) {
-      return 0;
-    }
-
-    return 100;
-  }
-
-  protected createWidgetOptions(uri: URI, options?: WidgetOpenerOptions): ServerProxyWidgetContext {
-    const serverProxyId = uri.authority;
-    const path = uri.path;
-
-    const serverProxy = this.serverProxyManager.getById(serverProxyId);
-
-    if (!serverProxy) {
-      throw Error(`Unknown server proxy id: ${serverProxyId}`);
-    }
-
-    // TODO app starter or something
-    const promise = this.serverProxyRpcServer.startApp(
-      serverProxy.id,
-      path.toString()
-    );
-
-    return new ServerProxyWidgetContext(
-      uri.toString(),
-      serverProxy,
-      path.toString(),
-      promise,
-      this.serverProxyRpcServer.stopApp
-    );
-  }
 }

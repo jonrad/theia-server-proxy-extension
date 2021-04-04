@@ -28,6 +28,6 @@ export interface ServerProxyRpcServer extends JsonRpcServer<ServerProxyRpcClient
 
 export const ServerProxyRpcClient = Symbol('ServerProxyRpcClient');
 export interface ServerProxyRpcClient {
-  // This is empty for now, but keeping it here for future purposes
-  // eg to be able to notify the client of the current status of the app
+    // This is empty for now, but keeping it here for future purposes
+    // eg to be able to notify the client of the current status of the app
 }
