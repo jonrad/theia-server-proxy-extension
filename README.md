@@ -112,6 +112,7 @@ TODO
 * Make widget not load the actual app!
 * Make sure can open in multiple workspaces
 * Debug command output
+* Test with different port/url
 
 ## Roadmap of nice to haves
 
