@@ -20,6 +20,8 @@ import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { CommandRegistry } from '@theia/core/lib/common';
 import { ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxyRequest } from './server-proxy-request';
+import { BUSY_CLASS } from '@theia/core/lib/browser';
+import { ServerProxyContentStyle } from './server-proxy-content-style';
 
 @injectable()
 export class ServerProxyWidget extends ReactWidget {
@@ -79,17 +81,13 @@ export class ServerProxyWidget extends ReactWidget {
 
     protected render(): React.ReactNode {
         if (this.ready) {
+            // TODO use function for uri
             return <iframe src={`/server-proxy/${this.serverProxyRequest.serverProxy.id}/${this.appId}/`} style={{
                 width: '100%',
                 height: '100%'
             }}></iframe>;
         } else {
-            return <div style={{
-                width: "100%",
-                height: "100%"
-            }}>
-                Waiting...
-            </div>;
+          return <div className={ServerProxyContentStyle.PRE_LOAD}></div>;
         }
     }
 }

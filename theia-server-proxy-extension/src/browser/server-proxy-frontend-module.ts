@@ -27,8 +27,7 @@ import { ServerProxyRpcClientImpl } from './server-proxy-rpc-client-impl';
 import { ServerProxyWidgetFactory } from './server-proxy-widget-factory';
 import { ServerProxyManager } from './server-proxy-manager';
 
-// TODO 1 is this needed
-// import '../../src/browser/style/index.css';
+import '../../src/browser/style/index.css';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
     bind(ServerProxyCommandContribution).toSelf();
