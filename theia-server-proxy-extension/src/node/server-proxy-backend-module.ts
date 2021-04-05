@@ -23,7 +23,7 @@ import * as net from 'net';
 import { injectable, inject, postConstruct } from 'inversify';
 import { BackendApplicationContribution } from '@theia/core/lib/node/backend-application';
 import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware';
-import { ConnectionHandler, JsonRpcConnectionHandler } from '@theia/core/lib/common';
+import { ConnectionHandler, JsonRpcConnectionHandler, Path } from '@theia/core/lib/common';
 import { ServerProxyRpcClient } from '../common/rpc';
 import { ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxy } from '../common/server-proxy';
@@ -97,7 +97,7 @@ export class ServerProxyExpressContribution implements BackendApplicationContrib
 }
 
 @injectable()
-export class ServerProxyServer implements ServerProxyRpcServer {
+export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
     client: ServerProxyRpcClient | undefined;
 
     @inject(AppManager)
@@ -116,7 +116,8 @@ export class ServerProxyServer implements ServerProxyRpcServer {
     }
 
     startApp(id: string, workspace: string, args?: any): Promise<number | undefined> {
-        return this.appManager.startApp(id, workspace, args);
+        const path = new Path(workspace);
+        return this.appManager.startApp(id, path, args);
     }
 
     stopApp(id: number): Promise<Boolean> {
@@ -136,7 +137,7 @@ export default new ContainerModule((bind: interfaces.Bind, unbind: interfaces.Un
     bind(ServerProxyExpressContribution).toSelf();
     bind(BackendApplicationContribution).toService(ServerProxyExpressContribution);
 
-    bind(ServerProxyRpcServer).to(ServerProxyServer);
+    bind(ServerProxyRpcServer).to(ServerProxyRpcServerImpl);
 
     bindContributionProvider(bind, ServerProxyContribution);
     bind(ServerProxyManager).toSelf().inSingletonScope();

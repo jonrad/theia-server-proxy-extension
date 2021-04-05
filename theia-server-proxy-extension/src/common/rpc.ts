@@ -18,8 +18,10 @@ import { JsonRpcServer } from "@theia/core";
 import { ServerProxy } from "./server-proxy";
 
 export const ServerProxyRpcServer = Symbol('IServerProxyRpcServer');
+
 export interface ServerProxyRpcServer extends JsonRpcServer<ServerProxyRpcClient> {
-    startApp(id: string, workspace: string, args?: any): Promise<number | undefined>
+    // Path type is not serializable so this needs to be a string
+    startApp(id: string, path: string, args?: any): Promise<number | undefined>
 
     stopApp(id: number): Promise<Boolean>
 

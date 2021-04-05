@@ -14,12 +14,13 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
+import { Path } from "@theia/core";
 import URI from "@theia/core/lib/common/uri";
 
 export const scheme: string = "server-proxy";
 
 // TODO 1 is this the right way?
-export const buildUri = (serverProxyId: string, path: string) =>
+export const buildUri = (serverProxyId: string, path: Path) =>
     new URI()
         .withScheme(scheme)
         .withAuthority(serverProxyId)

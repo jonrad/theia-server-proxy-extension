@@ -40,7 +40,7 @@ export class ServerProxyWidgetOpenHandler extends WidgetOpenHandler<ServerProxyW
             return 0;
         }
 
-        if (!this.serverProxyManager.getById(uri.authority)) {
+        if (!this.serverProxyManager.getServerProxyById(uri.authority)) {
             return 0;
         }
 
@@ -52,28 +52,22 @@ export class ServerProxyWidgetOpenHandler extends WidgetOpenHandler<ServerProxyW
         return 100;
     }
 
+    // TODO: this is wrong. This needs to return a serializable object
     protected createWidgetOptions(uri: URI, options?: WidgetOpenerOptions): ServerProxyWidgetContext {
         const serverProxyId = uri.authority;
         const path = uri.path;
 
-        const serverProxy = this.serverProxyManager.getById(serverProxyId);
+        const serverProxy = this.serverProxyManager.getServerProxyById(serverProxyId);
 
         if (!serverProxy) {
             throw Error(`Unknown server proxy id: ${serverProxyId}`);
         }
 
-        // TODO app starter or something
-        const promise = this.serverProxyRpcServer.startApp(
+        const context = this.serverProxyManager.startApp(
             serverProxy.id,
-            path.toString()
+            path
         );
 
-        return new ServerProxyWidgetContext(
-            uri.toString(),
-            serverProxy,
-            path.toString(),
-            promise,
-            this.serverProxyRpcServer.stopApp
-        );
+        return context;
     }
 }

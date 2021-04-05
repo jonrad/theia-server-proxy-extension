@@ -42,6 +42,7 @@ export default new ContainerModule((bind: interfaces.Bind) => {
     bind(WidgetFactory).toService(ServerProxyWidgetFactory);
 
     bind(ServerProxyManager).toSelf();
+
     bind(ServerProxyWidgetOpenHandler).toSelf().inSingletonScope();
     bind(OpenHandler).toService(ServerProxyWidgetOpenHandler);
 

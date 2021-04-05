@@ -20,7 +20,7 @@ export class ServerProxyWidgetContext {
     constructor(
         public readonly id: string,
         public readonly serverProxy: ServerProxy,
-        public readonly path: string,
+        public readonly path: string, //Path type is not serializable
         public readonly appPromise: Promise<number | undefined>,
         private readonly doStop: (id: number) => void //TODO this is silly
     ) { }

@@ -15,13 +15,13 @@
  ********************************************************************************/
 
 import { injectable, inject, named, postConstruct } from 'inversify';
-import { ContributionProvider } from "@theia/core/lib/common";
+import { ContributionProvider, Path } from "@theia/core/lib/common";
 import { Options, RequestHandler } from "http-proxy-middleware";
 
 export interface ServerProxyCommandContext {
     relativeUrl: string;
     port: number;
-    workspacePath: string;
+    workspacePath: Path;
 }
 
 export const ServerProxyContribution = Symbol('ServerProxyContribution');

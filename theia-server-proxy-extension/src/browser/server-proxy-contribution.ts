@@ -58,7 +58,7 @@ export class ServerProxyCommandContribution implements CommandContribution {
                         const workspacePath = roots[0].resource.path;
                         const uri = buildUri(
                             s.id,
-                            workspacePath.toString()
+                            workspacePath
                         )
 
                         await this.serverProxyWidgetManager.open(uri);

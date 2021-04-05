@@ -18,6 +18,8 @@ import * as http from 'http';
 import { injectable, inject } from 'inversify';
 import * as getPort from 'get-port';
 import { ServerProxyManager } from './server-proxy-contribution';
+import { Path } from '@theia/core';
+import { ILogger } from '@theia/core';
 
 class ServerProxyApplication {
     constructor(
@@ -48,6 +50,9 @@ export class AppManager {
 
     private lastAppId = 0;
 
+    @inject(ILogger)
+    protected readonly logger: ILogger;
+
     @inject(RawProcessFactory)
     private readonly rawProcessFactory: RawProcessFactory;
 
@@ -74,11 +79,11 @@ export class AppManager {
         return await getPort();
     }
 
-    public async startApp(id: string, path: string, args: any): Promise<number | undefined> {
+    public async startApp(id: string, path: Path, args: any): Promise<number | undefined> {
         // TODO figure out theia configuration provider
         const port: number = await this.findAvailablePort();
         const appId: number = ++this.lastAppId;
-        console.log(`Routing ${appId} to ${port}`);
+        this.logger.info(`server-proxy mapping app id ${appId} for ${id} to port ${port}`);
 
         const serverProxy = this.serverProxyManager.getById(id);
 
