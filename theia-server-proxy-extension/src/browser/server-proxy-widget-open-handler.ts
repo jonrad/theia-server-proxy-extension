@@ -52,10 +52,9 @@ export class ServerProxyWidgetOpenHandler extends WidgetOpenHandler<ServerProxyW
         return 100;
     }
 
-    // TODO: this is wrong. This needs to return a serializable object
     protected createWidgetOptions(uri: URI, options?: WidgetOpenerOptions): ServerProxyWidgetContext {
         const serverProxyId = uri.authority;
-        const path = uri.path;
+        const path = uri.path.toString();
 
         const serverProxy = this.serverProxyManager.getServerProxyById(serverProxyId);
 
@@ -63,11 +62,9 @@ export class ServerProxyWidgetOpenHandler extends WidgetOpenHandler<ServerProxyW
             throw Error(`Unknown server proxy id: ${serverProxyId}`);
         }
 
-        const context = this.serverProxyManager.startApp(
-            serverProxy.id,
+        return {
+            serverProxy,
             path
-        );
-
-        return context;
+        }
     }
 }

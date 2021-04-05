@@ -14,8 +14,10 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
+import { Path } from '@theia/core';
 import { Widget, WidgetFactory } from '@theia/core/lib/browser';
 import { injectable, inject } from 'inversify';
+import { ServerProxyManager } from './server-proxy-manager';
 import { ServerProxyWidget } from './server-proxy-widget';
 import { ServerProxyWidgetContext } from './server-proxy-widget-context';
 
@@ -23,14 +25,22 @@ import { ServerProxyWidgetContext } from './server-proxy-widget-context';
 export class ServerProxyWidgetFactory implements WidgetFactory {
     public id: string = ServerProxyWidget.ID;
 
+    @inject(ServerProxyManager)
+    private readonly serverProxyManager: ServerProxyManager;
+
     public constructor(
         @inject(ServerProxyWidget.ID) private readonly serverProxyWidgetFactory: () => ServerProxyWidget
     ) {
     }
 
     async createWidget(widgetContext: ServerProxyWidgetContext): Promise<Widget> {
+        const app = this.serverProxyManager.startApp(
+            widgetContext.serverProxy,
+            new Path(widgetContext.path)
+        );
+
         const widget = this.serverProxyWidgetFactory();
-        widget.init(widgetContext);
+        widget.init(app);
 
         return widget;
     }

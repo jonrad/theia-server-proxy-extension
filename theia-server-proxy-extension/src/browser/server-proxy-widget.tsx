@@ -19,8 +19,9 @@ import { injectable, inject } from 'inversify';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { CommandRegistry } from '@theia/core/lib/common';
 import { ServerProxyRpcServer } from '../common/rpc';
-import { ServerProxyWidgetContext } from './server-proxy-widget-context';
 import { ServerProxyContentStyle } from './server-proxy-content-style';
+import { ServerProxyApp } from './server-proxy-app';
+import { buildUri } from './server-proxy-uri';
 
 @injectable()
 export class ServerProxyWidget extends ReactWidget {
@@ -37,26 +38,25 @@ export class ServerProxyWidget extends ReactWidget {
 
     private appId: number | undefined = undefined;
 
-    private context: ServerProxyWidgetContext;
+    private app: ServerProxyApp;
 
     constructor() {
         super();
     }
 
-    public async init(context: ServerProxyWidgetContext): Promise<void> {
-        this.id = context.id;
+    public async init(app: ServerProxyApp): Promise<void> {
+        const serverProxy = app.serverProxy;
 
-        this.context = context;
+        this.id = buildUri(serverProxy.id, app.path).toString();
+        this.app = app;
 
-        this.title.label = this.context.serverProxy.name;
-        this.title.caption = this.context.serverProxy.name;
+        this.title.label = serverProxy.name;
+        this.title.caption = serverProxy.name;
         this.title.closable = true;
-
-        const promise = context.appPromise;
 
         this.update();
 
-        promise.then((appId: number | undefined) => {
+        this.app.started.then((appId: number | undefined) => {
             if (!appId) {
                 // TODO some information
                 this.dispose();
@@ -70,9 +70,7 @@ export class ServerProxyWidget extends ReactWidget {
     }
 
     public dispose(): void {
-        this.context.appPromise.then(p => {
-            this.context.stop();
-        });
+        this.app.stop();
 
         super.dispose();
     }
@@ -80,7 +78,7 @@ export class ServerProxyWidget extends ReactWidget {
     protected render(): React.ReactNode {
         if (this.ready) {
             // TODO use function for uri
-            return <iframe src={`/server-proxy/${this.context.serverProxy.id}/${this.appId}/`} style={{
+            return <iframe src={`/server-proxy/${this.app.serverProxy.id}/${this.appId}/`} style={{
                 width: '100%',
                 height: '100%'
             }}></iframe>;

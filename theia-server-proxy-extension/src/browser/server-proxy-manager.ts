@@ -17,9 +17,8 @@
 import { injectable, inject, postConstruct } from 'inversify';
 import { ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxy } from '../common/server-proxy';
-import { ServerProxyWidgetContext } from './server-proxy-widget-context';
-import { buildUri } from './server-proxy-uri';
 import { Path } from '@theia/core';
+import { ServerProxyApp } from './server-proxy-app';
 
 @injectable()
 export class ServerProxyManager {
@@ -39,22 +38,11 @@ export class ServerProxyManager {
         return this.serverProxiesById.get(serverProxyId);
     }
 
-    public startApp(serverProxyId: string, path: Path): ServerProxyWidgetContext {
-        const serverProxy = this.getServerProxyById(serverProxyId);
-        if (!serverProxy) {
-            throw new Error(`No such server proxy ${serverProxyId}`);
-        }
-
-        const workspace = path.toString();
-        const promise = this.serverProxyRpcServer.startApp(serverProxyId, workspace);
-        const uri = buildUri(serverProxyId, path);
-
-        return new ServerProxyWidgetContext(
-            uri.toString(),
+    public startApp(serverProxy: ServerProxy, path: Path): ServerProxyApp {
+        return new ServerProxyApp(
+            this.serverProxyRpcServer,
             serverProxy,
-            workspace,
-            promise,
-            (id: number) => this.serverProxyRpcServer.stopApp(id)
+            path
         );
     }
 }

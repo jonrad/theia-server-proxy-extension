@@ -102,10 +102,10 @@ TODO
 
 ## Roadmap to Publish
 
+* Handle statuses/failures/etc on app start
 * Remove all todo 0 and 1s
 * Settings for binaries?
 * Browser package.json update versions?
-* Handle error on load
 * Make sure can open in multiple workspaces
 * Debug command output
 * Test with different port/url
