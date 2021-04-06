@@ -17,11 +17,28 @@
 import { JsonRpcServer } from "@theia/core";
 import { ServerProxy } from "./server-proxy";
 
-export const ServerProxyRpcServer = Symbol('IServerProxyRpcServer');
+export enum StatusId {
+    starting,
+    processStarted,
+    started,
+    stopped,
+    failed
+}
 
+export interface AppStatus {
+    statusId: StatusId
+    message?: string
+}
+
+export interface ServerProxyApplication {
+    id: number
+    status: AppStatus
+}
+
+export const ServerProxyRpcServer = Symbol('ServerProxyRpcServer');
 export interface ServerProxyRpcServer extends JsonRpcServer<ServerProxyRpcClient> {
     // Path type is not serializable so this needs to be a string
-    startApp(id: string, path: string, args?: any): Promise<number | undefined>
+    startApp(id: string, path: string, args?: any): ServerProxyApplication
 
     stopApp(id: number): Promise<Boolean>
 
@@ -30,6 +47,5 @@ export interface ServerProxyRpcServer extends JsonRpcServer<ServerProxyRpcClient
 
 export const ServerProxyRpcClient = Symbol('ServerProxyRpcClient');
 export interface ServerProxyRpcClient {
-    // This is empty for now, but keeping it here for future purposes
-    // eg to be able to notify the client of the current status of the app
+    onChange(appId: number, status: AppStatus): void;
 }

@@ -14,31 +14,38 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { Path } from '@theia/core';
-import { ServerProxyRpcServer } from '../common/rpc';
+import { Emitter, Event, Path } from '@theia/core';
+import { AppStatus, ServerProxyApplication, ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxy } from '../common/server-proxy';
 
-export class ServerProxyApp {
-    public started: Promise<number | undefined>;
+export class FrontendServerProxyApplication implements ServerProxyApplication {
+    public readonly id: number;
+
+    public status: AppStatus;
+
+    private changeEmitter: Emitter<AppStatus> = new Emitter<AppStatus>();
+    public change: Event<AppStatus> = this.changeEmitter.event;
+
+    private onChange(status: AppStatus): void {
+        this.status = status;
+        this.changeEmitter.fire(status);
+    }
 
     constructor(
         private readonly serverProxyRpcServer: ServerProxyRpcServer, //GROSS! FIX ME
         public readonly serverProxy: ServerProxy,
         public readonly path: Path
     ) {
-        this.started = this.serverProxyRpcServer.startApp(
+        const result = this.serverProxyRpcServer.startApp(
             this.serverProxy.id,
             this.path.toString()
-        )
+        );
+
+        this.id = result.id;
+        this.status = result.status;
     }
 
     public async stop(): Promise<void> {
-        // TODO: cancellation
-        const appId = await this.started;
-        if (!appId) {
-            return;
-        }
-
-        this.serverProxyRpcServer.stopApp(appId);
+        this.serverProxyRpcServer.stopApp(this.id);
     }
 }

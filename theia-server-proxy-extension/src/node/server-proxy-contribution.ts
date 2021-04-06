@@ -24,13 +24,19 @@ export interface ServerProxyCommandContext {
     workspacePath: Path;
 }
 
+export interface ServerProxyCommand {
+    command: string[]
+
+    env?: { [name: string]: string | undefined }
+}
+
 export const ServerProxyContribution = Symbol('ServerProxyContribution');
 export interface ServerProxyContribution {
     readonly id: string;
 
     readonly name: string;
 
-    getCommand(context: ServerProxyCommandContext): string[]
+    getCommand(context: ServerProxyCommandContext): Promise<ServerProxyCommand>
 
     getMiddleware?(basePath: string, baseOptions: Options): RequestHandler
 }

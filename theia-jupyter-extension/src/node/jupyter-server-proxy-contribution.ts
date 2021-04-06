@@ -14,35 +14,65 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { injectable } from 'inversify';
-import { ServerProxyCommandContext, ServerProxyContribution } from 'theia-server-proxy-extension/lib/node/server-proxy-contribution';
+import { injectable, inject } from 'inversify';
+import { ServerProxyCommandContext, ServerProxyContribution, ServerProxyCommand } from 'theia-server-proxy-extension/lib/node/server-proxy-contribution';
 import * as path from 'path';
+import { EnvVariablesServer } from '@theia/core/lib/common/env-variables';
+
+const ENV_JUPYTER_CUSTOM_PROCESS: string = 'ENV_JUPYTER_CUSTOM_PROCESS';
+const ENV_JUPYTER_PATH: string = 'ENV_JUPYTER_PATH';
 
 @injectable()
 export class JupyterServerProxyContribution implements ServerProxyContribution {
+    @inject(EnvVariablesServer)
+    private readonly envVariablesServer: EnvVariablesServer;
+
     id: string = "jupyter";
 
     name: string = "Jupyter";
 
-    getCommand(context: ServerProxyCommandContext): string[] {
-        const settingsPath = path.join(__dirname, "../../assets/.jupyter");
+    async getCommand(context: ServerProxyCommandContext): Promise<ServerProxyCommand> {
+        const configDir = path.join(__dirname, "../../assets/.jupyter");
 
-        return [
-            "docker",
-            "run",
-            "--rm",
-            "-p",
-            `${context.port}:8888`,
-            "-v",
-            `${settingsPath}:/home/jovyan/.jupyter`,
-            "-v",
-            `${context.workspacePath}:/mnt`,
-            "jupyter/minimal-notebook:latest",
-            "start-notebook.sh",
-            `--NotebookApp.base_url=${context.relativeUrl}`,
-            `--NotebookApp.token=''`,
-            `--NotebookApp.notebook_dir='/mnt'`,
-            `--NotebookApp.tornado_settings={'headers': {'Content-Security-Policy': "frame-ancestors * 'self' "}}`,
-        ]
+        // Is this the best/proper way to do this? I dunno
+        const customProcess = await this.envVariablesServer.getValue(ENV_JUPYTER_CUSTOM_PROCESS)
+        if (customProcess?.value) {
+            const command = [
+                customProcess.value,
+                context.port.toString(),
+                context.workspacePath.toString(),
+                context.relativeUrl,
+                configDir
+            ]
+
+            return { command };
+        } else {
+            const binary = (await this.envVariablesServer.getValue(ENV_JUPYTER_PATH))?.value || "jupyter";
+
+            const command = [
+                binary,
+                "notebook",
+                '--NotebookApp.port',
+                context.port.toString(),
+                '--NotebookApp.notebook_dir',
+                context.workspacePath.toString(),
+                '--NotebookApp.base_url',
+                context.relativeUrl,
+                `--NotebookApp.token`,
+                '',
+                '--NotebookApp.tornado_settings',
+                `{'headers': {'Content-Security-Policy': "frame-ancestors * 'self' "}}`,
+                '--NotebookApp.open_browser',
+                'False'
+            ];
+
+            // sigh... is there a better way to do this?
+            const env = { ["JUPYTER_CONFIG_DIR"]: configDir }
+
+            return {
+                command,
+                env
+            }
+        }
     }
 }

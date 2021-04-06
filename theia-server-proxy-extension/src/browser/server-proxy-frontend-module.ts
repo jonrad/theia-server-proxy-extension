@@ -50,6 +50,6 @@ export default new ContainerModule((bind: interfaces.Bind) => {
     bind(ServerProxyRpcServer).toDynamicValue(ctx => {
         const client = ctx.container.get<ServerProxyRpcClient>(ServerProxyRpcClient);
         const connection = ctx.container.get(WebSocketConnectionProvider);
-        return connection.createProxy<ServerProxyRpcClient>('/services/server-proxy', client);
+        return connection.createProxy<ServerProxyRpcServer>('/services/server-proxy', client);
     }).inSingletonScope();
 });

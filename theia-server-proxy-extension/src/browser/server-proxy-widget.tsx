@@ -56,7 +56,7 @@ export class ServerProxyWidget extends ReactWidget {
 
         this.update();
 
-        this.app.started.then((appId: number | undefined) => {
+        /* this.app.started.then((appId: number | undefined) => {
             if (!appId) {
                 // TODO some information
                 this.dispose();
@@ -66,7 +66,7 @@ export class ServerProxyWidget extends ReactWidget {
             this.appId = appId;
             this.ready = true;
             this.update();
-        })
+        }) */
     }
 
     public dispose(): void {

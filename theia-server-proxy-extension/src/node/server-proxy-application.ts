@@ -18,16 +18,21 @@ import * as http from 'http';
 import { injectable, inject } from 'inversify';
 import * as getPort from 'get-port';
 import { ServerProxyManager } from './server-proxy-contribution';
-import { Path } from '@theia/core';
+import { Emitter, Event, Path } from '@theia/core';
 import { ILogger } from '@theia/core';
+import { AppStatus, ServerProxyApplication, StatusId } from '../common/rpc';
 
+// TODO: configurable
+const TIMEOUT = 30_000;
+
+/*
 class ServerProxyApplication {
     constructor(
         public readonly serverProxyId: string,
         public readonly appId: number,
         public readonly port: number,
         // this shouldn't be exposed
-        public readonly process: RawProcess
+        private readonly process: RawProcess
     ) {
     }
 
@@ -42,6 +47,70 @@ class ServerProxyApplication {
         });
     }
 
+    public stop() {
+        this.process.kill();
+    }
+}
+*/
+
+export class BackendServerProxyApplication implements ServerProxyApplication {
+    private changeEmitter: Emitter<AppStatus> = new Emitter<AppStatus>();
+    public change: Event<AppStatus> = this.changeEmitter.event;
+
+    public status: AppStatus;
+
+    private onChange(status: AppStatus): void {
+        this.status = status;
+        this.changeEmitter.fire(status);
+    }
+
+    constructor(
+        public readonly id: number,
+        initialStatus: AppStatus,
+        private readonly process: RawProcess
+    ) {
+        this.onChange(initialStatus);
+    }
+
+    private async isAccessible(): Promise<Boolean> {
+        return new Promise((resolve, reject) => {
+            // TODO 0 share this
+            const request = http.get(`http://localhost:${this.port}/server-proxy/${this.serverProxyId}/${this.appId}/`);
+
+            request.on('error', (err: Error) => resolve(false));
+            request.on('response', (response: http.IncomingMessage) => {
+                resolve(true)
+            });
+        });
+    }
+
+    public async init(): Promise<void> {
+        try {
+            await this.process.onStart;
+
+            this.onChange({
+                statusId: StatusId.processStarted
+            });
+
+            const startTime = new Date().getTime();
+
+            while (!(await this.isAccessible())) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                if (new Date().getTime() - startTime > TIMEOUT) {
+                    throw new Error("Timed out waiting for app to start");
+                }
+            }
+
+            this.onChange({
+                statusId: StatusId.started
+            });
+        } catch (e) {
+            this.onChange({
+                statusId: StatusId.failed,
+                message: e?.toString()
+            })
+        }
+    }
 }
 
 @injectable()
@@ -60,7 +129,8 @@ export class AppManager {
     private readonly serverProxyManager: ServerProxyManager;
 
     public getAppPort(id: number): number | undefined {
-        return this.appById.get(id)?.port;
+        //return this.appById.get(id)?.port;
+        return undefined;
     }
 
     public async stopApp(id: number): Promise<Boolean> {
@@ -68,7 +138,7 @@ export class AppManager {
         this.appById.delete(id);
 
         if (app) {
-            await app.process.kill();
+            // await app.stop();
             return true;
         } else {
             return false;
@@ -79,59 +149,50 @@ export class AppManager {
         return await getPort();
     }
 
-    public async startApp(id: string, path: Path, args: any): Promise<number | undefined> {
-        // TODO figure out theia configuration provider
+    public async startApp(
+        serverProxyId: string,
+        path: Path
+    ): Promise<BackendServerProxyApplication> {
         const port: number = await this.findAvailablePort();
         const appId: number = ++this.lastAppId;
-        this.logger.info(`server-proxy mapping app id ${appId} for ${id} to port ${port}`);
-
-        const serverProxy = this.serverProxyManager.getById(id);
+        this.logger.info(`server-proxy mapping app id ${appId} for ${serverProxyId} to port ${port}`);
+        const serverProxy = this.serverProxyManager.getById(serverProxyId);
 
         if (!serverProxy) {
-            //fail
-            return;
+            throw Error(`Invalid server proxy id ${serverProxyId}`);
         }
 
-        const command = serverProxy.getCommand({
+        const { command, env } = await serverProxy.getCommand({
             relativeUrl: `/server-proxy/${serverProxy.id}/${appId}`,
             port: port,
             workspacePath: path
         });
 
         if (command.length == 0) {
-            //fail
-            return;
+            throw Error(`Improperly configured server proxy ${serverProxyId}. Returned empty command`);
         }
 
-        const process = this.rawProcessFactory({
+        const envDict: { [name: string]: string | undefined } =
+            env ? { ...process.env, ...env } : process.env;
+
+        const rawProcess = this.rawProcessFactory({
             command: command[0],
-            args: command.slice(1)
+            args: command.slice(1),
+            options: {
+                env: envDict
+            }
         });
 
-        try {
-            await process.onStart;
+        const application = new BackendServerProxyApplication(
+            appId,
+            { statusId: StatusId.starting },
+            rawProcess
+        );
 
-            const app = new ServerProxyApplication(
-                id,
-                appId,
-                port,
-                process
-            );
+        this.appById.set(appId, application);
 
-            while (!(await app.isRunning())) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                //infinite
-            }
+        application.init();
 
-            this.appById.set(appId, app);
-
-            return appId;
-        } catch (e) {
-            process.kill();
-            this.appById.delete(appId);
-            throw e;
-        }
-
-        // todo error handling
+        return application;
     }
 }
