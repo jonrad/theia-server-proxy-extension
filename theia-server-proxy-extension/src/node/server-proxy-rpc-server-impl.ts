@@ -18,10 +18,9 @@ import { Path } from '@theia/core';
 import { injectable, inject } from 'inversify';
 import { ServerProxyRpcClient } from '../common/rpc';
 import { ServerProxyRpcServer } from '../common/rpc';
-import { ServerProxy } from '../common/server-proxy';
+import { ServerProxy, ServerProxyInstanceStatus } from '../common/server-proxy';
 import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
 import { ServerProxyManager } from './server-proxy-manager';
-
 
 @injectable()
 export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
@@ -42,9 +41,17 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
         });
     }
 
-    async startApp(serverProxyId: string, workspace: string, args?: any): Promise<number> {
+    async startApp(serverProxyId: string, workspace: string, args?: any): Promise<ServerProxyInstanceStatus> {
         const path = new Path(workspace);
-        return await this.appManager.startApp(serverProxyId, path);
+
+        const instance = (await this.appManager.startApp(serverProxyId, path));
+
+        instance.statusChanged((status) => {
+            console.log(`Sending to client ${!!this.client} ${status.instanceId} `)
+            this.client?.fireStatusChanged(status);
+        });
+
+        return instance.status;
     }
 
     stopApp(id: number): Promise<Boolean> {
@@ -53,6 +60,10 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
 
     setClient(client: ServerProxyRpcClient | undefined): void {
         this.client = client;
+    }
+
+    getClient(): ServerProxyRpcClient | undefined {
+        return this.client;
     }
 
     dispose(): void {

@@ -22,6 +22,7 @@ import { ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxyContentStyle } from './server-proxy-content-style';
 import { ServerProxyInstance } from './server-proxy-instance';
 import { buildUri } from './server-proxy-uri';
+import { StatusId } from '../common/server-proxy';
 
 @injectable()
 export class ServerProxyWidget extends ReactWidget {
@@ -34,43 +35,37 @@ export class ServerProxyWidget extends ReactWidget {
     @inject(CommandRegistry)
     protected readonly commandRegistry: CommandRegistry;
 
-    private ready: Boolean = false;
-
-    private appId: number | undefined = undefined;
-
-    private app: ServerProxyInstance;
-
-    constructor() {
-        super();
+    private get ready(): boolean {
+        const status = this.instance.status;
+        return status?.statusId == StatusId.started;
     }
 
-    public async init(app: ServerProxyInstance): Promise<void> {
-        const serverProxy = app.serverProxy;
+    private instance: ServerProxyInstance;
 
-        this.id = buildUri(serverProxy.id, app.path).toString();
-        this.app = app;
+    public async init(instance: ServerProxyInstance): Promise<void> {
+        const serverProxy = instance.serverProxy;
+
+        this.id = buildUri(serverProxy.id, instance.path).toString();
+        this.instance = instance;
 
         this.title.label = serverProxy.name;
         this.title.caption = serverProxy.name;
         this.title.closable = true;
 
-        this.update();
-
-        this.app.started.then((appId: number | undefined) => {
-            if (!appId) {
-                // TODO some information
+        this.instance.statusChangedEvent((change) => {
+            if (change.statusId == StatusId.errored || change.statusId == StatusId.stopped) {
                 this.dispose();
                 return;
             }
 
-            this.appId = appId;
-            this.ready = true;
             this.update();
         });
+
+        this.update();
     }
 
     public dispose(): void {
-        this.app.stop();
+        this.instance.stop();
 
         super.dispose();
     }
@@ -78,7 +73,7 @@ export class ServerProxyWidget extends ReactWidget {
     protected render(): React.ReactNode {
         if (this.ready) {
             // TODO use function for uri
-            return <iframe src={`/server-proxy/${this.app.serverProxy.id}/${this.appId}/`} style={{
+            return <iframe src={`/server-proxy/${this.instance.serverProxy.id}/${this.instance.id}/`} style={{
                 width: '100%',
                 height: '100%'
             }}></iframe>;

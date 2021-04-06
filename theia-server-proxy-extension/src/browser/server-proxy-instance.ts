@@ -14,26 +14,52 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { Path } from '@theia/core';
+import { Disposable, Event, Path } from '@theia/core';
 import { ServerProxyRpcServer } from '../common/rpc';
-import { ServerProxy } from '../common/server-proxy';
+import { ServerProxy, ServerProxyInstanceStatus } from '../common/server-proxy';
 
-export class ServerProxyInstance {
-    started: Promise<number>;
+export class ServerProxyInstance implements Disposable {
+    public readonly id: number;
 
-    constructor(
-        private readonly serverProxyRpcServer: ServerProxyRpcServer, //GROSS! FIX ME
-        public readonly serverProxy: ServerProxy,
-        public readonly path: Path
-    ) {
-        this.started = this.serverProxyRpcServer.startApp(
-            this.serverProxy.id,
-            this.path.toString()
-        );
+    public readonly serverProxy: ServerProxy;
+
+    public readonly path: Path;
+
+    private _status: ServerProxyInstanceStatus
+    public get status(): ServerProxyInstanceStatus {
+        return this._status;
     }
 
-    public async stop(): Promise<void> {
-        const appId = await this.started;
-        this.serverProxyRpcServer.stopApp(appId);
+    public readonly statusChangedEvent: Event<ServerProxyInstanceStatus>;
+
+    private readonly serverProxyRpcServer: ServerProxyRpcServer;
+
+    private readonly disposable: Disposable;
+
+    constructor(
+        initialStatus: ServerProxyInstanceStatus,
+        serverProxy: ServerProxy,
+        path: Path,
+        serverProxyRpcServer: ServerProxyRpcServer,
+        statusChangedEvent: Event<ServerProxyInstanceStatus>
+    ) {
+        this.id = initialStatus.instanceId;
+        this.serverProxy = serverProxy;
+        this.path = path;
+        this._status = initialStatus;
+        this.statusChangedEvent = statusChangedEvent;
+        this.serverProxyRpcServer = serverProxyRpcServer;
+
+        this.disposable = statusChangedEvent((status) => {
+            this._status = status;
+        })
+    }
+
+    public stop(): Promise<Boolean> {
+        return this.serverProxyRpcServer.stopApp(this.id);
+    }
+
+    dispose(): void {
+        this.disposable.dispose();
     }
 }

@@ -18,3 +18,18 @@ export interface ServerProxy {
     id: string
     name: string
 }
+
+export enum StatusId {
+    starting,
+    waitingForPort,
+    started,
+    stopped,
+    errored
+}
+
+export interface ServerProxyInstanceStatus {
+    instanceId: number
+    timeMs: number
+    statusId: StatusId
+    statusMessage?: string
+}

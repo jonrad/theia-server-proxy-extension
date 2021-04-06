@@ -13,61 +13,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-import { RawProcess, RawProcessFactory } from '@theia/process/lib/node';
-import * as http from 'http';
+import { RawProcessFactory } from '@theia/process/lib/node';
 import { injectable, inject } from 'inversify';
 import * as getAvailablePort from 'get-port';
 import { Path } from '@theia/core';
 import { ILogger } from '@theia/core';
 import { ServerProxyManager } from './server-proxy-manager';
-
-// TODO: configurable
-const RETRY_TIME = 1_000;
-const TIMEOUT = 30_000;
-
-export class ServerProxyInstance {
-    constructor(
-        public readonly appId: number,
-        public readonly serverProxyId: string,
-        public readonly port: number,
-        private readonly process: RawProcess
-    ) {
-    }
-
-    private async isAccessible(): Promise<Boolean> {
-        return new Promise((resolve, reject) => {
-            // TODO 0 share this
-            const request = http.get(`http://localhost:${this.port}/server-proxy/${this.serverProxyId}/${this.appId}/`);
-
-            request.on('error', (err: Error) => resolve(false));
-            request.on('response', (response: http.IncomingMessage) => {
-                resolve(true)
-            });
-        });
-    }
-
-    public stop(): void {
-        return this.process.kill();
-    }
-
-    public async init(): Promise<void> {
-        try {
-            await this.process.onStart;
-
-            const startTime = new Date().getTime();
-
-            while (!(await this.isAccessible())) {
-                await new Promise(resolve => setTimeout(resolve, RETRY_TIME));
-                if (new Date().getTime() - startTime > TIMEOUT) {
-                    throw new Error("Timed out waiting for app to start");
-                }
-            }
-        } catch (e) {
-            this.stop();
-            throw e;
-        }
-    }
-}
+import { StatusId } from '../common/server-proxy';
+import { ServerProxyInstance } from './server-proxy-instance';
 
 @injectable()
 export class ServerProxyInstanceManager {
@@ -107,7 +60,7 @@ export class ServerProxyInstanceManager {
     public async startApp(
         serverProxyId: string,
         path: Path
-    ): Promise<number> {
+    ): Promise<ServerProxyInstance> {
         const port: number = await this.findAvailablePort();
         const appId: number = ++this.lastAppId;
         this.logger.info(`server-proxy mapping app id ${appId} for ${serverProxyId} to port ${port}`);
@@ -147,13 +100,20 @@ export class ServerProxyInstanceManager {
 
         this.appById.set(appId, application);
 
-        try {
-            await application.init();
-        } catch (e) {
-            this.appById.delete(appId);
-            throw e;
+        const maybeCleanup = () => {
+            if (application.status.statusId == StatusId.stopped || application.status.statusId == StatusId.errored) {
+                this.appById.delete(appId);
+            }
         }
 
-        return appId;
+        application.statusChanged((status) => {
+            maybeCleanup();
+        })
+
+        maybeCleanup();
+
+        application.init();
+
+        return application;
     }
 }
