@@ -20,13 +20,14 @@ import { ConnectionHandler, JsonRpcConnectionHandler } from '@theia/core/lib/com
 import { ServerProxyRpcClient } from '../common/rpc';
 import { ServerProxyRpcServer } from '../common/rpc';
 import { bindContributionProvider } from '@theia/core';
-import { AppManager } from './server-proxy-application';
-import { ServerProxyContribution, ServerProxyManager } from './server-proxy-contribution';
+import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
+import { ServerProxyContribution } from './server-proxy-contribution';
 import { ServerProxyExpressContribution } from './server-proxy-express-contribution';
 import { ServerProxyRpcServerImpl } from './server-proxy-rpc-server-impl';
+import { ServerProxyManager } from './server-proxy-manager';
 
-export default new ContainerModule((bind: interfaces.Bind, unbind: interfaces.Unbind, isBound: interfaces.IsBound, rebind: interfaces.Rebind) => {
-    bind(AppManager).toSelf().inSingletonScope();
+export default new ContainerModule((bind: interfaces.Bind) => {
+    bind(ServerProxyInstanceManager).toSelf().inSingletonScope();
     bind(ServerProxyExpressContribution).toSelf();
     bind(BackendApplicationContribution).toService(ServerProxyExpressContribution);
 
@@ -36,7 +37,7 @@ export default new ContainerModule((bind: interfaces.Bind, unbind: interfaces.Un
     bind(ServerProxyManager).toSelf().inSingletonScope();
 
     bind(ConnectionHandler).toDynamicValue(ctx =>
-        new JsonRpcConnectionHandler<ServerProxyRpcClient>("/services/server-proxy", client => {
+        new JsonRpcConnectionHandler<ServerProxyRpcClient>("/services/server-proxy", (client: ServerProxyRpcClient) => {
             const server = ctx.container.get<ServerProxyRpcServer>(ServerProxyRpcServer);
             server.setClient(client);
             return server;

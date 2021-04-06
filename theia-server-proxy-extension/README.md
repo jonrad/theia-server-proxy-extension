@@ -6,4 +6,8 @@ This extension does nothing by itself. It provides contribution points for other
 
 ## Definitions
 
-TODO
+# Common
+*ServerProxy* - Definition of the a server proxy. Used to create server proxy instances
+
+# Backend
+* ServerProxyInstance* - A single instance of a server proxy

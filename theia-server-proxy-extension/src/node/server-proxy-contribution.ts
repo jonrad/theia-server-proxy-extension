@@ -14,11 +14,10 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { injectable, inject, named, postConstruct } from 'inversify';
-import { ContributionProvider, Path } from "@theia/core/lib/common";
+import { Path } from "@theia/core/lib/common";
 import { Options, RequestHandler } from "http-proxy-middleware";
 
-export interface ServerProxyCommandContext {
+export interface ServerProxyCommandArgs {
     relativeUrl: string;
     port: number;
     workspacePath: Path;
@@ -36,33 +35,7 @@ export interface ServerProxyContribution {
 
     readonly name: string;
 
-    getCommand(context: ServerProxyCommandContext): Promise<ServerProxyCommand>
+    getCommand(args: ServerProxyCommandArgs): Promise<ServerProxyCommand>
 
     getMiddleware?(basePath: string, baseOptions: Options): RequestHandler
-}
-
-@injectable()
-export class ServerProxyManager {
-    private contributionsById: Map<string, ServerProxyContribution> = new Map<string, ServerProxyContribution>();
-
-    @inject(ContributionProvider) @named(ServerProxyContribution)
-    protected readonly contributionProvider: ContributionProvider<ServerProxyContribution>
-
-    @postConstruct()
-    async init() {
-        this
-            .contributionProvider
-            .getContributions()
-            .forEach(c => this.contributionsById.set(c.id, c))
-    }
-
-    getById(id: string): ServerProxyContribution | undefined {
-        return this.contributionsById.get(id);
-    }
-
-    get(): ServerProxyContribution[] {
-        return this
-            .contributionProvider
-            .getContributions()
-    }
 }

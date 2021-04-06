@@ -16,15 +16,16 @@
 import { RawProcess, RawProcessFactory } from '@theia/process/lib/node';
 import * as http from 'http';
 import { injectable, inject } from 'inversify';
-import * as getPort from 'get-port';
-import { ServerProxyManager } from './server-proxy-contribution';
+import * as getAvailablePort from 'get-port';
 import { Path } from '@theia/core';
 import { ILogger } from '@theia/core';
+import { ServerProxyManager } from './server-proxy-manager';
 
 // TODO: configurable
+const RETRY_TIME = 1_000;
 const TIMEOUT = 30_000;
 
-export class ServerProxyApplication {
+export class ServerProxyInstance {
     constructor(
         public readonly appId: number,
         public readonly serverProxyId: string,
@@ -56,7 +57,7 @@ export class ServerProxyApplication {
             const startTime = new Date().getTime();
 
             while (!(await this.isAccessible())) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                await new Promise(resolve => setTimeout(resolve, RETRY_TIME));
                 if (new Date().getTime() - startTime > TIMEOUT) {
                     throw new Error("Timed out waiting for app to start");
                 }
@@ -69,8 +70,8 @@ export class ServerProxyApplication {
 }
 
 @injectable()
-export class AppManager {
-    private appById: Map<number, ServerProxyApplication> = new Map<number, ServerProxyApplication>()
+export class ServerProxyInstanceManager {
+    private appById: Map<number, ServerProxyInstance> = new Map<number, ServerProxyInstance>()
 
     private lastAppId = 0;
 
@@ -100,7 +101,7 @@ export class AppManager {
     }
 
     private async findAvailablePort(): Promise<number> {
-        return await getPort();
+        return await getAvailablePort();
     }
 
     public async startApp(
@@ -137,7 +138,7 @@ export class AppManager {
             }
         });
 
-        const application = new ServerProxyApplication(
+        const application = new ServerProxyInstance(
             appId,
             serverProxy.id,
             port,

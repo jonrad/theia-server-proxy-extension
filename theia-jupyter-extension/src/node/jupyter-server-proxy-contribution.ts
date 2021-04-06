@@ -15,7 +15,7 @@
  ********************************************************************************/
 
 import { injectable, inject } from 'inversify';
-import { ServerProxyCommandContext, ServerProxyContribution, ServerProxyCommand } from 'theia-server-proxy-extension/lib/node/server-proxy-contribution';
+import { ServerProxyCommandArgs, ServerProxyContribution, ServerProxyCommand } from 'theia-server-proxy-extension/lib/node/server-proxy-contribution';
 import * as path from 'path';
 import { EnvVariablesServer } from '@theia/core/lib/common/env-variables';
 
@@ -31,7 +31,7 @@ export class JupyterServerProxyContribution implements ServerProxyContribution {
 
     name: string = "Jupyter";
 
-    async getCommand(context: ServerProxyCommandContext): Promise<ServerProxyCommand> {
+    async getCommand(args: ServerProxyCommandArgs): Promise<ServerProxyCommand> {
         const configDir = path.join(__dirname, "../../assets/.jupyter");
 
         // Is this the best/proper way to do this? I dunno
@@ -39,9 +39,9 @@ export class JupyterServerProxyContribution implements ServerProxyContribution {
         if (customProcess?.value) {
             const command = [
                 customProcess.value,
-                context.port.toString(),
-                context.workspacePath.toString(),
-                context.relativeUrl,
+                args.port.toString(),
+                args.workspacePath.toString(),
+                args.relativeUrl,
                 configDir
             ]
 
@@ -53,11 +53,11 @@ export class JupyterServerProxyContribution implements ServerProxyContribution {
                 binary,
                 "notebook",
                 '--NotebookApp.port',
-                context.port.toString(),
+                args.port.toString(),
                 '--NotebookApp.notebook_dir',
-                context.workspacePath.toString(),
+                args.workspacePath.toString(),
                 '--NotebookApp.base_url',
-                context.relativeUrl,
+                args.relativeUrl,
                 `--NotebookApp.token`,
                 '',
                 '--NotebookApp.tornado_settings',

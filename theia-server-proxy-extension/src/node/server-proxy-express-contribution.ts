@@ -21,13 +21,13 @@ import * as net from 'net';
 import { injectable, inject, postConstruct } from 'inversify';
 import { BackendApplicationContribution } from '@theia/core/lib/node/backend-application';
 import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware';
-import { AppManager } from './server-proxy-application';
-import { ServerProxyManager } from './server-proxy-contribution';
+import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
+import { ServerProxyManager } from './server-proxy-manager';
 
 @injectable()
 export class ServerProxyExpressContribution implements BackendApplicationContribution {
-    @inject(AppManager)
-    private readonly appManager: AppManager
+    @inject(ServerProxyInstanceManager)
+    private readonly appManager: ServerProxyInstanceManager
 
     @inject(ServerProxyManager)
     private readonly serverProxyManager: ServerProxyManager
@@ -41,6 +41,7 @@ export class ServerProxyExpressContribution implements BackendApplicationContrib
 
     configure(app: express.Application): void {
         this.serverProxyManager.get().forEach(serverProxy => {
+            // TODO share code
             const basePath = `/server-proxy/${serverProxy.id}/`;
 
             const baseOptions = {

@@ -16,7 +16,7 @@
 
 import { createProxyMiddleware, Options, RequestHandler } from 'http-proxy-middleware';
 import { injectable } from 'inversify';
-import { ServerProxyCommandContext, ServerProxyContribution, ServerProxyCommand } from 'theia-server-proxy-extension/lib/node/server-proxy-contribution';
+import { ServerProxyCommandArgs, ServerProxyContribution, ServerProxyCommand } from 'theia-server-proxy-extension/lib/node/server-proxy-contribution';
 import * as path from 'path';
 
 @injectable()
@@ -25,7 +25,7 @@ export class RStudioServerProxyContribution implements ServerProxyContribution {
 
     name: string = "RStudio";
 
-    getCommand(context: ServerProxyCommandContext): ServerProxyCommand[] {
+    async getCommand(args: ServerProxyCommandArgs): Promise<ServerProxyCommand> {
         const settingsPath = path.join(__dirname, "../../assets/rserver.conf");
 
         const command = [
@@ -33,13 +33,13 @@ export class RStudioServerProxyContribution implements ServerProxyContribution {
             "run",
             "--rm",
             "-p",
-            `${context.port}:8787`,
+            `${args.port}:8787`,
             "-e",
             "DISABLE_AUTH=true",
             "-v",
             `${settingsPath}:/etc/rstudio/rserver.conf`,
             "-v",
-            `${context.workspacePath}:/home/rstudio`,
+            `${args.workspacePath}:/home/rstudio`,
             "rocker/rstudio",
         ]
 

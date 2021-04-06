@@ -14,26 +14,24 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
+import { Path } from '@theia/core';
 import { injectable, inject } from 'inversify';
-import { Disposable, Path } from '@theia/core/lib/common';
 import { ServerProxyRpcClient } from '../common/rpc';
 import { ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxy } from '../common/server-proxy';
-import { AppManager } from './server-proxy-application';
-import { ServerProxyManager } from './server-proxy-contribution';
+import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
+import { ServerProxyManager } from './server-proxy-manager';
 
 
 @injectable()
 export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
     client: ServerProxyRpcClient | undefined;
 
-    @inject(AppManager)
-    private readonly appManager: AppManager
+    @inject(ServerProxyInstanceManager)
+    private readonly appManager: ServerProxyInstanceManager
 
     @inject(ServerProxyManager)
     private readonly serverProxyManager: ServerProxyManager
-
-    private readonly appDisposable: Map<number, Disposable> = new Map<number, Disposable>();
 
     async getServerProxies(): Promise<ServerProxy[]> {
         return this.serverProxyManager.get().map(c => {
@@ -47,14 +45,6 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
     async startApp(serverProxyId: string, workspace: string, args?: any): Promise<number> {
         const path = new Path(workspace);
         return await this.appManager.startApp(serverProxyId, path);
-    }
-
-    disposeApp(id: number): void {
-        const disposable = this.appDisposable.get(id);
-        if (disposable) {
-            disposable.dispose();
-            this.appDisposable.delete(id);
-        }
     }
 
     stopApp(id: number): Promise<Boolean> {
