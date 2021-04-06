@@ -18,7 +18,7 @@ import { injectable, inject, postConstruct } from 'inversify';
 import { ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxy } from '../common/server-proxy';
 import { Path } from '@theia/core';
-import { FrontendServerProxyApplication } from './server-proxy-app';
+import { ServerProxyApp } from './server-proxy-app';
 
 @injectable()
 export class ServerProxyManager {
@@ -26,8 +26,6 @@ export class ServerProxyManager {
     private readonly serverProxyRpcServer: ServerProxyRpcServer;
 
     private readonly serverProxiesById: Map<string, ServerProxy> = new Map<string, ServerProxy>();
-
-    private readonly appById: Map<string, FrontendServerProxyApplication> = new Map<string, FrontendServerProxyApplication>();
 
     @postConstruct()
     async init(): Promise<void> {
@@ -40,13 +38,11 @@ export class ServerProxyManager {
         return this.serverProxiesById.get(serverProxyId);
     }
 
-    public startApp(serverProxy: ServerProxy, path: Path): FrontendServerProxyApplication {
-        const app = new FrontendServerProxyApplication(
+    public startApp(serverProxy: ServerProxy, path: Path): ServerProxyApp {
+        return new ServerProxyApp(
             this.serverProxyRpcServer,
             serverProxy,
             path
         );
-
-        app.change()
     }
 }

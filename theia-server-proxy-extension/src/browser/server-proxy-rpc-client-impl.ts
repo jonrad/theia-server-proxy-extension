@@ -13,17 +13,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-import { Emitter, Event } from '@theia/core';
 import { injectable } from 'inversify';
-import { AppStatus, ServerProxyRpcClient } from '../common/rpc';
+import { ServerProxyRpcClient } from '../common/rpc';
 
 @injectable()
 export class ServerProxyRpcClientImpl implements ServerProxyRpcClient {
-    emitter: Emitter<{ appId: number, status: AppStatus }> = new Emitter<{ appId: number, status: AppStatus }>();
-
-    change: Event<{ appId: number, status: AppStatus }> = this.emitter.event;
-
-    onChange(appId: number, status: AppStatus): void {
-        this.emitter.fire({ appId, status });
-    }
 }

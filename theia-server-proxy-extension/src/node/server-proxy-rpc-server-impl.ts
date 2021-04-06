@@ -16,7 +16,7 @@
 
 import { injectable, inject } from 'inversify';
 import { Disposable, Path } from '@theia/core/lib/common';
-import { AppStatus, ServerProxyApplication, ServerProxyRpcClient, StatusId } from '../common/rpc';
+import { ServerProxyRpcClient } from '../common/rpc';
 import { ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxy } from '../common/server-proxy';
 import { AppManager } from './server-proxy-application';
@@ -44,25 +44,9 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
         });
     }
 
-    sendStatus(appId: number, status: AppStatus): void {
-        this.client?.onChange(appId, status);
-    }
-
-    async startApp(serverProxyId: string, workspace: string, args?: any): Promise<ServerProxyApplication> {
+    async startApp(serverProxyId: string, workspace: string, args?: any): Promise<number> {
         const path = new Path(workspace);
-        const app = await this.appManager.startApp(serverProxyId, path);
-
-        const disposable = app.change((status: AppStatus) => {
-            this.sendStatus(app.id, status);
-
-            if (app.status.statusId == StatusId.failed || app.status.statusId == StatusId.stopped) {
-                this.disposeApp(app.id);
-            }
-        });
-
-        this.appDisposable.set(app.id, disposable);
-
-        return app;
+        return await this.appManager.startApp(serverProxyId, path);
     }
 
     disposeApp(id: number): void {

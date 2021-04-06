@@ -18,58 +18,19 @@ import * as http from 'http';
 import { injectable, inject } from 'inversify';
 import * as getPort from 'get-port';
 import { ServerProxyManager } from './server-proxy-contribution';
-import { Emitter, Event, Path } from '@theia/core';
+import { Path } from '@theia/core';
 import { ILogger } from '@theia/core';
-import { AppStatus, ServerProxyApplication, StatusId } from '../common/rpc';
 
 // TODO: configurable
 const TIMEOUT = 30_000;
 
-/*
-class ServerProxyApplication {
+export class ServerProxyApplication {
     constructor(
-        public readonly serverProxyId: string,
         public readonly appId: number,
+        public readonly serverProxyId: string,
         public readonly port: number,
-        // this shouldn't be exposed
         private readonly process: RawProcess
     ) {
-    }
-
-    public async isRunning(): Promise<Boolean> {
-        return new Promise((resolve, reject) => {
-            const request = http.get(`http://localhost:${this.port}/server-proxy/${this.serverProxyId}/${this.appId}/`);
-
-            request.on('error', (err: Error) => resolve(false));
-            request.on('response', (response: http.IncomingMessage) => {
-                resolve(true)
-            });
-        });
-    }
-
-    public stop() {
-        this.process.kill();
-    }
-}
-*/
-
-export class BackendServerProxyApplication implements ServerProxyApplication {
-    private changeEmitter: Emitter<AppStatus> = new Emitter<AppStatus>();
-    public change: Event<AppStatus> = this.changeEmitter.event;
-
-    public status: AppStatus;
-
-    private onChange(status: AppStatus): void {
-        this.status = status;
-        this.changeEmitter.fire(status);
-    }
-
-    constructor(
-        public readonly id: number,
-        initialStatus: AppStatus,
-        private readonly process: RawProcess
-    ) {
-        this.onChange(initialStatus);
     }
 
     private async isAccessible(): Promise<Boolean> {
@@ -84,13 +45,13 @@ export class BackendServerProxyApplication implements ServerProxyApplication {
         });
     }
 
+    public stop(): void {
+        return this.process.kill();
+    }
+
     public async init(): Promise<void> {
         try {
             await this.process.onStart;
-
-            this.onChange({
-                statusId: StatusId.processStarted
-            });
 
             const startTime = new Date().getTime();
 
@@ -100,15 +61,8 @@ export class BackendServerProxyApplication implements ServerProxyApplication {
                     throw new Error("Timed out waiting for app to start");
                 }
             }
-
-            this.onChange({
-                statusId: StatusId.started
-            });
         } catch (e) {
-            this.onChange({
-                statusId: StatusId.failed,
-                message: e?.toString()
-            })
+            throw e;
         }
     }
 }
@@ -129,8 +83,7 @@ export class AppManager {
     private readonly serverProxyManager: ServerProxyManager;
 
     public getAppPort(id: number): number | undefined {
-        //return this.appById.get(id)?.port;
-        return undefined;
+        return this.appById.get(id)?.port;
     }
 
     public async stopApp(id: number): Promise<Boolean> {
@@ -138,7 +91,7 @@ export class AppManager {
         this.appById.delete(id);
 
         if (app) {
-            // await app.stop();
+            await app.stop();
             return true;
         } else {
             return false;
@@ -152,7 +105,7 @@ export class AppManager {
     public async startApp(
         serverProxyId: string,
         path: Path
-    ): Promise<BackendServerProxyApplication> {
+    ): Promise<number> {
         const port: number = await this.findAvailablePort();
         const appId: number = ++this.lastAppId;
         this.logger.info(`server-proxy mapping app id ${appId} for ${serverProxyId} to port ${port}`);
@@ -183,16 +136,17 @@ export class AppManager {
             }
         });
 
-        const application = new BackendServerProxyApplication(
+        const application = new ServerProxyApplication(
             appId,
-            { statusId: StatusId.starting },
+            serverProxy.id,
+            port,
             rawProcess
         );
 
         this.appById.set(appId, application);
 
-        application.init();
+        await application.init();
 
-        return application;
+        return appId;
     }
 }
