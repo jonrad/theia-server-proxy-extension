@@ -20,7 +20,7 @@ import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { CommandRegistry } from '@theia/core/lib/common';
 import { ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxyContentStyle } from './server-proxy-content-style';
-import { ServerProxyApp } from './server-proxy-app';
+import { ServerProxyInstance } from './server-proxy-instance';
 import { buildUri } from './server-proxy-uri';
 
 @injectable()
@@ -38,13 +38,13 @@ export class ServerProxyWidget extends ReactWidget {
 
     private appId: number | undefined = undefined;
 
-    private app: ServerProxyApp;
+    private app: ServerProxyInstance;
 
     constructor() {
         super();
     }
 
-    public async init(app: ServerProxyApp): Promise<void> {
+    public async init(app: ServerProxyInstance): Promise<void> {
         const serverProxy = app.serverProxy;
 
         this.id = buildUri(serverProxy.id, app.path).toString();

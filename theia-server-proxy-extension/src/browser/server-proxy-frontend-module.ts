@@ -20,7 +20,7 @@ import { ContainerModule, interfaces } from 'inversify';
 
 import { ServerProxyRpcServer, ServerProxyRpcClient } from '../common/rpc';
 
-import { ServerProxyCommandContribution } from './server-proxy-contribution';
+import { ServerProxyCommandContribution } from './server-proxy-command-contribution';
 import { ServerProxyWidgetOpenHandler } from "./server-proxy-widget-open-handler";
 import { ServerProxyWidget } from './server-proxy-widget';
 import { ServerProxyRpcClientImpl } from './server-proxy-rpc-client-impl';

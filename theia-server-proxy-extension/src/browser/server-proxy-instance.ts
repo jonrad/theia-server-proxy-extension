@@ -18,7 +18,7 @@ import { Path } from '@theia/core';
 import { ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxy } from '../common/server-proxy';
 
-export class ServerProxyApp {
+export class ServerProxyInstance {
     started: Promise<number>;
 
     constructor(

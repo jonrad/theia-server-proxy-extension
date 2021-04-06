@@ -18,7 +18,7 @@ import { injectable, inject, postConstruct } from 'inversify';
 import { ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxy } from '../common/server-proxy';
 import { Path } from '@theia/core';
-import { ServerProxyApp } from './server-proxy-app';
+import { ServerProxyInstance } from './server-proxy-instance';
 
 @injectable()
 export class ServerProxyManager {
@@ -38,8 +38,8 @@ export class ServerProxyManager {
         return this.serverProxiesById.get(serverProxyId);
     }
 
-    public startApp(serverProxy: ServerProxy, path: Path): ServerProxyApp {
-        return new ServerProxyApp(
+    public startApp(serverProxy: ServerProxy, path: Path): ServerProxyInstance {
+        return new ServerProxyInstance(
             this.serverProxyRpcServer,
             serverProxy,
             path

@@ -19,7 +19,6 @@ import { ServerProxy } from "./server-proxy";
 
 export const ServerProxyRpcServer = Symbol('ServerProxyRpcServer');
 export interface ServerProxyRpcServer extends JsonRpcServer<ServerProxyRpcClient> {
-    // Path type is not serializable so this needs to be a string
     startApp(id: string, path: string, args?: any): Promise<number>
 
     stopApp(id: number): Promise<Boolean>
