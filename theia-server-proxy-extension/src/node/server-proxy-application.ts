@@ -62,6 +62,7 @@ export class ServerProxyApplication {
                 }
             }
         } catch (e) {
+            this.stop();
             throw e;
         }
     }
@@ -145,7 +146,12 @@ export class AppManager {
 
         this.appById.set(appId, application);
 
-        await application.init();
+        try {
+            await application.init();
+        } catch (e) {
+            this.appById.delete(appId);
+            throw e;
+        }
 
         return appId;
     }
