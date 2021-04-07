@@ -3,9 +3,7 @@
   "scripts": {
     "prepare": "lerna run prepare",
     "rebuild:browser": "theia rebuild:browser",
-    "rebuild:electron": "theia rebuild:electron",
     "start:browser": "yarn rebuild:browser && yarn --cwd browser-app start",
-    "start:electron": "yarn rebuild:electron && yarn --cwd electron-app start",
     "watch": "lerna run --parallel watch"
   },
   "devDependencies": {
@@ -15,8 +13,7 @@
     "theia-server-proxy-extension",
     "theia-jupyter-extension",
     "theia-rstudio-extension",
-    "browser-app",
-    "electron-app"
+    "browser-app"
   ],
   "version": "0.0.1"
 }
