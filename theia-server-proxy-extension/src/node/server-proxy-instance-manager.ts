@@ -103,6 +103,7 @@ export class ServerProxyInstanceManager {
         const maybeCleanup = () => {
             if (application.status.statusId == StatusId.stopped || application.status.statusId == StatusId.errored) {
                 this.appById.delete(appId);
+                application.dispose();
             }
         }
 

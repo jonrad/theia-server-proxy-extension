@@ -17,7 +17,7 @@
 import * as React from 'react';
 import { injectable, inject } from 'inversify';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
-import { CommandRegistry } from '@theia/core/lib/common';
+import { CommandRegistry, Disposable } from '@theia/core/lib/common';
 import { ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxyContentStyle } from './server-proxy-content-style';
 import { ServerProxyInstance } from './server-proxy-instance';
@@ -35,9 +35,16 @@ export class ServerProxyWidget extends ReactWidget {
     @inject(CommandRegistry)
     protected readonly commandRegistry: CommandRegistry;
 
+    private readonly disposables: Disposable[] = [];
+
     private get ready(): boolean {
         const status = this.instance.status;
-        return status?.statusId == StatusId.started;
+        return status.statusId == StatusId.started;
+    }
+
+    private get stopped(): boolean {
+        const status = this.instance.status;
+        return status.statusId == StatusId.stopped || status.statusId == StatusId.errored;
     }
 
     private instance: ServerProxyInstance;
@@ -52,21 +59,16 @@ export class ServerProxyWidget extends ReactWidget {
         this.title.caption = serverProxy.name;
         this.title.closable = true;
 
-        this.instance.statusChangedEvent((change) => {
-            if (change.statusId == StatusId.errored || change.statusId == StatusId.stopped) {
-                this.dispose();
-                return;
-            }
-
+        this.disposables.push(this.instance); // TODO this isn't right. What if we want it to stick around?
+        this.disposables.push(instance.statusChangedEvent(() => {
             this.update();
-        });
+        }));
 
         this.update();
     }
 
     public dispose(): void {
-        this.instance.stop();
-
+        this.disposables.forEach(d => d.dispose());
         super.dispose();
     }
 
@@ -77,6 +79,11 @@ export class ServerProxyWidget extends ReactWidget {
                 width: '100%',
                 height: '100%'
             }}></iframe>;
+        } else if (this.stopped) {
+            return <div style={{
+                width: '100%',
+                height: '100%'
+            }}>Instance stopped</div>;
         } else {
             return <div className={ServerProxyContentStyle.LOADING}></div>;
         }

@@ -15,14 +15,14 @@
  ********************************************************************************/
 import { RawProcess } from '@theia/process/lib/node';
 import * as http from 'http';
-import { Event, Emitter } from '@theia/core';
+import { Event, Emitter, Disposable } from '@theia/core';
 import { ServerProxyInstanceStatus, StatusId } from '../common/server-proxy';
 
 // TODO: configurable
 const RETRY_TIME = 1_000;
 const TIMEOUT = 30_000;
 
-export class ServerProxyInstance {
+export class ServerProxyInstance implements Disposable {
     public readonly statusChanged: Event<ServerProxyInstanceStatus>;
     private readonly statusChangedEmitter: Emitter<ServerProxyInstanceStatus>;
 
@@ -31,6 +31,8 @@ export class ServerProxyInstance {
     public get status(): ServerProxyInstanceStatus {
         return this._status;
     }
+
+    private disposables: Disposable[] = [];
 
     private fireStatusChanged(statusId: StatusId, message?: string) {
         this._status = {
@@ -53,23 +55,24 @@ export class ServerProxyInstance {
         this.statusChanged = this.statusChangedEmitter.event;
 
         this.fireStatusChanged(StatusId.starting);
+
+        this.disposables.push(process.onClose(() => {
+            this.fireStatusChanged(StatusId.stopped);
+        }))
     }
 
     private async isAccessible(): Promise<Boolean> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             // TODO 0 share this
             const request = http.get(`http://localhost:${this.port}/server-proxy/${this.serverProxyId}/${this.appId}/`);
 
-            request.on('error', (err: Error) => resolve(false));
-            request.on('response', (response: http.IncomingMessage) => {
-                resolve(true)
-            });
+            request.on('error', () => resolve(false));
+            request.on('response', () => resolve(true));
         });
     }
 
     public stop(): void {
-        this.fireStatusChanged(StatusId.stopped);
-        return this.process.kill();
+        this.process.kill();
     }
 
     public async init(): Promise<void> {
@@ -91,5 +94,10 @@ export class ServerProxyInstance {
             this.stop();
             this.fireStatusChanged(StatusId.errored, e.toString());
         }
+    }
+
+    dispose(): void {
+        this.stop();
+        this.disposables.forEach(d => d.dispose());
     }
 }

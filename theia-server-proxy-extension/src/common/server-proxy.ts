@@ -20,11 +20,11 @@ export interface ServerProxy {
 }
 
 export enum StatusId {
-    starting,
-    waitingForPort,
-    started,
-    stopped,
-    errored
+    starting = "starting",
+    waitingForPort = "waiting-for-port",
+    started = "started",
+    stopped = "stopped",
+    errored = "errored"
 }
 
 export interface ServerProxyInstanceStatus {

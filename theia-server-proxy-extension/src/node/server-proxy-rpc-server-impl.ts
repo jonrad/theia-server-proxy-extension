@@ -47,7 +47,6 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
         const instance = (await this.appManager.startApp(serverProxyId, path));
 
         instance.statusChanged((status) => {
-            console.log(`Sending to client ${!!this.client} ${status.instanceId} `)
             this.client?.fireStatusChanged(status);
         });
 
