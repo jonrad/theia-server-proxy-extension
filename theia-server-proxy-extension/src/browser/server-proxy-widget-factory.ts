@@ -17,6 +17,7 @@
 import { Path } from '@theia/core';
 import { Widget, WidgetFactory } from '@theia/core/lib/browser';
 import { injectable, inject } from 'inversify';
+import { ServerProxyInstance } from './server-proxy-instance';
 import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
 import { ServerProxyWidget } from './server-proxy-widget';
 import { ServerProxyWidgetContext } from './server-proxy-widget-context';
@@ -25,11 +26,9 @@ import { ServerProxyWidgetContext } from './server-proxy-widget-context';
 export class ServerProxyWidgetFactory implements WidgetFactory {
     public id: string = ServerProxyWidget.ID;
 
-    @inject(ServerProxyInstanceManager)
-    private readonly serverProxyInstanceManager: ServerProxyInstanceManager;
-
     public constructor(
-        @inject(ServerProxyWidget.ID) private readonly serverProxyWidgetFactory: () => ServerProxyWidget
+        @inject(ServerProxyInstanceManager) private readonly serverProxyInstanceManager: ServerProxyInstanceManager,
+        @inject(ServerProxyWidget.ID) private readonly serverProxyWidgetFactory: (instance: ServerProxyInstance) => ServerProxyWidget
     ) {
     }
 
@@ -39,9 +38,6 @@ export class ServerProxyWidgetFactory implements WidgetFactory {
             new Path(widgetContext.path)
         );
 
-        const widget = this.serverProxyWidgetFactory();
-        widget.init(instance);
-
-        return widget;
+        return this.serverProxyWidgetFactory(instance);
     }
 }
