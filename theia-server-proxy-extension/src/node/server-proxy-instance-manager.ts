@@ -19,7 +19,7 @@ import * as getAvailablePort from 'get-port';
 import { Path } from '@theia/core';
 import { ILogger } from '@theia/core';
 import { ServerProxyManager } from './server-proxy-manager';
-import { ServerProxyInstanceStatus, StatusId } from '../common/server-proxy';
+import { ServerProxyInstanceStatus } from '../common/server-proxy';
 import { ServerProxyInstance } from './server-proxy-instance';
 
 @injectable()
@@ -90,7 +90,7 @@ export class ServerProxyInstanceManager {
         this.instanceById.set(instanceId, instance);
 
         const maybeCleanup = () => {
-            if (instance.status.statusId == StatusId.stopped || instance.status.statusId == StatusId.errored) {
+            if (ServerProxyInstanceStatus.isCompleted(instance.status)) {
                 this.instanceById.delete(instanceId);
                 instance.dispose();
             }

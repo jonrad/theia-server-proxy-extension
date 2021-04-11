@@ -14,7 +14,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { injectable, inject, postConstruct } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { ServerProxyRpcClient, ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxy, ServerProxyInstanceStatus } from '../common/server-proxy';
 import { Disposable, Emitter, Path } from '@theia/core';
@@ -22,19 +22,15 @@ import { ServerProxyInstance } from './server-proxy-instance';
 
 @injectable()
 export class ServerProxyInstanceManager implements Disposable {
-    @inject(ServerProxyRpcServer)
-    private readonly serverProxyRpcServer: ServerProxyRpcServer;
-
-    @inject(ServerProxyRpcClient)
-    private readonly serverProxyRpcClient: ServerProxyRpcClient;
-
-    private disposable: Disposable;
+    private readonly disposable: Disposable;
 
     private readonly instancesById: Map<number, { instance: ServerProxyInstance, emitter: Emitter<ServerProxyInstanceStatus> }> =
         new Map<number, { instance: ServerProxyInstance, emitter: Emitter<ServerProxyInstanceStatus> }>();
 
-    @postConstruct()
-    protected init(): void {
+    constructor(
+        @inject(ServerProxyRpcServer) private readonly serverProxyRpcServer: ServerProxyRpcServer,
+        @inject(ServerProxyRpcClient) private readonly serverProxyRpcClient: ServerProxyRpcClient
+    ) {
         this.disposable = this.serverProxyRpcClient.statusChanged(status => {
             const maybeInstance = this.instancesById.get(status.instanceId);
             if (!maybeInstance) {
@@ -90,7 +86,7 @@ export class ServerProxyInstanceManager implements Disposable {
     }
 
     dispose(): void {
-        this.disposable?.dispose();
+        this.disposable.dispose();
         this.instancesById.forEach(({ emitter }) => emitter.dispose());
         this.instancesById.clear();
     }

@@ -19,7 +19,7 @@ import { Path } from '@theia/core';
 import { injectable, inject } from 'inversify';
 import { ServerProxyRpcClient } from '../common/rpc';
 import { ServerProxyRpcServer } from '../common/rpc';
-import { ServerProxy, ServerProxyInstanceStatus, StatusId } from '../common/server-proxy';
+import { ServerProxy, ServerProxyInstanceStatus } from '../common/server-proxy';
 import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
 import { ServerProxyManager } from './server-proxy-manager';
 
@@ -51,7 +51,7 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
 
         disposable = instance.statusChanged((status: ServerProxyInstanceStatus) => {
             this.client?.fireStatusChanged(status);
-            if (status.statusId == StatusId.stopped || status.statusId == StatusId.errored) {
+            if (ServerProxyInstanceStatus.isCompleted(status)) {
                 disposable?.dispose();
             }
         });

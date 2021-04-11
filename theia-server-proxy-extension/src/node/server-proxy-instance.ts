@@ -47,7 +47,11 @@ export class ServerProxyInstance implements Disposable {
 
         this.disposables.push(process.onClose(() => {
             this.setStatus(StatusId.stopped);
-        }))
+        }));
+
+        this.disposables.push(process.onError((e: Error) => {
+            this.setStatus(StatusId.errored, e.message);
+        }));
     }
 
     private setStatus(statusId: StatusId, message?: string) {

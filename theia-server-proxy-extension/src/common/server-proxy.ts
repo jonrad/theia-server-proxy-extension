@@ -33,3 +33,15 @@ export interface ServerProxyInstanceStatus {
     statusId: StatusId
     statusMessage?: string
 }
+
+export namespace StatusId {
+    export function isCompleted(statusId: StatusId): boolean {
+        return statusId == StatusId.stopped || statusId == StatusId.errored;
+    }
+}
+
+export namespace ServerProxyInstanceStatus {
+    export function isCompleted(status: ServerProxyInstanceStatus): boolean {
+        return StatusId.isCompleted(status.statusId);
+    }
+}

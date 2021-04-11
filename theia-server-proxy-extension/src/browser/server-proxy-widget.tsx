@@ -22,7 +22,7 @@ import { ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxyContentStyle } from './server-proxy-content-style';
 import { ServerProxyInstance } from './server-proxy-instance';
 import { buildUri } from './server-proxy-uri';
-import { StatusId } from '../common/server-proxy';
+import { ServerProxyInstanceStatus, StatusId } from '../common/server-proxy';
 
 @injectable()
 export class ServerProxyWidget extends ReactWidget {
@@ -43,8 +43,7 @@ export class ServerProxyWidget extends ReactWidget {
     }
 
     private get stopped(): boolean {
-        const status = this.instance.status;
-        return status.statusId == StatusId.stopped || status.statusId == StatusId.errored;
+        return ServerProxyInstanceStatus.isCompleted(this.instance.status);
     }
 
     private instance: ServerProxyInstance;

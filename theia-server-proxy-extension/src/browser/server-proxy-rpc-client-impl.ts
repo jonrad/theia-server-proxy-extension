@@ -33,7 +33,7 @@ export class ServerProxyRpcClientImpl implements ServerProxyRpcClient {
 
     fireStatusChanged(status: ServerProxyInstanceStatus): void {
         this.logger.info(
-            `Received status changed event of instance id ${status.instanceId} to ${status.statusId} with message '${status.statusMessage}'`
+            `Received status changed event of instance id ${status.instanceId} to ${status.statusId} with message '${status.statusMessage || ''}'`
         );
 
         this.statusChangedEmitter.fire(status);
