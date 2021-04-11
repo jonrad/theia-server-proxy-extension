@@ -18,21 +18,21 @@ import { injectable } from 'inversify';
 import { ServerProxyInstance } from './server-proxy-instance';
 import { ServerProxyInstanceStatus, StatusId } from '../common/server-proxy';
 import { IFrameWidget } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-widget';
-import { IFrameModel } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-model';
+import { IFrameModel, IFrameModelStatus } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-model';
 
 @injectable()
 export class ServerProxyWidget extends IFrameWidget {
-    public static ID: string = "server.proxy.widget";
+    public static readonly ID: string = "server.proxy.widget";
 
     private readonly instance: ServerProxyInstance;
 
-    private static buildStatus(instance: ServerProxyInstance): string {
+    private static buildStatus(instance: ServerProxyInstance): IFrameModelStatus {
         if (instance.status.statusId == StatusId.started) {
-            return "ready";
+            return IFrameModelStatus.ready;
         } else if (ServerProxyInstanceStatus.isCompleted(instance.status)) {
-            return "stopped";
+            return IFrameModelStatus.stopped;
         } else {
-            return "loading";
+            return IFrameModelStatus.loading;
         }
     }
 

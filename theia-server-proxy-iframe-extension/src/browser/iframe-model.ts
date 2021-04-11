@@ -16,10 +16,16 @@
 
 import { Emitter, Event } from '@theia/core/lib/common';
 
+export enum IFrameModelStatus {
+    loading = "loading",
+    stopped = "stopped",
+    ready = "ready"
+}
+
 export class IFrameModel {
     private _name: string;
     private _url: string;
-    private _status: string;
+    private _status: IFrameModelStatus;
 
     private updatedEmitter: Emitter<IFrameModel> = new Emitter<IFrameModel>();
 
@@ -39,10 +45,10 @@ export class IFrameModel {
         this.updatedEmitter.fire(this);
     }
 
-    get status(): string {
+    get status(): IFrameModelStatus {
         return this._status;
     }
-    set status(value: string) {
+    set status(value: IFrameModelStatus) {
         this._status = value;
         this.updatedEmitter.fire(this);
     }
@@ -54,7 +60,7 @@ export class IFrameModel {
     constructor(
         name: string,
         url: string,
-        status: string
+        status: IFrameModelStatus
     ) {
         this._name = name;
         this._url = url;

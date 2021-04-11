@@ -16,6 +16,7 @@
 
 import * as React from 'react';
 import { IFrameContentStyle } from './iframe-content-style';
+import { IFrameModelStatus } from './iframe-model';
 
 export class IFrame extends React.Component<IFrame.Props> {
     render(): React.ReactNode {
@@ -26,9 +27,9 @@ export class IFrame extends React.Component<IFrame.Props> {
             // loadingIcon
         } = this.props;
 
-        if (status == "loading") {
+        if (status == IFrameModelStatus.loading) {
             return <div className={IFrameContentStyle.LOADING}></div>;
-        } else if (status == "stopped") {
+        } else if (status == IFrameModelStatus.stopped) {
             return <div className={IFrameContentStyle.FULLSCREEN}>Instance stopped: {statusText}</div>;
         } else {
             return <iframe src={url} className={IFrameContentStyle.FULLSCREEN}></iframe>;
@@ -48,7 +49,7 @@ export class IFrame extends React.Component<IFrame.Props> {
 export namespace IFrame {
     export interface Props {
         url: string
-        status: string
+        status: IFrameModelStatus
         statusText?: string
         loadingIcon?: string
     }
