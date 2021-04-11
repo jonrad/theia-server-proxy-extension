@@ -34,17 +34,6 @@ export class ServerProxyInstance implements Disposable {
 
     private disposables: Disposable[] = [];
 
-    private fireStatusChanged(statusId: StatusId, message?: string) {
-        this._status = {
-            instanceId: this.appId,
-            statusId: statusId,
-            statusMessage: message,
-            timeMs: new Date().getTime()
-        };
-
-        this.statusChangedEmitter.fire(this._status);
-    }
-
     constructor(
         public readonly appId: number,
         public readonly serverProxyId: string,
@@ -54,11 +43,22 @@ export class ServerProxyInstance implements Disposable {
         this.statusChangedEmitter = new Emitter<ServerProxyInstanceStatus>();
         this.statusChanged = this.statusChangedEmitter.event;
 
-        this.fireStatusChanged(StatusId.starting);
+        this.setStatus(StatusId.starting);
 
         this.disposables.push(process.onClose(() => {
-            this.fireStatusChanged(StatusId.stopped);
+            this.setStatus(StatusId.stopped);
         }))
+    }
+
+    private setStatus(statusId: StatusId, message?: string) {
+        this._status = {
+            instanceId: this.appId,
+            statusId: statusId,
+            statusMessage: message,
+            timeMs: new Date().getTime()
+        };
+
+        this.statusChangedEmitter.fire(this._status);
     }
 
     private async isAccessible(): Promise<Boolean> {
@@ -72,27 +72,29 @@ export class ServerProxyInstance implements Disposable {
     }
 
     public stop(): void {
+        // TODO 0 what if it doesn't listen
         this.process.kill();
     }
 
     public async init(): Promise<void> {
         try {
             await this.process.onStart;
-            this.fireStatusChanged(StatusId.waitingForPort);
+            this.setStatus(StatusId.waitingForPort);
 
             const startTime = new Date().getTime();
 
             while (!(await this.isAccessible())) {
                 await new Promise(resolve => setTimeout(resolve, RETRY_TIME));
                 if (new Date().getTime() - startTime > TIMEOUT) {
-                    throw new Error("Timed out waiting for app to start");
+                    await this.stop();
+                    this.setStatus(StatusId.errored, "Timed out waiting for app to start");
                 }
             }
 
-            this.fireStatusChanged(StatusId.started);
+            this.setStatus(StatusId.started);
         } catch (e) {
             this.stop();
-            this.fireStatusChanged(StatusId.errored, e.toString());
+            this.setStatus(StatusId.errored, e.toString());
         }
     }
 

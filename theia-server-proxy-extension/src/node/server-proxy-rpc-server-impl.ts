@@ -14,11 +14,12 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
+import { Disposable } from '@theia/core';
 import { Path } from '@theia/core';
 import { injectable, inject } from 'inversify';
 import { ServerProxyRpcClient } from '../common/rpc';
 import { ServerProxyRpcServer } from '../common/rpc';
-import { ServerProxy, ServerProxyInstanceStatus } from '../common/server-proxy';
+import { ServerProxy, ServerProxyInstanceStatus, StatusId } from '../common/server-proxy';
 import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
 import { ServerProxyManager } from './server-proxy-manager';
 
@@ -46,11 +47,20 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
 
         const instance = (await this.appManager.startApp(serverProxyId, path));
 
-        instance.statusChanged((status) => {
+        let disposable: Disposable | undefined = undefined;
+
+        disposable = instance.statusChanged((status: ServerProxyInstanceStatus) => {
             this.client?.fireStatusChanged(status);
+            if (status.statusId == StatusId.stopped || status.statusId == StatusId.errored) {
+                disposable?.dispose();
+            }
         });
 
         return instance.status;
+    }
+
+    async getStatus(id: number): Promise<ServerProxyInstanceStatus | undefined> {
+        return this.appManager.getStatus(id);
     }
 
     stopApp(id: number): Promise<Boolean> {

@@ -19,7 +19,7 @@ import * as getAvailablePort from 'get-port';
 import { Path } from '@theia/core';
 import { ILogger } from '@theia/core';
 import { ServerProxyManager } from './server-proxy-manager';
-import { StatusId } from '../common/server-proxy';
+import { ServerProxyInstanceStatus, StatusId } from '../common/server-proxy';
 import { ServerProxyInstance } from './server-proxy-instance';
 
 @injectable()
@@ -116,5 +116,11 @@ export class ServerProxyInstanceManager {
         application.init();
 
         return application;
+    }
+
+    public getStatus(
+        instanceId: number
+    ): ServerProxyInstanceStatus | undefined {
+        return this.appById.get(instanceId)?.status;
     }
 }

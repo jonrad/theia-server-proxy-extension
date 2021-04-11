@@ -51,47 +51,42 @@ export class ServerProxyInstanceManager implements Disposable {
     }
 
     public async startInstance(serverProxy: ServerProxy, path: Path): Promise<ServerProxyInstance> {
-        // TODO: refactor this whole thing to not have to do this
-        // this catches the race condition where the status may have changed before we started listening to it
+        const instanceStatus = await this.serverProxyRpcServer.startApp(
+            serverProxy.id,
+            path.toString()
+        );
 
-        const latestStatuses = new Map<Number, ServerProxyInstanceStatus>();
-        const statusChangedListener = this.serverProxyRpcClient.statusChanged(status => {
-            const previous = latestStatuses.get(status.instanceId)?.timeMs;
-            if (previous && previous > status.timeMs) {
-                return;
-            }
+        const instanceId = instanceStatus.instanceId;
 
-            latestStatuses.set(status.instanceId, status);
-        });
+        const emitter = new Emitter<ServerProxyInstanceStatus>();
 
-        try {
-            const instanceStatus = await this.serverProxyRpcServer.startApp(
-                serverProxy.id,
-                path.toString()
-            );
+        const instance = new ServerProxyInstance(
+            instanceStatus,
+            serverProxy,
+            path,
+            this.serverProxyRpcServer,
+            emitter.event
+        );
 
-            const emitter = new Emitter<ServerProxyInstanceStatus>();
+        // At this point, the status checker will be able to refresh our new instance
+        this.instancesById.set(instanceStatus.instanceId, { instance, emitter });
 
-            const instance = new ServerProxyInstance(
-                instanceStatus,
-                serverProxy,
-                path,
-                this.serverProxyRpcServer,
-                emitter.event
-            );
+        // The status may have updated before we added it to the dictionary. So let's verify we have the latest
+        const latestStatus = await this.serverProxyRpcServer.getStatus(
+            instanceId
+        )
 
-            this.instancesById.set(instanceStatus.instanceId, { instance, emitter });
-
-            const latestStatus = latestStatuses.get(instance.id);
-
-            if (latestStatus && latestStatus.timeMs > instance.status.timeMs) {
-                emitter.fire(latestStatus);
-            }
-
-            return instance;
-        } finally {
-            statusChangedListener.dispose();
+        if (!latestStatus) {
+            // Server lost our instance somehow (eg it crashed)
+            this.instancesById.delete(instanceId)
+            throw Error('Was able to start the instance, but it seems to have crashed');
         }
+
+        if (latestStatus.timeMs > instance.status.timeMs) {
+            emitter.fire(latestStatus);
+        }
+
+        return instance;
     }
 
     dispose(): void {
