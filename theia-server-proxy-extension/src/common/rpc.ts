@@ -19,11 +19,11 @@ import { ServerProxy, ServerProxyInstanceStatus } from "./server-proxy";
 
 export const ServerProxyRpcServer = Symbol('ServerProxyRpcServer');
 export interface ServerProxyRpcServer extends JsonRpcServer<ServerProxyRpcClient> {
-    startApp(id: string, path: string, args?: any): Promise<ServerProxyInstanceStatus>
+    startInstance(id: string, path: string, args?: any): Promise<ServerProxyInstanceStatus>
 
-    getStatus(id: number): Promise<ServerProxyInstanceStatus | undefined>
+    getInstanceStatus(id: number): Promise<ServerProxyInstanceStatus | undefined>
 
-    stopApp(id: number): Promise<Boolean>
+    stopInstance(id: number): Promise<Boolean>
 
     getServerProxies(): Promise<ServerProxy[]>
 }

@@ -56,7 +56,7 @@ export class ServerProxyInstance implements Disposable {
     }
 
     public stop(): Promise<Boolean> {
-        return this.serverProxyRpcServer.stopApp(this.id);
+        return this.serverProxyRpcServer.stopInstance(this.id);
     }
 
     dispose(): void {

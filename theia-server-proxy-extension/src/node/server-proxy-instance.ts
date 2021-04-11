@@ -35,7 +35,7 @@ export class ServerProxyInstance implements Disposable {
     private disposables: Disposable[] = [];
 
     constructor(
-        public readonly appId: number,
+        public readonly instanceId: number,
         public readonly serverProxyId: string,
         public readonly port: number,
         private readonly process: RawProcess
@@ -52,7 +52,7 @@ export class ServerProxyInstance implements Disposable {
 
     private setStatus(statusId: StatusId, message?: string) {
         this._status = {
-            instanceId: this.appId,
+            instanceId: this.instanceId,
             statusId: statusId,
             statusMessage: message,
             timeMs: new Date().getTime()
@@ -64,7 +64,7 @@ export class ServerProxyInstance implements Disposable {
     private async isAccessible(): Promise<Boolean> {
         return new Promise((resolve) => {
             // TODO 0 share this
-            const request = http.get(`http://localhost:${this.port}/server-proxy/${this.serverProxyId}/${this.appId}/`);
+            const request = http.get(`http://localhost:${this.port}/server-proxy/${this.serverProxyId}/${this.instanceId}/`);
 
             request.on('error', () => resolve(false));
             request.on('response', () => resolve(true));
@@ -87,7 +87,7 @@ export class ServerProxyInstance implements Disposable {
                 await new Promise(resolve => setTimeout(resolve, RETRY_TIME));
                 if (new Date().getTime() - startTime > TIMEOUT) {
                     await this.stop();
-                    this.setStatus(StatusId.errored, "Timed out waiting for app to start");
+                    this.setStatus(StatusId.errored, "Timed out waiting for instance to start");
                 }
             }
 

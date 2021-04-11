@@ -24,9 +24,10 @@ import { ServerProxyInstance } from './server-proxy-instance';
 
 @injectable()
 export class ServerProxyInstanceManager {
-    private appById: Map<number, ServerProxyInstance> = new Map<number, ServerProxyInstance>()
+    private instanceById: Map<number, ServerProxyInstance> = new Map<number, ServerProxyInstance>()
 
-    private lastAppId = 0;
+    // does it matter that people can 'guess' other instance ids?
+    private lastInstanceId = 0;
 
     @inject(ILogger)
     protected readonly logger: ILogger;
@@ -37,33 +38,21 @@ export class ServerProxyInstanceManager {
     @inject(ServerProxyManager)
     private readonly serverProxyManager: ServerProxyManager;
 
-    public getAppPort(id: number): number | undefined {
-        return this.appById.get(id)?.port;
-    }
-
-    public async stopApp(id: number): Promise<Boolean> {
-        const app = this.appById.get(id);
-        this.appById.delete(id);
-
-        if (app) {
-            await app.stop();
-            return true;
-        } else {
-            return false;
-        }
+    public getInstancePort(id: number): number | undefined {
+        return this.instanceById.get(id)?.port;
     }
 
     private async findAvailablePort(): Promise<number> {
         return await getAvailablePort();
     }
 
-    public async startApp(
+    public async startInstance(
         serverProxyId: string,
         path: Path
     ): Promise<ServerProxyInstance> {
         const port: number = await this.findAvailablePort();
-        const appId: number = ++this.lastAppId;
-        this.logger.info(`server-proxy mapping app id ${appId} for ${serverProxyId} to port ${port}`);
+        const instanceId: number = ++this.lastInstanceId;
+        this.logger.info(`server-proxy mapping instance id ${instanceId} for ${serverProxyId} to port ${port}`);
         const serverProxy = this.serverProxyManager.getById(serverProxyId);
 
         if (!serverProxy) {
@@ -71,7 +60,7 @@ export class ServerProxyInstanceManager {
         }
 
         const { command, env } = await serverProxy.getCommand({
-            relativeUrl: `/server-proxy/${serverProxy.id}/${appId}`,
+            relativeUrl: `/server-proxy/${serverProxy.id}/${instanceId}`,
             port: port,
             workspacePath: path
         });
@@ -91,36 +80,48 @@ export class ServerProxyInstanceManager {
             }
         });
 
-        const application = new ServerProxyInstance(
-            appId,
+        const instance = new ServerProxyInstance(
+            instanceId,
             serverProxy.id,
             port,
             rawProcess
         );
 
-        this.appById.set(appId, application);
+        this.instanceById.set(instanceId, instance);
 
         const maybeCleanup = () => {
-            if (application.status.statusId == StatusId.stopped || application.status.statusId == StatusId.errored) {
-                this.appById.delete(appId);
-                application.dispose();
+            if (instance.status.statusId == StatusId.stopped || instance.status.statusId == StatusId.errored) {
+                this.instanceById.delete(instanceId);
+                instance.dispose();
             }
         }
 
-        application.statusChanged((status) => {
+        instance.statusChanged((status) => {
             maybeCleanup();
         })
 
         maybeCleanup();
 
-        application.init();
+        instance.init();
 
-        return application;
+        return instance;
     }
 
-    public getStatus(
+    public getInstanceStatus(
         instanceId: number
     ): ServerProxyInstanceStatus | undefined {
-        return this.appById.get(instanceId)?.status;
+        return this.instanceById.get(instanceId)?.status;
+    }
+
+    public async stopInstance(id: number): Promise<Boolean> {
+        const instance = this.instanceById.get(id);
+        this.instanceById.delete(id);
+
+        if (instance) {
+            await instance.stop();
+            return true;
+        } else {
+            return false;
+        }
     }
 }

@@ -27,7 +27,7 @@ import { ServerProxyManager } from './server-proxy-manager';
 @injectable()
 export class ServerProxyExpressContribution implements BackendApplicationContribution {
     @inject(ServerProxyInstanceManager)
-    private readonly appManager: ServerProxyInstanceManager
+    private readonly instanceManager: ServerProxyInstanceManager
 
     @inject(ServerProxyManager)
     private readonly serverProxyManager: ServerProxyManager
@@ -58,8 +58,8 @@ export class ServerProxyExpressContribution implements BackendApplicationContrib
                     if (!split || split.length < 4) {
                         return;
                     }
-                    const appId = Number(split[3]);
-                    const port = this.appManager.getAppPort(appId) || 80;
+                    const instanceId = Number(split[3]);
+                    const port = this.instanceManager.getInstancePort(instanceId) || 80;
                     return `http://localhost:${port}`;
                 }
             };

@@ -28,7 +28,7 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
     client: ServerProxyRpcClient | undefined;
 
     @inject(ServerProxyInstanceManager)
-    private readonly appManager: ServerProxyInstanceManager
+    private readonly instanceManager: ServerProxyInstanceManager
 
     @inject(ServerProxyManager)
     private readonly serverProxyManager: ServerProxyManager
@@ -42,10 +42,10 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
         });
     }
 
-    async startApp(serverProxyId: string, workspace: string, args?: any): Promise<ServerProxyInstanceStatus> {
+    async startInstance(serverProxyId: string, workspace: string, args?: any): Promise<ServerProxyInstanceStatus> {
         const path = new Path(workspace);
 
-        const instance = (await this.appManager.startApp(serverProxyId, path));
+        const instance = (await this.instanceManager.startInstance(serverProxyId, path));
 
         let disposable: Disposable | undefined = undefined;
 
@@ -59,12 +59,12 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
         return instance.status;
     }
 
-    async getStatus(id: number): Promise<ServerProxyInstanceStatus | undefined> {
-        return this.appManager.getStatus(id);
+    async getInstanceStatus(id: number): Promise<ServerProxyInstanceStatus | undefined> {
+        return this.instanceManager.getInstanceStatus(id);
     }
 
-    stopApp(id: number): Promise<Boolean> {
-        return this.appManager.stopApp(id);
+    stopInstance(id: number): Promise<Boolean> {
+        return this.instanceManager.stopInstance(id);
     }
 
     setClient(client: ServerProxyRpcClient | undefined): void {

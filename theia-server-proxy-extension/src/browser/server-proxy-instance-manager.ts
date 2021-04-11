@@ -51,7 +51,7 @@ export class ServerProxyInstanceManager implements Disposable {
     }
 
     public async startInstance(serverProxy: ServerProxy, path: Path): Promise<ServerProxyInstance> {
-        const instanceStatus = await this.serverProxyRpcServer.startApp(
+        const instanceStatus = await this.serverProxyRpcServer.startInstance(
             serverProxy.id,
             path.toString()
         );
@@ -72,7 +72,7 @@ export class ServerProxyInstanceManager implements Disposable {
         this.instancesById.set(instanceStatus.instanceId, { instance, emitter });
 
         // The status may have updated before we added it to the dictionary. So let's verify we have the latest
-        const latestStatus = await this.serverProxyRpcServer.getStatus(
+        const latestStatus = await this.serverProxyRpcServer.getInstanceStatus(
             instanceId
         )
 
