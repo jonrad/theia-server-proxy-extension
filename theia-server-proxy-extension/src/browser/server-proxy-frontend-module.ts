@@ -29,15 +29,15 @@ import { ServerProxyManager } from './server-proxy-manager';
 
 import '../../src/browser/style/index.css';
 import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
+import { ServerProxyInstance } from './server-proxy-instance';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
     bind(ServerProxyCommandContribution).toSelf();
     bind(CommandContribution).toService(ServerProxyCommandContribution);
 
     // The widget and everything needed to build it
-    bind(ServerProxyWidget).toSelf();
-    bind<interfaces.Factory<ServerProxyWidget>>(ServerProxyWidget.ID).toFactory<ServerProxyWidget>((context: interfaces.Context) => {
-        return () => context.container.get<ServerProxyWidget>(ServerProxyWidget);
+    bind<interfaces.Factory<ServerProxyWidget>>(ServerProxyWidget.ID).toFactory<ServerProxyWidget>(() => {
+        return (instance: ServerProxyInstance) => new ServerProxyWidget(instance);
     });
     bind(ServerProxyWidgetFactory).toSelf();
     bind(WidgetFactory).toService(ServerProxyWidgetFactory);

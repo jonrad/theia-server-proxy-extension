@@ -13,22 +13,3 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-
-.theia-server-proxy-load-indicator {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 10;
-    background: var(--theia-editor-background);
-    background-image: var(--theia-preloader);
-    background-size: 60px 60px;
-    background-repeat: no-repeat;
-    background-position: center;
-    transition: opacity 0.8s;
-}
-
-.theiaserver-proxy-load-indicator.theia-fade-out {
-    opacity: 0;
-}
