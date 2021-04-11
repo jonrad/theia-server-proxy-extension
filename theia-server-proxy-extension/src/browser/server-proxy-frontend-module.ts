@@ -28,6 +28,7 @@ import { ServerProxyWidgetFactory } from './server-proxy-widget-factory';
 import { ServerProxyManager } from './server-proxy-manager';
 
 import '../../src/browser/style/index.css';
+import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
     bind(ServerProxyCommandContribution).toSelf();
@@ -42,11 +43,12 @@ export default new ContainerModule((bind: interfaces.Bind) => {
     bind(WidgetFactory).toService(ServerProxyWidgetFactory);
 
     bind(ServerProxyManager).toSelf();
+    bind(ServerProxyInstanceManager).toSelf();
 
     bind(ServerProxyWidgetOpenHandler).toSelf().inSingletonScope();
     bind(OpenHandler).toService(ServerProxyWidgetOpenHandler);
 
-    bind(ServerProxyRpcClient).to(ServerProxyRpcClientImpl);
+    bind(ServerProxyRpcClient).to(ServerProxyRpcClientImpl).inSingletonScope();
     bind(ServerProxyRpcServer).toDynamicValue(ctx => {
         const client = ctx.container.get<ServerProxyRpcClient>(ServerProxyRpcClient);
         const connection = ctx.container.get(WebSocketConnectionProvider);

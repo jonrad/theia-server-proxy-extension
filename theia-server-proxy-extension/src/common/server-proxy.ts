@@ -18,3 +18,30 @@ export interface ServerProxy {
     id: string
     name: string
 }
+
+export enum StatusId {
+    starting = "starting",
+    waitingForPort = "waiting-for-port",
+    started = "started",
+    stopped = "stopped",
+    errored = "errored"
+}
+
+export interface ServerProxyInstanceStatus {
+    instanceId: number
+    timeMs: number
+    statusId: StatusId
+    statusMessage?: string
+}
+
+export namespace StatusId {
+    export function isCompleted(statusId: StatusId): boolean {
+        return statusId == StatusId.stopped || statusId == StatusId.errored;
+    }
+}
+
+export namespace ServerProxyInstanceStatus {
+    export function isCompleted(status: ServerProxyInstanceStatus): boolean {
+        return StatusId.isCompleted(status.statusId);
+    }
+}

@@ -14,18 +14,22 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { JsonRpcServer } from "@theia/core";
-import { ServerProxy } from "./server-proxy";
+import { JsonRpcServer, Event } from "@theia/core";
+import { ServerProxy, ServerProxyInstanceStatus } from "./server-proxy";
 
 export const ServerProxyRpcServer = Symbol('ServerProxyRpcServer');
 export interface ServerProxyRpcServer extends JsonRpcServer<ServerProxyRpcClient> {
-    startApp(id: string, path: string, args?: any): Promise<number>
+    startInstance(id: string, path: string, args?: any): Promise<ServerProxyInstanceStatus>
 
-    stopApp(id: number): Promise<Boolean>
+    getInstanceStatus(id: number): Promise<ServerProxyInstanceStatus | undefined>
+
+    stopInstance(id: number): Promise<Boolean>
 
     getServerProxies(): Promise<ServerProxy[]>
 }
 
 export const ServerProxyRpcClient = Symbol('ServerProxyRpcClient');
 export interface ServerProxyRpcClient {
+    readonly statusChanged: Event<ServerProxyInstanceStatus>;
+    fireStatusChanged(status: ServerProxyInstanceStatus): void;
 }

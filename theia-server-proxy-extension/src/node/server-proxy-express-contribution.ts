@@ -20,14 +20,14 @@ import * as https from 'https';
 import * as net from 'net';
 import { injectable, inject, postConstruct } from 'inversify';
 import { BackendApplicationContribution } from '@theia/core/lib/node/backend-application';
-import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware';
+import { createProxyMiddleware, Options, RequestHandler } from 'http-proxy-middleware';
 import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
 import { ServerProxyManager } from './server-proxy-manager';
 
 @injectable()
 export class ServerProxyExpressContribution implements BackendApplicationContribution {
     @inject(ServerProxyInstanceManager)
-    private readonly appManager: ServerProxyInstanceManager
+    private readonly instanceManager: ServerProxyInstanceManager
 
     @inject(ServerProxyManager)
     private readonly serverProxyManager: ServerProxyManager
@@ -44,8 +44,8 @@ export class ServerProxyExpressContribution implements BackendApplicationContrib
             // TODO share code
             const basePath = `/server-proxy/${serverProxy.id}/`;
 
-            const baseOptions = {
-                target: "http://localhost:31337",
+            const baseOptions: Options = {
+                target: "http://localhost:31337", // not used, but is required by http-proxy-middleware
                 ws: true,
                 changeOrigin: true,
                 router: (req: express.Request) => {
@@ -58,8 +58,12 @@ export class ServerProxyExpressContribution implements BackendApplicationContrib
                     if (!split || split.length < 4) {
                         return;
                     }
-                    const appId = Number(split[3]);
-                    const port = this.appManager.getAppPort(appId) || 80;
+                    const instanceId = Number(split[3]);
+                    const port = this.instanceManager.getInstancePort(instanceId);
+                    if (!port) {
+                        throw Error(`Server Proxy with id ${instanceId} does not exist`);
+                    }
+
                     return `http://localhost:${port}`;
                 }
             };

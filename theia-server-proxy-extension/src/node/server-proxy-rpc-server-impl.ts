@@ -14,21 +14,21 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
+import { Disposable } from '@theia/core';
 import { Path } from '@theia/core';
 import { injectable, inject } from 'inversify';
 import { ServerProxyRpcClient } from '../common/rpc';
 import { ServerProxyRpcServer } from '../common/rpc';
-import { ServerProxy } from '../common/server-proxy';
+import { ServerProxy, ServerProxyInstanceStatus } from '../common/server-proxy';
 import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
 import { ServerProxyManager } from './server-proxy-manager';
-
 
 @injectable()
 export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
     client: ServerProxyRpcClient | undefined;
 
     @inject(ServerProxyInstanceManager)
-    private readonly appManager: ServerProxyInstanceManager
+    private readonly instanceManager: ServerProxyInstanceManager
 
     @inject(ServerProxyManager)
     private readonly serverProxyManager: ServerProxyManager
@@ -42,17 +42,37 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
         });
     }
 
-    async startApp(serverProxyId: string, workspace: string, args?: any): Promise<number> {
+    async startInstance(serverProxyId: string, workspace: string, args?: any): Promise<ServerProxyInstanceStatus> {
         const path = new Path(workspace);
-        return await this.appManager.startApp(serverProxyId, path);
+
+        const instance = (await this.instanceManager.startInstance(serverProxyId, path));
+
+        let disposable: Disposable | undefined = undefined;
+
+        disposable = instance.statusChanged((status: ServerProxyInstanceStatus) => {
+            this.client?.fireStatusChanged(status);
+            if (ServerProxyInstanceStatus.isCompleted(status)) {
+                disposable?.dispose();
+            }
+        });
+
+        return instance.status;
     }
 
-    stopApp(id: number): Promise<Boolean> {
-        return this.appManager.stopApp(id);
+    async getInstanceStatus(id: number): Promise<ServerProxyInstanceStatus | undefined> {
+        return this.instanceManager.getInstanceStatus(id);
+    }
+
+    stopInstance(id: number): Promise<Boolean> {
+        return this.instanceManager.stopInstance(id);
     }
 
     setClient(client: ServerProxyRpcClient | undefined): void {
         this.client = client;
+    }
+
+    getClient(): ServerProxyRpcClient | undefined {
+        return this.client;
     }
 
     dispose(): void {

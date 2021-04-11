@@ -31,11 +31,10 @@ export default new ContainerModule((bind: interfaces.Bind) => {
     bind(ServerProxyExpressContribution).toSelf();
     bind(BackendApplicationContribution).toService(ServerProxyExpressContribution);
 
-    bind(ServerProxyRpcServer).to(ServerProxyRpcServerImpl);
-
     bindContributionProvider(bind, ServerProxyContribution);
     bind(ServerProxyManager).toSelf().inSingletonScope();
 
+    bind(ServerProxyRpcServer).to(ServerProxyRpcServerImpl);
     bind(ConnectionHandler).toDynamicValue(ctx =>
         new JsonRpcConnectionHandler<ServerProxyRpcClient>("/services/server-proxy", (client: ServerProxyRpcClient) => {
             const server = ctx.container.get<ServerProxyRpcServer>(ServerProxyRpcServer);
