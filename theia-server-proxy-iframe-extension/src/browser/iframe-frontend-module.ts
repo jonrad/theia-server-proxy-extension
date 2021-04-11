@@ -14,5 +14,14 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-export namespace ServerProxyContentStyle {
-}
+import { ContainerModule, interfaces } from 'inversify';
+import { IFrameWidget } from "./iframe-widget";
+import { IFrameModel } from "./iframe-model";
+
+import '../../src/browser/style/index.css';
+
+export default new ContainerModule((bind: interfaces.Bind) => {
+    bind<interfaces.Factory<IFrameWidget>>(IFrameWidget.ID).toFactory<IFrameWidget>(() => {
+        return (instance: IFrameModel) => new IFrameWidget(instance);
+    });
+});

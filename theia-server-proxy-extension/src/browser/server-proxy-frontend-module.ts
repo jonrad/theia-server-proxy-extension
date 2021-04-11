@@ -14,7 +14,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { CommandContribution, CommandRegistry } from '@theia/core';
+import { CommandContribution } from '@theia/core';
 import { WidgetFactory, WebSocketConnectionProvider, OpenHandler } from '@theia/core/lib/browser';
 import { ContainerModule, interfaces } from 'inversify';
 

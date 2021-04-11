@@ -14,5 +14,8 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-export namespace ServerProxyContentStyle {
+export namespace IFrameContentStyle {
+    export const LOADING = 'theia-server-proxy-load-indicator';
+    export const FADE_OUT = 'theia-fade-out';
+    export const FULLSCREEN = 'theia-server-proxy-fullscreen';
 }
