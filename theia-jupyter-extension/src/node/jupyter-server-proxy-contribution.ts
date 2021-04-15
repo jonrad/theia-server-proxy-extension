@@ -18,6 +18,7 @@ import { injectable, inject } from 'inversify';
 import { ServerProxyCommandArgs, ServerProxyContribution, ServerProxyCommand } from 'theia-server-proxy-extension/lib/node/server-proxy-contribution';
 import * as path from 'path';
 import { EnvVariablesServer } from '@theia/core/lib/common/env-variables';
+import { Extension } from '../common/const';
 
 const ENV_JUPYTER_CUSTOM_PROCESS: string = 'ENV_JUPYTER_CUSTOM_PROCESS';
 const ENV_JUPYTER_PATH: string = 'ENV_JUPYTER_PATH';
@@ -27,9 +28,9 @@ export class JupyterServerProxyContribution implements ServerProxyContribution {
     @inject(EnvVariablesServer)
     private readonly envVariablesServer: EnvVariablesServer;
 
-    id: string = "jupyter";
+    id: string = Extension.ID;
 
-    name: string = "Jupyter";
+    name: string = Extension.Name;
 
     async getCommand(args: ServerProxyCommandArgs): Promise<ServerProxyCommand> {
         const configDir = path.join(__dirname, "../../assets/.jupyter");

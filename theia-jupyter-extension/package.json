@@ -12,6 +12,7 @@
   "dependencies": {
     "@theia/core": "1.12.0",
     "theia-server-proxy-extension": "0.0.0",
+    "theia-server-proxy-iframe-extension": "0.0.0",
     "http-proxy-middleware": "^1.0.6"
   },
   "devDependencies": {
@@ -26,6 +27,7 @@
   },
   "theiaExtensions": [
     {
+      "frontend": "lib/browser/jupyter-frontend-module",
       "backend": "lib/node/jupyter-backend-module"
     }
   ]
