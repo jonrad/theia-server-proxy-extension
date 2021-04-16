@@ -44,7 +44,8 @@ export class ServerProxyWidget extends IFrameWidget {
             new IFrameModel(
                 instance.serverProxy.name,
                 `server-proxy/${instance.serverProxy.id}/${instance.id}/`,
-                ServerProxyWidget.buildStatus(instance)
+                ServerProxyWidget.buildStatus(instance),
+                false
             )
         );
 

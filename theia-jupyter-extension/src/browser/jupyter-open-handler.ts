@@ -96,7 +96,8 @@ export class JupyterOpenHandler implements OpenHandler {
             new IFrameModel(
                 uri.path.name,
                 iframeUri,
-                IFrameModelStatus.ready
+                IFrameModelStatus.ready,
+                false
             )
         );
 

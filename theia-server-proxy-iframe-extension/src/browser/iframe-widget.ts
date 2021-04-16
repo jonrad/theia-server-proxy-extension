@@ -14,17 +14,18 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import * as React from 'react';
 import { injectable } from 'inversify';
-import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { Disposable } from '@theia/core/lib/common';
 import { IFrameModel, IFrameModelStatus } from './iframe-model';
 import { IFrameContentStyle } from './iframe-content-style';
+import { BaseWidget } from '@theia/core/lib/browser';
 
 @injectable()
-export class IFrameWidget extends ReactWidget {
+export class IFrameWidget extends BaseWidget {
 
     protected readonly disposables: Disposable[] = [];
+
+    private currentStatus: IFrameModelStatus;
 
     constructor(
         public readonly id: string,
@@ -36,11 +37,17 @@ export class IFrameWidget extends ReactWidget {
         this.title.caption = model.name;
         this.title.closable = true;
 
-        this.disposables.push(model.updated(() => {
-            this.update();
-        }));
+        this.node.append(this.render());
+        this.currentStatus = this.model.status;
 
-        this.update();
+        this.disposables.push(model.updated(() => {
+            if (model.status == this.currentStatus) {
+                return;
+            }
+
+            this.node.firstChild?.remove();
+            this.node.append(this.render());
+        }));
     }
 
     public dispose(): void {
@@ -48,16 +55,38 @@ export class IFrameWidget extends ReactWidget {
         super.dispose();
     }
 
-    protected render(): React.ReactNode {
+    protected render(): HTMLElement {
         const status = this.model.status;
         const url = this.model.url;
         if (status == IFrameModelStatus.loading) {
-            return <div className={IFrameContentStyle.LOADING}></div>;
+            const div = document.createElement('div');
+            div.className = IFrameContentStyle.LOADING;
+            return div;
         } else if (status == IFrameModelStatus.stopped) {
-            return <div className={IFrameContentStyle.FULLSCREEN}>Instance stopped</div>;
+            const div = document.createElement('div');
+            div.innerText = "Instance Stopped";
+            div.className = IFrameContentStyle.FULLSCREEN;
+            return div;
         } else {
-            return <iframe src={url} className={IFrameContentStyle.FULLSCREEN}></iframe>;
+            return this.buildIframe(url);
         }
+    }
+
+    protected onIFrameLoad(frame: HTMLIFrameElement): void {
+        const title = frame.contentDocument?.title;
+        if (title) {
+            this.title.label = title;
+        }
+    }
+
+    protected buildIframe(url: string): HTMLElement {
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.className = IFrameContentStyle.FULLSCREEN;
+        if (this.model.useFrameTitle) {
+            iframe.addEventListener('load', () => this.onIFrameLoad(iframe));
+        }
+        return iframe;
     }
 }
 

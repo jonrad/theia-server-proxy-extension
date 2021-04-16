@@ -60,7 +60,9 @@ export class IFrameModel {
     constructor(
         name: string,
         url: string,
-        status: IFrameModelStatus
+        status: IFrameModelStatus,
+        // this feature hasn't been thought through all the way yet
+        readonly useFrameTitle: Boolean = false
     ) {
         this._name = name;
         this._url = url;
