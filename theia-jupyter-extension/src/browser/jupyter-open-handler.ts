@@ -77,8 +77,7 @@ export class JupyterOpenHandler implements OpenHandler {
             return this.fallback(uri);
         }
 
-        const instances = await this.serverProxyInstanceManager.getInstances();
-        const instance = instances.find(f => f.serverProxy.id == "jupyter")
+        const instance = (await this.serverProxyInstanceManager.getInstancesByType(Extension.ID))[0];
 
         if (!instance) {
             return this.fallback(uri);

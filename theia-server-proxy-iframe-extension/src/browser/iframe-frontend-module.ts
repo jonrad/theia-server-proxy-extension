@@ -22,6 +22,6 @@ import '../../src/browser/style/index.css';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
     bind<interfaces.Factory<IFrameWidget>>(IFrameWidget.ID).toFactory<IFrameWidget>(() => {
-        return (instance: IFrameModel) => new IFrameWidget(instance);
+        return (model: IFrameModel) => new IFrameWidget(IFrameWidget.buildWidgetId(model.url), model);
     });
 });
