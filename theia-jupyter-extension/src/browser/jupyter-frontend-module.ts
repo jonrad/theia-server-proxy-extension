@@ -15,13 +15,10 @@
  ********************************************************************************/
 
 import { ContainerModule, interfaces } from 'inversify';
-import { IFrameWidget } from "./iframe-widget";
-import { IFrameModel } from "./iframe-model";
-
-import '../../src/browser/style/index.css';
+import { OpenHandler } from '@theia/core/lib/browser';
+import { JupyterOpenHandler } from './jupyter-open-handler';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
-    bind<interfaces.Factory<IFrameWidget>>(IFrameWidget.ID).toFactory<IFrameWidget>(() => {
-        return (model: IFrameModel) => new IFrameWidget(IFrameWidget.buildWidgetId(model.url), model);
-    });
+    bind(JupyterOpenHandler).toSelf();
+    bind(OpenHandler).toService(JupyterOpenHandler);
 });

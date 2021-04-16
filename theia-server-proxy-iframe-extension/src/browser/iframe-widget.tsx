@@ -26,10 +26,11 @@ export class IFrameWidget extends ReactWidget {
 
     protected readonly disposables: Disposable[] = [];
 
-    constructor(protected readonly model: IFrameModel) {
+    constructor(
+        public readonly id: string,
+        protected readonly model: IFrameModel
+    ) {
         super();
-
-        this.id = IFrameWidget.ID + "-" + model.url;
 
         this.title.label = model.name;
         this.title.caption = model.name;
@@ -56,4 +57,8 @@ export class IFrameWidget extends ReactWidget {
 
 export namespace IFrameWidget {
     export const ID: string = "iframe.widget";
+
+    export function buildWidgetId(uri: string): string {
+        return ID + `-${uri}`;
+    }
 }

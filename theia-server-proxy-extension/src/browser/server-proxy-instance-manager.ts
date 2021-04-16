@@ -43,6 +43,10 @@ export class ServerProxyInstanceManager implements Disposable {
             }
 
             emitter.fire(status);
+
+            if (ServerProxyInstanceStatus.isCompleted(status)) {
+                this.instancesById.delete(status.instanceId);
+            }
         });
     }
 
@@ -83,6 +87,17 @@ export class ServerProxyInstanceManager implements Disposable {
         }
 
         return instance;
+    }
+
+    public async getInstances(): Promise<ServerProxyInstance[]> {
+        return Array.from(
+            this.instancesById.values(),
+            ({ instance }) => instance
+        );
+    }
+
+    public async getInstancesByType(serverProxyId: string): Promise<ServerProxyInstance[]> {
+        return (await this.getInstances()).filter(s => s.serverProxy.id == serverProxyId);
     }
 
     dispose(): void {

@@ -14,9 +14,9 @@
     "@theia/keymaps": "1.12.0",
     "@theia/workspace": "1.12.0",
     "@theia/plugin-ext": "1.12.0",
-    "theia-server-proxy-iframe-extension": "0.0.0"
+    "theia-server-proxy-iframe-extension": "0.0.0",
     "get-port": "^5.1.1",
-    "http-proxy-middleware": "^1.0.6",
+    "http-proxy-middleware": "^1.0.6"
   },
   "devDependencies": {
     "rimraf": "latest",
