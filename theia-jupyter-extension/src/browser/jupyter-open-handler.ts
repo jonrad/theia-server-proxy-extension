@@ -42,11 +42,6 @@ export class JupyterOpenHandler implements OpenHandler {
     @inject(OpenerService)
     protected readonly openerService: OpenerService;
 
-    @postConstruct()
-    protected async init(): Promise<void> {
-
-    }
-
     canHandle(uri: URI): number {
         try {
             if (uri.path.ext.toLocaleLowerCase() == ".ipynb") {
