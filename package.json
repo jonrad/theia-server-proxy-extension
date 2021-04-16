@@ -5,7 +5,8 @@
     "rebuild:browser": "theia rebuild:browser",
     "start:browser": "yarn rebuild:browser && yarn --cwd browser-app start",
     "watch": "lerna run --parallel watch",
-    "build:rstudio-docker": "docker build rstudio-docker -t jonrad:rstudio"
+    "build:rstudio-docker": "docker build rstudio-docker -t jonrad:rstudio",
+    "run:rstudio-docker": "docker run --rm -p 8787:8787 -e DISABLE_AUTH=true -e R_DEFAULT_PACKAGES=rstudioapi -v $PWD/theia-rstudio-extension/assets/rserver.conf:/etc/rstudio/rserver.conf -v $PWD:/home/rstudio jonrad:rstudio"
   },
   "devDependencies": {
     "lerna": "2.4.0"

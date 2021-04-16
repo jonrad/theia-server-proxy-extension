@@ -103,6 +103,11 @@ export class RStudioOpenHandler implements OpenHandler {
             params: [`rstudioapi::navigateToFile("${relativeFilePath}")`, "", 0],
         });
 
+        let resolve: ((_: any) => void) | undefined = undefined;
+        const promise = new Promise((r) => {
+            resolve = r;
+        });
+
         const request = http.request({
             hostname: 'localhost',
             port: 3000,
@@ -114,16 +119,15 @@ export class RStudioOpenHandler implements OpenHandler {
                 'X-CSRF-Token': csrfToken
             }
         }, res => {
-            res.on('data', d => {
-                console.log(d);
+            res.on('end', () => {
+                resolve?.(true);
             })
         });
 
         request.write(data);
         request.end();
-        console.log("Ended");
 
-        return undefined;
+        await promise;
     }
 
 }
