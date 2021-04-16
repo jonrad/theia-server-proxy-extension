@@ -18,9 +18,10 @@
 import URI from '@theia/core/lib/common/uri';
 import { ILogger } from '@theia/core';
 import { inject, injectable } from 'inversify';
-import { OpenHandler, FrontendApplication, OpenerService } from '@theia/core/lib/browser';
+import { OpenHandler, FrontendApplication, OpenerService, WidgetManager } from '@theia/core/lib/browser';
 import * as http from 'http';
 import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
+import { ServerProxyWidget } from 'theia-server-proxy-extension/lib/browser/server-proxy-widget';
 import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
 import { Extension } from '../common/const';
 import { ServerProxyRpcServer } from 'theia-server-proxy-extension/lib/common/rpc';
@@ -42,6 +43,9 @@ export class RStudioOpenHandler implements OpenHandler {
 
     @inject(ServerProxyRpcServer)
     protected readonly serverProxyRpcServer: ServerProxyRpcServer;
+
+    @inject(WidgetManager)
+    protected readonly widgetManager: WidgetManager;
 
     @inject(OpenerService)
     protected readonly openerService: OpenerService;
@@ -95,6 +99,24 @@ export class RStudioOpenHandler implements OpenHandler {
             return this.fallback(uri);
         }
 
+        const widget = await this.widgetManager.getWidget(
+            ServerProxyWidget.ID,
+            {
+                serverProxy: {
+                    id: Extension.ID,
+                    name: Extension.Name
+                },
+                path: workspace.path.toString()
+            }
+        )
+
+        if (!widget) {
+            this.logger.info("Couldn't find widget");
+            return this.fallback(uri);
+        }
+
+        const activatePromise = this.app.shell.activateWidget(widget.id);
+
         const data = JSON.stringify({
             clientId,
             clientVersion,
@@ -128,6 +150,7 @@ export class RStudioOpenHandler implements OpenHandler {
         request.end();
 
         await promise;
+        await activatePromise;
     }
 
 }
