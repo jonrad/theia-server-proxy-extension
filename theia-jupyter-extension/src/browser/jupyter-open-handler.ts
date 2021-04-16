@@ -15,7 +15,7 @@
  ********************************************************************************/
 
 import URI from '@theia/core/lib/common/uri';
-import { inject, injectable, postConstruct } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { OpenHandler, FrontendApplication, OpenerService } from '@theia/core/lib/browser';
 import { IFrameWidget } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-widget'
 import { IFrameModel, IFrameModelStatus } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-model';
@@ -72,7 +72,8 @@ export class JupyterOpenHandler implements OpenHandler {
             return this.fallback(uri);
         }
 
-        const instance = (await this.serverProxyInstanceManager.getInstancesByType(Extension.ID))[0];
+        const instance = (await this.serverProxyInstanceManager.getInstancesByType(Extension.ID))
+            .filter(w => workspace.relative(new URI(w.path.toString())))[0];
 
         if (!instance) {
             return this.fallback(uri);
