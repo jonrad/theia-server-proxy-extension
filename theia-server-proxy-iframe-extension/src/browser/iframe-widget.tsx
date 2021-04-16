@@ -18,8 +18,8 @@ import * as React from 'react';
 import { injectable } from 'inversify';
 import { ReactWidget } from '@theia/core/lib/browser/widgets/react-widget';
 import { Disposable } from '@theia/core/lib/common';
-import { IFrame } from './iframe';
-import { IFrameModel } from './iframe-model';
+import { IFrameModel, IFrameModelStatus } from './iframe-model';
+import { IFrameContentStyle } from './iframe-content-style';
 
 @injectable()
 export class IFrameWidget extends ReactWidget {
@@ -49,9 +49,15 @@ export class IFrameWidget extends ReactWidget {
     }
 
     protected render(): React.ReactNode {
-        return <IFrame
-            url={this.model.url}
-            status={this.model.status} />;
+        const status = this.model.status;
+        const url = this.model.url;
+        if (status == IFrameModelStatus.loading) {
+            return <div className={IFrameContentStyle.LOADING}></div>;
+        } else if (status == IFrameModelStatus.stopped) {
+            return <div className={IFrameContentStyle.FULLSCREEN}>Instance stopped</div>;
+        } else {
+            return <iframe src={url} className={IFrameContentStyle.FULLSCREEN}></iframe>;
+        }
     }
 }
 
