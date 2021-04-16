@@ -20,6 +20,7 @@ import { RstudioCommandContribution } from './rstudio-command-contribution';
 import { RStudioServerProxyOpenHandler } from './rstudio-server-proxy-open-handler';
 import { TabBarToolbarContribution } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
 import { OpenHandler } from '@theia/core/lib/browser';
+import { RStudioOpenHandler } from './rstudio-open-handler';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
     bind(RstudioCommandContribution).toSelf().inSingletonScope();
@@ -27,4 +28,5 @@ export default new ContainerModule((bind: interfaces.Bind) => {
     bind(TabBarToolbarContribution).toService(RstudioCommandContribution);
 
     bind(OpenHandler).to(RStudioServerProxyOpenHandler);
+    bind(OpenHandler).to(RStudioOpenHandler);
 });

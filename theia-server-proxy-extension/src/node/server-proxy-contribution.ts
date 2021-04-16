@@ -96,4 +96,8 @@ export abstract class BaseServerProxyInstanceBuilder<T> implements ServerProxyIn
             rawProcess
         );
     }
+
+    getMiddleware?(basePath: string, baseOptions: Options): RequestHandler
+
+    getDetails?(): any;
 }

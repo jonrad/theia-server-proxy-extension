@@ -75,6 +75,10 @@ export class RStudioServerProxyContribution implements ServerProxyContribution {
     ) {
     }
 
+    private clientId: string | undefined;
+    private clientVersion: string | undefined;
+    private csrfToken: string | undefined;
+
     getMiddleware(basePath: string, baseOptions: Options): RequestHandler {
         baseOptions.pathRewrite = { '^(/[^ /]*){3}': '' };
 
@@ -94,6 +98,40 @@ export class RStudioServerProxyContribution implements ServerProxyContribution {
             proxyRes.headers.location = redirect
         };
 
+        const baseOnProxyReq = baseOptions.onProxyReq;
+        baseOptions.onProxyReq = (proxyReq, request, response) => {
+            if (request.url == "/rpc/set_user_state") {
+                request.on('readable', () => {
+                    let body = "";
+                    let data = "";
+                    while (data = request.read()) {
+                        body += data;
+                    }
+
+                    if (!body) {
+                        return;
+                    }
+
+                    const json = JSON.parse(body);
+
+                    this.clientId = json.clientId;
+                    this.clientVersion = json.clientVersion;
+                    this.csrfToken = request.headers["x-csrf-token"]?.toString();
+                })
+            }
+
+            baseOnProxyReq?.(proxyReq, request, response);
+        };
+
+
         return createProxyMiddleware(basePath, baseOptions);
+    }
+
+    getDetails(): any {
+        return {
+            clientId: this.clientId,
+            clientVersion: this.clientVersion,
+            csrfToken: this.csrfToken
+        };
     }
 }

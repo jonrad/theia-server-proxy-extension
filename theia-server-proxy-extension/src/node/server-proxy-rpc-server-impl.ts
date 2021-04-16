@@ -56,8 +56,16 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
         if (!instance) {
             return undefined;
         }
+    }
 
-        return this.toDto(instance);
+    async getTemp(): Promise<any[]> {
+        return this.serverProxyManager.get().map(c => {
+            return {
+                id: c.id,
+                name: c.name,
+                details: c.getDetails?.()
+            }
+        });
     }
 
     async getInstances(): Promise<ServerProxyInstanceDto[]> {
