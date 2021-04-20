@@ -2,6 +2,7 @@
 
 Monorepo containing:
 * [Theia Server Proxy Extension](./theia-server-proxy-extension) - Library enabling third party applications to be served via Theia
+* [Theia Server Proxy Debug Extension](./theia-server-proxy-debug-extension) - Debugging of the server proxy extension. Useful for development
 * [Theia Server Proxy IFrame](./theia-server-proxy-iframe) - Widget/UI elements for generic iframe support
 * [Theia Jupyter Extension](./theia-jupyter-extension) - Jupyter Notebook extension for Theia
 * [Theia RStudio Extension](./theia-rstudio-extension) - RStudio extension for Theia
@@ -107,7 +108,6 @@ TODO
 * Remove all todo 0 and 1s
 * Settings for binaries?
 * Browser package.json update versions?
-* Make sure can open in multiple workspaces
 * Debug command output
 * Test with different port/url
 * widget context should have instance of app

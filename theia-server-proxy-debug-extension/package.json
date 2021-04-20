@@ -1,0 +1,36 @@
+{
+  "name": "theia-server-proxy-debug-extension",
+  "keywords": [
+    "theia-extension"
+  ],
+  "version": "0.0.0",
+  "files": [
+    "lib",
+    "src"
+  ],
+  "dependencies": {
+    "@theia/core": "1.12.0",
+    "@theia/filesystem": "1.12.0",
+    "@theia/keymaps": "1.12.0",
+    "@theia/workspace": "1.12.0",
+    "@theia/plugin-ext": "1.12.0",
+    "theia-server-proxy-extension": "0.0.0",
+    "get-port": "^5.1.1",
+    "http-proxy-middleware": "^1.0.6"
+  },
+  "devDependencies": {
+    "rimraf": "latest",
+    "typescript": "latest"
+  },
+  "scripts": {
+    "prepare": "yarn run clean && yarn run build",
+    "clean": "rimraf lib",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "theiaExtensions": [
+    {
+      "frontend": "lib/browser/server-proxy-debug-frontend-module"
+    }
+  ]
+}
