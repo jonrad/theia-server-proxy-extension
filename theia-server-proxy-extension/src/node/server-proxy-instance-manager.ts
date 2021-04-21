@@ -46,6 +46,19 @@ export class ServerProxyInstanceManager {
         return await getAvailablePort();
     }
 
+    public async getInstance(
+        serverProxyId: string,
+        path: Path
+    ): Promise<ServerProxyInstance | undefined> {
+        for (const instance of this.instanceById.values()) {
+            if (instance.serverProxyId == serverProxyId && instance.context == path.toString()) {
+                return instance;
+            }
+        }
+
+        return undefined;
+    }
+
     public async startInstance(
         serverProxyId: string,
         path: Path
@@ -82,6 +95,7 @@ export class ServerProxyInstanceManager {
 
         const instance = new ServerProxyInstance(
             instanceId,
+            path.toString(),
             serverProxy.id,
             port,
             rawProcess

@@ -36,6 +36,7 @@ export class ServerProxyInstance implements Disposable {
 
     constructor(
         public readonly instanceId: number,
+        public readonly context: string,
         public readonly serverProxyId: string,
         public readonly port: number,
         private readonly process: RawProcess

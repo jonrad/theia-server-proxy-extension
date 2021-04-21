@@ -50,12 +50,7 @@ export class ServerProxyInstanceManager implements Disposable {
         });
     }
 
-    public async startInstance(serverProxy: ServerProxy, path: Path): Promise<ServerProxyInstance> {
-        const instanceStatus = await this.serverProxyRpcServer.startInstance(
-            serverProxy.id,
-            path.toString()
-        );
-
+    private async buildServerProxyInstance(serverProxy: ServerProxy, path: Path, instanceStatus: ServerProxyInstanceStatus): Promise<ServerProxyInstance> {
         const instanceId = instanceStatus.instanceId;
 
         const emitter = new Emitter<ServerProxyInstanceStatus>();
@@ -87,6 +82,28 @@ export class ServerProxyInstanceManager implements Disposable {
         }
 
         return instance;
+    }
+
+    public async getOrCreateInstance(serverProxy: ServerProxy, path: Path): Promise<ServerProxyInstance> {
+        const currentInstanceStatus = await this.serverProxyRpcServer.getInstance(
+            serverProxy.id,
+            path.toString()
+        );
+
+        if (currentInstanceStatus) {
+            return this.buildServerProxyInstance(serverProxy, path, currentInstanceStatus);
+        }
+
+        return this.startInstance(serverProxy, path);
+    }
+
+    public async startInstance(serverProxy: ServerProxy, path: Path): Promise<ServerProxyInstance> {
+        const instanceStatus = await this.serverProxyRpcServer.startInstance(
+            serverProxy.id,
+            path.toString()
+        );
+
+        return this.buildServerProxyInstance(serverProxy, path, instanceStatus);
     }
 
     public async getInstances(): Promise<ServerProxyInstance[]> {

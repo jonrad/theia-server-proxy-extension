@@ -33,7 +33,7 @@ export class ServerProxyWidgetFactory implements WidgetFactory {
     }
 
     async createWidget(widgetContext: ServerProxyWidgetContext): Promise<Widget> {
-        const instance = await this.serverProxyInstanceManager.startInstance(
+        const instance = await this.serverProxyInstanceManager.getOrCreateInstance(
             widgetContext.serverProxy,
             new Path(widgetContext.path)
         );

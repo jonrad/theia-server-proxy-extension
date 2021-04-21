@@ -42,6 +42,10 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
         });
     }
 
+    async getInstance(serverProxyId: string, path: string): Promise<ServerProxyInstanceStatus | undefined> {
+        return (await this.instanceManager.getInstance(serverProxyId, new Path(path)))?.status;
+    }
+
     async startInstance(serverProxyId: string, workspace: string, args?: any): Promise<ServerProxyInstanceStatus> {
         const path = new Path(workspace);
 
