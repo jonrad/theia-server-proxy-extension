@@ -39,7 +39,6 @@ export class ServerProxyDebugWidget extends ReactWidget {
         this.title.closable = true;
 
         this.serverProxyInstances = await this.serverProxyInstanceManager.getInstances();
-        console.log(this.serverProxyInstances.length);
 
         this.update();
     }
