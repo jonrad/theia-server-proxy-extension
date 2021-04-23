@@ -17,9 +17,11 @@
 import { ContainerModule, interfaces } from 'inversify';
 
 import { ServerProxyContribution } from 'theia-server-proxy-extension/lib/node/server-proxy-contribution';
-import { RStudioServerProxyContribution } from './rstudio-server-proxy-contribution';
+import { RStudioServerProxyContribution, RStudioServerProxyInstanceBuilder } from './rstudio-server-proxy-contribution';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
+    bind(RStudioServerProxyInstanceBuilder).toSelf();
+
     bind(RStudioServerProxyContribution).toSelf();
     bind(ServerProxyContribution).toService(RStudioServerProxyContribution);
 });

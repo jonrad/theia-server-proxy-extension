@@ -73,7 +73,7 @@ export class JupyterOpenHandler implements OpenHandler {
         }
 
         const instance = (await this.serverProxyInstanceManager.getInstancesByType(Extension.ID))
-            .filter(w => workspace.relative(new URI(w.path.toString())))[0];
+            .filter(w => workspace.relative(new URI(w.context.path)))[0]; //TODO can we strongly type this
 
         if (!instance) {
             return this.fallback(uri);
@@ -106,5 +106,4 @@ export class JupyterOpenHandler implements OpenHandler {
 
         return widget;
     }
-
 }

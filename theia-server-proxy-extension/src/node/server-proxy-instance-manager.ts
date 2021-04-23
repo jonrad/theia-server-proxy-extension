@@ -13,14 +13,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-import { RawProcessFactory } from '@theia/process/lib/node';
 import { injectable, inject } from 'inversify';
-import * as getAvailablePort from 'get-port';
-import { Path } from '@theia/core';
 import { ILogger } from '@theia/core';
-import { ServerProxyManager } from './server-proxy-manager';
 import { ServerProxyInstanceStatus } from '../common/server-proxy';
 import { ServerProxyInstance } from './server-proxy-instance';
+import { ServerProxyContribution } from './server-proxy-contribution';
 
 @injectable()
 export class ServerProxyInstanceManager {
@@ -32,26 +29,16 @@ export class ServerProxyInstanceManager {
     @inject(ILogger)
     protected readonly logger: ILogger;
 
-    @inject(RawProcessFactory)
-    private readonly rawProcessFactory: RawProcessFactory;
-
-    @inject(ServerProxyManager)
-    private readonly serverProxyManager: ServerProxyManager;
-
     public getInstancePort(id: number): number | undefined {
         return this.instanceById.get(id)?.port;
     }
 
-    private async findAvailablePort(): Promise<number> {
-        return await getAvailablePort();
-    }
-
     public async getInstance(
         serverProxyId: string,
-        path: Path
+        context: any
     ): Promise<ServerProxyInstance | undefined> {
         for (const instance of this.instanceById.values()) {
-            if (instance.serverProxyId == serverProxyId && instance.context == path.toString()) {
+            if (instance.serverProxyId == serverProxyId && instance.context == context) {
                 return instance;
             }
         }
@@ -60,45 +47,23 @@ export class ServerProxyInstanceManager {
     }
 
     public async startInstance(
-        serverProxyId: string,
-        path: Path
+        serverProxy: ServerProxyContribution,
+        context: any
     ): Promise<ServerProxyInstance> {
-        const port: number = await this.findAvailablePort();
-        const instanceId: number = ++this.lastInstanceId;
-        this.logger.info(`server-proxy mapping instance id ${instanceId} for ${serverProxyId} to port ${port}`);
-        const serverProxy = this.serverProxyManager.getById(serverProxyId);
 
-        if (!serverProxy) {
-            throw Error(`Invalid server proxy id ${serverProxyId}`);
+        const existingInstance = await this.getInstance(serverProxy.id, context);
+        if (existingInstance) {
+            return existingInstance;
         }
 
-        const { command, env } = await serverProxy.getCommand({
-            relativeUrl: `/server-proxy/${serverProxy.id}/${instanceId}`,
-            port: port,
-            workspacePath: path
-        });
+        const instanceId = ++this.lastInstanceId;
 
-        if (command.length == 0) {
-            throw Error(`Improperly configured server proxy ${serverProxyId}. Returned empty command`);
-        }
+        const relativeUrl = `/server-proxy/${serverProxy.id}/${instanceId}`;
 
-        const envDict: { [name: string]: string | undefined } =
-            env ? { ...process.env, ...env } : process.env;
-
-        const rawProcess = this.rawProcessFactory({
-            command: command[0],
-            args: command.slice(1),
-            options: {
-                env: envDict
-            }
-        });
-
-        const instance = new ServerProxyInstance(
+        const instance = await serverProxy.serverProxyInstanceBuilder.build(
             instanceId,
-            path.toString(),
-            serverProxy.id,
-            port,
-            rawProcess
+            relativeUrl,
+            context
         );
 
         this.instanceById.set(instanceId, instance);
@@ -110,7 +75,7 @@ export class ServerProxyInstanceManager {
             }
         }
 
-        instance.statusChanged((status) => {
+        instance.statusChanged(() => {
             maybeCleanup();
         })
 

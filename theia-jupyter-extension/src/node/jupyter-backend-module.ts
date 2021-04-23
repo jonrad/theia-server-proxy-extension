@@ -17,9 +17,11 @@
 import { ContainerModule, interfaces } from 'inversify';
 
 import { ServerProxyContribution } from 'theia-server-proxy-extension/lib/node/server-proxy-contribution';
-import { JupyterServerProxyContribution } from './jupyter-server-proxy-contribution';
+import { JupyterServerProxyContribution, JupyterServerProxyInstanceBuilder } from './jupyter-server-proxy-contribution';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
-    bind(JupyterServerProxyContribution).toSelf();
+    bind(JupyterServerProxyInstanceBuilder).toSelf();
+
+    bind(JupyterServerProxyContribution).toSelf().inSingletonScope();
     bind(ServerProxyContribution).toService(JupyterServerProxyContribution);
 });

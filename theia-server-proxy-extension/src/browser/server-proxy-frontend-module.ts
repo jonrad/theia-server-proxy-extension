@@ -14,27 +14,20 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { CommandContribution } from '@theia/core';
-import { WidgetFactory, WebSocketConnectionProvider, OpenHandler } from '@theia/core/lib/browser';
+import { WidgetFactory, WebSocketConnectionProvider } from '@theia/core/lib/browser';
 import { ContainerModule, interfaces } from 'inversify';
 
 import { ServerProxyRpcServer, ServerProxyRpcClient } from '../common/rpc';
 
-import { ServerProxyCommandContribution } from './server-proxy-command-contribution';
-import { ServerProxyWidgetOpenHandler } from "./server-proxy-widget-open-handler";
 import { ServerProxyWidget } from './server-proxy-widget';
 import { ServerProxyRpcClientImpl } from './server-proxy-rpc-client-impl';
 import { ServerProxyWidgetFactory } from './server-proxy-widget-factory';
 import { ServerProxyManager } from './server-proxy-manager';
 
-import '../../src/browser/style/index.css';
 import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
 import { ServerProxyInstance } from './server-proxy-instance';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
-    bind(ServerProxyCommandContribution).toSelf();
-    bind(CommandContribution).toService(ServerProxyCommandContribution);
-
     // The widget and everything needed to build it
     bind<interfaces.Factory<ServerProxyWidget>>(ServerProxyWidget.ID).toFactory<ServerProxyWidget>(() => {
         return (instance: ServerProxyInstance) => new ServerProxyWidget(instance);
@@ -44,9 +37,6 @@ export default new ContainerModule((bind: interfaces.Bind) => {
 
     bind(ServerProxyManager).toSelf().inSingletonScope();
     bind(ServerProxyInstanceManager).toSelf().inSingletonScope();
-
-    bind(ServerProxyWidgetOpenHandler).toSelf().inSingletonScope();
-    bind(OpenHandler).toService(ServerProxyWidgetOpenHandler);
 
     bind(ServerProxyRpcClient).to(ServerProxyRpcClientImpl).inSingletonScope();
     bind(ServerProxyRpcServer).toDynamicValue(ctx => {

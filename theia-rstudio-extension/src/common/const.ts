@@ -14,5 +14,15 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-export namespace ServerProxyContentStyle {
+import { ServerProxy } from "theia-server-proxy-extension/lib/common/server-proxy";
+
+export namespace Extension {
+    export const ID = 'rstudio';
+
+    export const Name = 'RStudio';
+
+    export const ServerProxy: ServerProxy = {
+        id: ID,
+        name: Name
+    }
 }

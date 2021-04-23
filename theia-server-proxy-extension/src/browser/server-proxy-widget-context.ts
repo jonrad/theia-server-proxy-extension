@@ -18,5 +18,5 @@ import { ServerProxy } from '../common/server-proxy';
 
 export interface ServerProxyWidgetContext {
     serverProxy: ServerProxy,
-    path: string
+    context: any
 }

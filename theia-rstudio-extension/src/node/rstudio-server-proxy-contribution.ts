@@ -15,37 +15,65 @@
  ********************************************************************************/
 
 import { createProxyMiddleware, Options, RequestHandler } from 'http-proxy-middleware';
-import { injectable } from 'inversify';
-import { ServerProxyCommandArgs, ServerProxyContribution, ServerProxyCommand } from 'theia-server-proxy-extension/lib/node/server-proxy-contribution';
+import { injectable, inject } from 'inversify';
+import { ServerProxyContribution, ServerProxyCommand, BaseServerProxyInstanceBuilder } from 'theia-server-proxy-extension/lib/node/server-proxy-contribution';
 import * as path from 'path';
+import * as os from 'os';
+import { ServerProxyInstance } from 'theia-server-proxy-extension/lib/node/server-proxy-instance';
+import { ServerProxyInstanceStatus } from 'theia-server-proxy-extension/lib/common/server-proxy';
 
 @injectable()
-export class RStudioServerProxyContribution implements ServerProxyContribution {
-    id: string = "rstudio";
+export class RStudioServerProxyInstanceBuilder extends BaseServerProxyInstanceBuilder<void> {
+    id: string;
 
-    name: string = "RStudio";
+    instance: ServerProxyInstance | undefined;
 
-    async getCommand(args: ServerProxyCommandArgs): Promise<ServerProxyCommand> {
+    async build(instanceId: number, relativeUrl: string, context: void): Promise<ServerProxyInstance> {
+        if (!this.instance || ServerProxyInstanceStatus.isCompleted(this.instance.status)) {
+            this.instance = await super.build(instanceId, relativeUrl, context);
+        }
+
+        return this.instance;
+    }
+
+    async getCommand(relativeUrl: string, context: any): Promise<ServerProxyCommand> {
         const settingsPath = path.join(__dirname, "../../assets/rserver.conf");
+        const port = 8787;
 
         const command = [
             "docker",
             "run",
             "--rm",
             "-p",
-            `${args.port}:8787`,
+            `${port}:8787`,
             "-e",
             "DISABLE_AUTH=true",
             "-v",
             `${settingsPath}:/etc/rstudio/rserver.conf`,
             "-v",
-            `${args.workspacePath}:/home/rstudio`,
-            "rocker/rstudio",
+            `${os.homedir()}:/home/rstudio`,
+            "rocker/rstudio"
         ]
 
         return {
+            port,
             command
         };
+    }
+}
+
+@injectable()
+export class RStudioServerProxyContribution implements ServerProxyContribution {
+
+    id: string = "rstudio";
+
+    name: string = "RStudio";
+
+    instance: ServerProxyInstance | undefined;
+
+    constructor(
+        @inject(RStudioServerProxyInstanceBuilder) public readonly serverProxyInstanceBuilder: RStudioServerProxyInstanceBuilder
+    ) {
     }
 
     getMiddleware(basePath: string, baseOptions: Options): RequestHandler {

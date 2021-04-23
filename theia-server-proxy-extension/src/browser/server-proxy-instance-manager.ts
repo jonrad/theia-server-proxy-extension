@@ -17,7 +17,7 @@
 import { injectable, inject } from 'inversify';
 import { ServerProxyRpcClient, ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxy, ServerProxyInstanceStatus } from '../common/server-proxy';
-import { Disposable, Emitter, Path } from '@theia/core';
+import { Disposable, Emitter } from '@theia/core';
 import { ServerProxyInstance } from './server-proxy-instance';
 
 @injectable()
@@ -50,7 +50,7 @@ export class ServerProxyInstanceManager implements Disposable {
         });
     }
 
-    private async buildServerProxyInstance(serverProxy: ServerProxy, path: Path, instanceStatus: ServerProxyInstanceStatus): Promise<ServerProxyInstance> {
+    private async buildServerProxyInstance(serverProxy: ServerProxy, context: any, instanceStatus: ServerProxyInstanceStatus): Promise<ServerProxyInstance> {
         const instanceId = instanceStatus.instanceId;
 
         const emitter = new Emitter<ServerProxyInstanceStatus>();
@@ -58,7 +58,7 @@ export class ServerProxyInstanceManager implements Disposable {
         const instance = new ServerProxyInstance(
             instanceStatus,
             serverProxy,
-            path,
+            context,
             this.serverProxyRpcServer,
             emitter.event
         );
@@ -84,26 +84,26 @@ export class ServerProxyInstanceManager implements Disposable {
         return instance;
     }
 
-    public async getOrCreateInstance(serverProxy: ServerProxy, path: Path): Promise<ServerProxyInstance> {
+    public async getOrCreateInstance(serverProxy: ServerProxy, context: any): Promise<ServerProxyInstance> {
         const currentInstanceStatus = await this.serverProxyRpcServer.getInstance(
             serverProxy.id,
-            path.toString()
+            context
         );
 
         if (currentInstanceStatus) {
-            return this.buildServerProxyInstance(serverProxy, path, currentInstanceStatus);
+            return this.buildServerProxyInstance(serverProxy, context, currentInstanceStatus);
         }
 
-        return this.startInstance(serverProxy, path);
+        return this.startInstance(serverProxy, context);
     }
 
-    public async startInstance(serverProxy: ServerProxy, path: Path): Promise<ServerProxyInstance> {
+    public async startInstance(serverProxy: ServerProxy, context: any): Promise<ServerProxyInstance> {
         const instanceStatus = await this.serverProxyRpcServer.startInstance(
             serverProxy.id,
-            path.toString()
+            context
         );
 
-        return this.buildServerProxyInstance(serverProxy, path, instanceStatus);
+        return this.buildServerProxyInstance(serverProxy, context, instanceStatus);
     }
 
     public async getInstances(): Promise<ServerProxyInstance[]> {

@@ -14,7 +14,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { Disposable, Event, Path } from '@theia/core';
+import { Disposable, Event } from '@theia/core';
 import { ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxy, ServerProxyInstanceStatus } from '../common/server-proxy';
 
@@ -23,7 +23,7 @@ export class ServerProxyInstance implements Disposable {
 
     public readonly serverProxy: ServerProxy;
 
-    public readonly path: Path;
+    public readonly context: any;
 
     private _status: ServerProxyInstanceStatus
     public get status(): ServerProxyInstanceStatus {
@@ -39,13 +39,13 @@ export class ServerProxyInstance implements Disposable {
     constructor(
         initialStatus: ServerProxyInstanceStatus,
         serverProxy: ServerProxy,
-        path: Path,
+        context: any,
         serverProxyRpcServer: ServerProxyRpcServer,
         statusChangedEvent: Event<ServerProxyInstanceStatus>
     ) {
         this.id = initialStatus.instanceId;
         this.serverProxy = serverProxy;
-        this.path = path;
+        this.context = context;
         this._status = initialStatus;
         this.statusChangedEvent = statusChangedEvent;
         this.serverProxyRpcServer = serverProxyRpcServer;

@@ -13,3 +13,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
+
+import { ContainerModule, interfaces } from 'inversify';
+import { CommandContribution } from '@theia/core';
+import { RstudioCommandContribution } from './rstudio-command-contribution';
+
+export default new ContainerModule((bind: interfaces.Bind) => {
+    bind(CommandContribution).to(RstudioCommandContribution);
+});

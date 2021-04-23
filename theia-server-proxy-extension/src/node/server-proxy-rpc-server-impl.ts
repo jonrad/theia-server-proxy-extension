@@ -15,7 +15,6 @@
  ********************************************************************************/
 
 import { Disposable } from '@theia/core';
-import { Path } from '@theia/core';
 import { injectable, inject } from 'inversify';
 import { ServerProxyRpcClient } from '../common/rpc';
 import { ServerProxyRpcServer } from '../common/rpc';
@@ -42,14 +41,17 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
         });
     }
 
-    async getInstance(serverProxyId: string, path: string): Promise<ServerProxyInstanceStatus | undefined> {
-        return (await this.instanceManager.getInstance(serverProxyId, new Path(path)))?.status;
+    async getInstance(serverProxyId: string, context: any): Promise<ServerProxyInstanceStatus | undefined> {
+        return (await this.instanceManager.getInstance(serverProxyId, context))?.status;
     }
 
-    async startInstance(serverProxyId: string, workspace: string, args?: any): Promise<ServerProxyInstanceStatus> {
-        const path = new Path(workspace);
+    async startInstance(serverProxyId: string, context: any): Promise<ServerProxyInstanceStatus> {
+        const serverProxy = this.serverProxyManager.getById(serverProxyId);
+        if (!serverProxy) {
+            throw Error(`Invalid server proxy id ${serverProxyId}`)
+        }
 
-        const instance = (await this.instanceManager.startInstance(serverProxyId, path));
+        const instance = (await this.instanceManager.startInstance(serverProxy, context));
 
         let disposable: Disposable | undefined = undefined;
 

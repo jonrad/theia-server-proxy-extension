@@ -14,20 +14,12 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { Path } from "@theia/core/lib/common";
 import { Options, RequestHandler } from "http-proxy-middleware";
-
-export interface ServerProxyCommandArgs {
-    relativeUrl: string;
-    port: number;
-    workspacePath: Path;
-}
-
-export interface ServerProxyCommand {
-    command: string[]
-
-    env?: { [name: string]: string | undefined }
-}
+import { ServerProxyInstance } from "./server-proxy-instance";
+import { RawProcessFactory } from '@theia/process/lib/node';
+import { inject, injectable } from 'inversify';
+import * as getAvailablePort from 'get-port';
+import { ILogger } from '@theia/core';
 
 export const ServerProxyContribution = Symbol('ServerProxyContribution');
 export interface ServerProxyContribution {
@@ -35,7 +27,68 @@ export interface ServerProxyContribution {
 
     readonly name: string;
 
-    getCommand(args: ServerProxyCommandArgs): Promise<ServerProxyCommand>
+    readonly serverProxyInstanceBuilder: ServerProxyInstanceBuilder;
 
     getMiddleware?(basePath: string, baseOptions: Options): RequestHandler
+}
+
+export interface ServerProxyInstanceBuilder {
+    build(instanceId: number, relativeUrl: string, context: any): Promise<ServerProxyInstance>
+}
+
+export interface ServerProxyCommand {
+    command: string[]
+
+    port: number
+
+    env?: { [name: string]: string | undefined }
+}
+
+@injectable()
+export abstract class BaseServerProxyInstanceBuilder<T> implements ServerProxyInstanceBuilder {
+    abstract id: string
+
+    @inject(ILogger)
+    protected readonly logger: ILogger;
+
+    @inject(RawProcessFactory)
+    private readonly rawProcessFactory: RawProcessFactory;
+
+    abstract getCommand(relativeUrl: string, context: any): Promise<ServerProxyCommand>;
+
+    protected async findAvailablePort(): Promise<number> {
+        return await getAvailablePort();
+    }
+
+    async build(instanceId: number, relativeUrl: string, context: T): Promise<ServerProxyInstance> {
+        const { command, env, port } = await this.getCommand(
+            relativeUrl,
+            context
+        );
+
+        if (command.length == 0) {
+            throw Error(`Improperly configured server proxy ${this.id}. Returned empty command`);
+        }
+
+        this.logger.info(`server-proxy mapping instance id ${instanceId} for ${this.id} to port ${port}`);
+
+        const envDict: { [name: string]: string | undefined } =
+            env ? { ...process.env, ...env } : process.env;
+
+        const rawProcess = this.rawProcessFactory({
+            command: command[0],
+            args: command.slice(1),
+            options: {
+                env: envDict
+            }
+        });
+
+        return new ServerProxyInstance(
+            instanceId,
+            context,
+            this.id,
+            port,
+            rawProcess
+        );
+    }
 }

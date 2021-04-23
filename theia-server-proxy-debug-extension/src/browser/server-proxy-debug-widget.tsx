@@ -63,7 +63,7 @@ export class ServerProxyDebugWidget extends ReactWidget {
                             <td>{instance.id}</td>
                             <td>{instance.serverProxy.id}</td>
                             <td>{instance.status.statusId}</td>
-                            <td>{instance.path.toString()}</td>
+                            <td>{JSON.stringify(instance.context)}</td>
                         </tr>
                     })}
                 </tbody>
