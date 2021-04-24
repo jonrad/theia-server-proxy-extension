@@ -19,21 +19,30 @@ import { ContainerModule, interfaces } from 'inversify';
 
 import { ServerProxyRpcServer, ServerProxyRpcClient } from '../common/rpc';
 
-import { ServerProxyWidget } from './server-proxy-widget';
+import { ServerProxyWidget, ServerProxyWidgetOptions } from './server-proxy-widget';
 import { ServerProxyRpcClientImpl } from './server-proxy-rpc-client-impl';
-import { ServerProxyWidgetFactory } from './server-proxy-widget-factory';
 import { ServerProxyManager } from './server-proxy-manager';
 
 import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
 import { ServerProxyInstance } from './server-proxy-instance';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
-    // The widget and everything needed to build it
-    bind<interfaces.Factory<ServerProxyWidget>>(ServerProxyWidget.ID).toFactory<ServerProxyWidget>(() => {
-        return (instance: ServerProxyInstance) => new ServerProxyWidget(instance);
-    });
-    bind(ServerProxyWidgetFactory).toSelf();
-    bind(WidgetFactory).toService(ServerProxyWidgetFactory);
+    bind(ServerProxyWidget).to(ServerProxyWidget);
+    bind(WidgetFactory).toDynamicValue(context => ({
+        id: ServerProxyWidget.ID,
+        async createWidget(options: ServerProxyWidgetOptions): Promise<ServerProxyWidget> {
+            const { container } = context;
+
+            const instanceManager = container.get(ServerProxyInstanceManager);
+            const instance = await instanceManager.getOrCreateInstance(
+                options.serverProxy,
+                options.context
+            );
+            const child = container.createChild();
+            child.bind(ServerProxyInstance).toConstantValue(instance);
+            return child.get(ServerProxyWidget);
+        }
+    })).inSingletonScope();
 
     bind(ServerProxyManager).toSelf().inSingletonScope();
     bind(ServerProxyInstanceManager).toSelf().inSingletonScope();

@@ -14,16 +14,11 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { injectable } from 'inversify';
-import { Disposable } from '@theia/core/lib/common';
 import { IFrameModel, IFrameModelStatus } from './iframe-model';
 import { IFrameContentStyle } from './iframe-content-style';
 import { BaseWidget } from '@theia/core/lib/browser';
 
-@injectable()
 export class IFrameWidget extends BaseWidget {
-
-    protected readonly disposables: Disposable[] = [];
 
     private currentStatus: IFrameModelStatus;
 
@@ -40,7 +35,7 @@ export class IFrameWidget extends BaseWidget {
         this.node.append(this.render());
         this.currentStatus = this.model.status;
 
-        this.disposables.push(model.updated(() => {
+        this.toDispose.push(model.updated(() => {
             if (model.status == this.currentStatus) {
                 return;
             }
@@ -48,11 +43,6 @@ export class IFrameWidget extends BaseWidget {
             this.node.firstChild?.remove();
             this.node.append(this.render());
         }));
-    }
-
-    public dispose(): void {
-        this.disposables.forEach(d => d.dispose());
-        super.dispose();
     }
 
     protected render(): HTMLElement {

@@ -111,9 +111,12 @@ TODO
 * Debug command output
 * Test with different port/url
 * widget context should have instance of app
+* Close window if express doesn't know about it
+* Port listing
 
 ## Roadmap of nice to haves
 
+* Open using minibrowser
 * Customizable loading logo
 * Fading of loading logo
 * Jupyter open files via theia

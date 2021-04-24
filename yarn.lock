@@ -1268,6 +1268,19 @@
     react-perfect-scrollbar "^1.5.3"
     ts-md5 "^1.2.2"
 
+"@theia/mini-browser@1.12.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@theia/mini-browser/-/mini-browser-1.12.0.tgz#c9c543ff8a3e590d11ea3aa576885a35f3ce50d3"
+  integrity sha512-YN3PQR5kl+oPxLfIxihyB7LfPhp3AjQ1dRGY1uTEyIaFyTdSettxS2W0GImHRqyK0oJIoegDKS5AUUUTkLWWVQ==
+  dependencies:
+    "@theia/core" "1.12.0"
+    "@theia/filesystem" "1.12.0"
+    "@types/mime-types" "^2.1.0"
+    mime-types "^2.1.18"
+    pdfobject "^2.0.201604172"
+    uuid "^8.0.0"
+    vhost "^3.0.2"
+
 "@theia/monaco-editor-core@^0.20.0":
   version "0.20.0"
   resolved "https://registry.yarnpkg.com/@theia/monaco-editor-core/-/monaco-editor-core-0.20.0.tgz#0f3cdfd6d1278bbcc3df0224471fc967a4d901c5"
@@ -8149,7 +8162,7 @@ mime-db@1.47.0:
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.47.0.tgz#8cb313e59965d3c05cfbf898915a267af46a335c"
   integrity sha512-QBmA/G2y+IfeS4oktet3qRZ+P5kPhCKRXxXnQEudYqUaEioAU1/Lq2us3D/t1Jfo4hE9REQPrbB7K5sOczJVIw==
 
-mime-types@^2.1.12, mime-types@^2.1.25, mime-types@~2.1.19, mime-types@~2.1.24:
+mime-types@^2.1.12, mime-types@^2.1.18, mime-types@^2.1.25, mime-types@~2.1.19, mime-types@~2.1.24:
   version "2.1.30"
   resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.30.tgz#6e7be8b4c479825f85ed6326695db73f9305d62d"
   integrity sha512-crmjA4bLtR8m9qLpHvgxSChT+XoSlZi8J4n/aIdn3z92e/U47Z0V/yl+Wh9W046GgFVAmoNR/fmdbZYcSSIUeg==
@@ -9188,6 +9201,11 @@ pbkdf2@^3.0.3:
     ripemd160 "^2.0.1"
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
+
+pdfobject@^2.0.201604172:
+  version "2.2.5"
+  resolved "https://registry.yarnpkg.com/pdfobject/-/pdfobject-2.2.5.tgz#3e79dae8925a68f60c79423f56737bfd2d7e8a0b"
+  integrity sha512-B301nc24w02BMqrJoDOUBGRfHBqGtLztsdUyyhYsZaxD3R1DyNKtkDcilo+A4FYSW82k/LXAiXVREkYoqU2G4g==
 
 pend@~1.2.0:
   version "1.2.0"

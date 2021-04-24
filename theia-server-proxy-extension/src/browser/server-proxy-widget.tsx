@@ -14,11 +14,16 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { injectable } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { ServerProxyInstance } from './server-proxy-instance';
-import { ServerProxyInstanceStatus, StatusId } from '../common/server-proxy';
+import { ServerProxy, ServerProxyInstanceStatus, StatusId } from '../common/server-proxy';
 import { IFrameWidget } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-widget';
 import { IFrameModel, IFrameModelStatus } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-model';
+
+export interface ServerProxyWidgetOptions {
+    serverProxy: ServerProxy,
+    context: any
+}
 
 @injectable()
 export class ServerProxyWidget extends IFrameWidget {
@@ -37,7 +42,7 @@ export class ServerProxyWidget extends IFrameWidget {
     }
 
     constructor(
-        instance: ServerProxyInstance
+        @inject(ServerProxyInstance) instance: ServerProxyInstance
     ) {
         super(
             IFrameWidget.buildWidgetId(`server-proxy/${instance.serverProxy.id}/${instance.id}/`),
@@ -51,8 +56,8 @@ export class ServerProxyWidget extends IFrameWidget {
 
         this.instance = instance;
 
-        this.disposables.push(this.instance); // TODO this isn't right. What if we want it to stick around?
-        this.disposables.push(instance.statusChangedEvent(() => {
+        this.toDispose.push(this.instance); // TODO this isn't right. What if we want it to stick around?
+        this.toDispose.push(instance.statusChangedEvent(() => {
             this.model.status = ServerProxyWidget.buildStatus(instance);
         }));
     }
