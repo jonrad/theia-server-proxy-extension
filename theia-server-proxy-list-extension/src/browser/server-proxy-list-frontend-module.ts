@@ -14,21 +14,22 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { CommandContribution } from '@theia/core';
-import { WidgetFactory } from '@theia/core/lib/browser';
+import { bindViewContribution, FrontendApplicationContribution, WidgetFactory } from '@theia/core/lib/browser';
 import { ContainerModule, interfaces } from 'inversify';
-
-import { ServerProxyCommandContribution } from './server-proxy-debug-command-contribution';
-
-import { ServerProxyDebugWidget } from './server-proxy-debug-widget';
+import { ServerProxyListWidget } from './server-proxy-list-widget';
+import { ServerProxyListViewContribution } from './server-proxy-list-view-contribution';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
-    bind(ServerProxyCommandContribution).toSelf();
-    bind(CommandContribution).toService(ServerProxyCommandContribution);
+    bindViewContribution(bind, ServerProxyListViewContribution);
+    bind(FrontendApplicationContribution).toService(ServerProxyListViewContribution);
 
-    bind(ServerProxyDebugWidget).toSelf();
+    bind(ServerProxyListWidget).toSelf();
     bind(WidgetFactory).toDynamicValue(context => ({
-        id: ServerProxyDebugWidget.ID,
-        createWidget: () => context.container.get<ServerProxyDebugWidget>(ServerProxyDebugWidget),
+        id: ServerProxyListWidget.ID,
+        createWidget: () => context.container.get<ServerProxyListWidget>(ServerProxyListWidget),
+        defaultWidgetOptions: {
+            area: 'bottom',
+            rank: 200,
+        },
     })).inSingletonScope();
 });

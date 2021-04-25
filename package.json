@@ -12,7 +12,7 @@
   "workspaces": [
     "theia-server-proxy-iframe-extension",
     "theia-server-proxy-extension",
-    "theia-server-proxy-debug-extension",
+    "theia-server-proxy-list-extension",
     "theia-jupyter-extension",
     "theia-rstudio-extension",
     "browser-app"

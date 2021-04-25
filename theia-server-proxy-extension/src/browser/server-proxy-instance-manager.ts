@@ -17,54 +17,63 @@
 import { injectable, inject } from 'inversify';
 import { ServerProxyRpcClient, ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxy, ServerProxyInstanceStatus } from '../common/server-proxy';
-import { Disposable, Emitter } from '@theia/core';
+import { Disposable, Emitter, Event } from '@theia/core';
 import { ServerProxyInstance } from './server-proxy-instance';
 
 @injectable()
 export class ServerProxyInstanceManager implements Disposable {
     private readonly disposable: Disposable;
 
-    private readonly instancesById: Map<number, { instance: ServerProxyInstance, emitter: Emitter<ServerProxyInstanceStatus> }> =
-        new Map<number, { instance: ServerProxyInstance, emitter: Emitter<ServerProxyInstanceStatus> }>();
+    private readonly instancesById: Map<number, { instance: ServerProxyInstance, instanceEmitter: Emitter<ServerProxyInstanceStatus> }> =
+        new Map<number, { instance: ServerProxyInstance, instanceEmitter: Emitter<ServerProxyInstanceStatus> }>();
+
+    public readonly updated: Event<ServerProxyInstance>;
+    private readonly updatedEmitter: Emitter<ServerProxyInstance>;
 
     constructor(
         @inject(ServerProxyRpcServer) private readonly serverProxyRpcServer: ServerProxyRpcServer,
         @inject(ServerProxyRpcClient) private readonly serverProxyRpcClient: ServerProxyRpcClient
     ) {
+        this.updatedEmitter = new Emitter<ServerProxyInstance>();
+        this.updated = this.updatedEmitter.event;
+
         this.disposable = this.serverProxyRpcClient.statusChanged(status => {
             const maybeInstance = this.instancesById.get(status.instanceId);
             if (!maybeInstance) {
                 return;
             }
 
-            const { instance, emitter } = maybeInstance;
+            const { instance, instanceEmitter } = maybeInstance;
             if (instance.status.timeMs > status.timeMs) {
                 return;
             }
 
-            emitter.fire(status);
+            instanceEmitter.fire(status);
 
             if (ServerProxyInstanceStatus.isCompleted(status)) {
                 this.instancesById.delete(status.instanceId);
             }
+
+            this.updatedEmitter.fire(instance);
         });
     }
 
     private async buildServerProxyInstance(serverProxy: ServerProxy, context: any, instanceStatus: ServerProxyInstanceStatus): Promise<ServerProxyInstance> {
         const instanceId = instanceStatus.instanceId;
 
-        const emitter = new Emitter<ServerProxyInstanceStatus>();
+        const instanceEmitter = new Emitter<ServerProxyInstanceStatus>();
 
         const instance = new ServerProxyInstance(
             instanceStatus,
             serverProxy,
             context,
             this.serverProxyRpcServer,
-            emitter.event
+            instanceEmitter.event
         );
 
         // At this point, the status checker will be able to refresh our new instance
-        this.instancesById.set(instanceStatus.instanceId, { instance, emitter });
+        this.instancesById.set(instanceStatus.instanceId, { instance, instanceEmitter });
+        this.updatedEmitter.fire(instance);
 
         // The status may have updated before we added it to the dictionary. So let's verify we have the latest
         const latestStatus = await this.serverProxyRpcServer.getInstanceStatus(
@@ -78,7 +87,8 @@ export class ServerProxyInstanceManager implements Disposable {
         }
 
         if (latestStatus.timeMs > instance.status.timeMs) {
-            emitter.fire(latestStatus);
+            instanceEmitter.fire(latestStatus);
+            this.updatedEmitter.fire(instance);
         }
 
         return instance;
@@ -119,7 +129,7 @@ export class ServerProxyInstanceManager implements Disposable {
 
     dispose(): void {
         this.disposable.dispose();
-        this.instancesById.forEach(({ emitter }) => emitter.dispose());
+        this.instancesById.forEach(({ instanceEmitter }) => instanceEmitter.dispose());
         this.instancesById.clear();
     }
 }

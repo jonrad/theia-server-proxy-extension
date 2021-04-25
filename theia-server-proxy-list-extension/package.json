@@ -1,12 +1,13 @@
 {
-  "name": "theia-server-proxy-debug-extension",
+  "name": "theia-server-proxy-list-extension",
   "keywords": [
     "theia-extension"
   ],
   "version": "0.0.0",
   "files": [
     "lib",
-    "src"
+    "src",
+    "styles/*"
   ],
   "dependencies": {
     "@theia/core": "1.12.0",
@@ -30,7 +31,7 @@
   },
   "theiaExtensions": [
     {
-      "frontend": "lib/browser/server-proxy-debug-frontend-module"
+      "frontend": "lib/browser/server-proxy-list-frontend-module"
     }
   ]
 }

@@ -44,10 +44,22 @@ export namespace StatusId {
     export function isCompleted(statusId: StatusId): boolean {
         return statusId == StatusId.stopped || statusId == StatusId.errored;
     }
+    export function isLoading(statusId: StatusId): boolean {
+        return statusId == StatusId.starting || statusId == StatusId.waitingForPort;
+    }
+    export function isRunning(statusId: StatusId): boolean {
+        return statusId == StatusId.started;
+    }
 }
 
 export namespace ServerProxyInstanceStatus {
     export function isCompleted(status: ServerProxyInstanceStatus): boolean {
         return StatusId.isCompleted(status.statusId);
+    }
+    export function isLoading(status: ServerProxyInstanceStatus): boolean {
+        return StatusId.isLoading(status.statusId);
+    }
+    export function isRunning(status: ServerProxyInstanceStatus): boolean {
+        return StatusId.isRunning(status.statusId);
     }
 }
