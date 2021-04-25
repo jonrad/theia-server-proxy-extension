@@ -17,7 +17,7 @@
 import "../../styles/server-proxy-list.css"
 import * as React from 'react';
 import { inject, injectable, postConstruct } from 'inversify';
-import { ReactWidget } from '@theia/core/lib/browser';
+import { ApplicationShell, ReactWidget, WidgetManager } from '@theia/core/lib/browser';
 import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
 import { ServerProxyInstance } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance';
 import { WindowService } from "@theia/core/lib/browser/window/window-service";
@@ -34,6 +34,12 @@ export class ServerProxyListWidget extends ReactWidget {
 
     @inject(WindowService)
     protected readonly windowService: WindowService;
+
+    @inject(WidgetManager)
+    protected readonly widgetManager: WidgetManager;
+
+    @inject(ApplicationShell)
+    protected readonly shell: ApplicationShell;
 
     protected serverProxyInstances: ServerProxyInstance[] = [];
 
@@ -54,12 +60,28 @@ export class ServerProxyListWidget extends ReactWidget {
         }));
     }
 
+    protected async onOpen(instance: ServerProxyInstance): Promise<void> {
+        //todo use open handler
+        const widget = await this.widgetManager.getOrCreateWidget(
+            ServerProxyListWidget.ID,
+            {
+                serverProxy: instance.serverProxy,
+                context: instance.context
+            });
+
+        await this.shell.addWidget(widget);
+        if (widget.isAttached) {
+            await this.shell.activateWidget(widget.id);
+        }
+    }
+
     protected render(): React.ReactNode {
         return (<div className="server-proxy-list">
             {this.serverProxyInstances.map(instance => {
                 return <ServerProxyComponent key={instance.id} {...{
                     instance,
                     onStop: () => instance.stop(),
+                    onOpen: () => this.onOpen(instance),
                     onOpenBrowser: () => this.windowService.openNewWindow(`/server-proxy/${instance.serverProxy.id}/${instance.id}/`, { external: true })
                 }} />
             })}
@@ -70,6 +92,7 @@ export class ServerProxyListWidget extends ReactWidget {
 export interface ServerProxyComponentProps {
     onOpenBrowser: () => void;
     onStop: () => Promise<Boolean>;
+    onOpen: () => Promise<void>
     instance: ServerProxyInstance
 }
 
@@ -90,7 +113,8 @@ class ServerProxyComponent extends React.Component<ServerProxyComponentProps> {
 
         const actions = [];
         actions.push(<button className="theia-button" key="stop" onClick={this.props.onStop}>Stop</button>);
-        actions.push(<button className="theia-button" key="open-browser" onClick={this.props.onOpenBrowser}>Open Browser</button>);
+        actions.push(<button className="theia-button" key="open" onClick={this.props.onOpen}>Open</button>);
+        actions.push(<button className="theia-button" key="open-browser" onClick={this.props.onOpenBrowser}>Open in Browser</button>);
 
         const statusClassName = this.getStatusClassName();
         return <div className="row exposedPort" id={"port-" + instance.id} title={JSON.stringify(instance.context)}>
