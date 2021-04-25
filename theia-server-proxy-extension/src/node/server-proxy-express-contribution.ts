@@ -64,7 +64,11 @@ export class ServerProxyExpressContribution implements BackendApplicationContrib
                         throw Error(`Server Proxy with id ${instanceId} does not exist`);
                     }
 
-                    return `http://localhost:${port}`;
+                    const hostname = `http://localhost:${port}`;
+                    req.hostname = hostname;
+                    req.headers.origin = hostname;
+
+                    return hostname;
                 }
             };
 
