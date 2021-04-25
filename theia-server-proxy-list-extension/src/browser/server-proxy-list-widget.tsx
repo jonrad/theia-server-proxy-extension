@@ -92,7 +92,6 @@ class ServerProxyComponent extends React.Component<ServerProxyComponentProps> {
         actions.push(<button className="theia-button" key="stop" onClick={this.props.onStop}>Stop</button>);
         actions.push(<button className="theia-button" key="open-browser" onClick={this.props.onOpenBrowser}>Open Browser</button>);
 
-        // const useIndicatorClass = `status-${port.served ? 'ib' : 'nb'}-${port.exposed ? 'ie' : 'ne'}`;
         const statusClassName = this.getStatusClassName();
         return <div className="row exposedPort" id={"port-" + instance.id} title={JSON.stringify(instance.context)}>
             <span className="indicator"><i className={"fa " + statusClassName}></i></span>
