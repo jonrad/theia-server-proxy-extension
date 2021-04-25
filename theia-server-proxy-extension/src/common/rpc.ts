@@ -15,17 +15,19 @@
  ********************************************************************************/
 
 import { JsonRpcServer, Event } from "@theia/core";
-import { ServerProxy, ServerProxyInstanceStatus } from "./server-proxy";
+import { ServerProxy, ServerProxyInstance, ServerProxyInstanceStatus } from "./server-proxy";
 
 export const ServerProxyRpcServer = Symbol('ServerProxyRpcServer');
 export interface ServerProxyRpcServer extends JsonRpcServer<ServerProxyRpcClient> {
-    getInstance(serverProxyId: string, path: string): Promise<ServerProxyInstanceStatus | undefined>
+    getInstance(serverProxyId: string, context: string): Promise<ServerProxyInstance | undefined>
 
-    startInstance(id: string, context: any): Promise<ServerProxyInstanceStatus>
+    getInstances(): Promise<ServerProxyInstance[]>
 
-    getInstanceStatus(id: number): Promise<ServerProxyInstanceStatus | undefined>
+    startInstance(id: string, context: string): Promise<ServerProxyInstance>
 
-    stopInstance(id: number): Promise<Boolean>
+    getInstanceStatus(id: string): Promise<ServerProxyInstanceStatus | undefined>
+
+    stopInstance(id: string): Promise<Boolean>
 
     getServerProxies(): Promise<ServerProxy[]>
 }

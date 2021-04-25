@@ -21,14 +21,15 @@ import * as path from 'path';
 import * as os from 'os';
 import { ServerProxyInstance } from 'theia-server-proxy-extension/lib/node/server-proxy-instance';
 import { ServerProxyInstanceStatus } from 'theia-server-proxy-extension/lib/common/server-proxy';
+import { Extension } from '../common/const';
 
 @injectable()
 export class RStudioServerProxyInstanceBuilder extends BaseServerProxyInstanceBuilder<void> {
-    id: string;
+    id: string = Extension.ID;
 
     instance: ServerProxyInstance | undefined;
 
-    async build(instanceId: number, relativeUrl: string, context: void): Promise<ServerProxyInstance> {
+    async build(instanceId: string, relativeUrl: string, context: void): Promise<ServerProxyInstance> {
         if (!this.instance || ServerProxyInstanceStatus.isCompleted(this.instance.status)) {
             this.instance = await super.build(instanceId, relativeUrl, context);
         }

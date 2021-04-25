@@ -21,7 +21,9 @@ import { ServerProxyContribution } from './server-proxy-contribution';
 
 @injectable()
 export class ServerProxyInstanceManager {
-    private instanceById: Map<number, ServerProxyInstance> = new Map<number, ServerProxyInstance>()
+    private instanceById: Map<string, ServerProxyInstance> = new Map<string, ServerProxyInstance>()
+    private instanceByContext: Map<string, ServerProxyInstance> =
+        new Map<string, ServerProxyInstance>()
 
     // does it matter that people can 'guess' other instance ids?
     private lastInstanceId = 0;
@@ -29,21 +31,28 @@ export class ServerProxyInstanceManager {
     @inject(ILogger)
     protected readonly logger: ILogger;
 
-    public getInstancePort(id: number): number | undefined {
+    public getInstancePort(id: string): number | undefined {
         return this.instanceById.get(id)?.port;
     }
 
-    public async getInstance(
+    public getInstance(
         serverProxyId: string,
         context: any
-    ): Promise<ServerProxyInstance | undefined> {
-        for (const instance of this.instanceById.values()) {
-            if (instance.serverProxyId == serverProxyId && instance.context == context) {
-                return instance;
-            }
-        }
+    ): ServerProxyInstance | undefined {
+        return this.instanceByContext.get(JSON.stringify({
+            serverProxyId: serverProxyId,
+            context: context
+        }));
+    }
 
-        return undefined;
+    public getInstanceById(
+        id: string
+    ): ServerProxyInstance | undefined {
+        return this.instanceById.get(id);
+    }
+
+    public getInstances(): ServerProxyInstance[] {
+        return Array.from(this.instanceById.values());
     }
 
     public async startInstance(
@@ -56,7 +65,7 @@ export class ServerProxyInstanceManager {
             return existingInstance;
         }
 
-        const instanceId = ++this.lastInstanceId;
+        const instanceId = (++this.lastInstanceId).toString();
 
         const relativeUrl = `/server-proxy/${serverProxy.id}/${instanceId}`;
 
@@ -67,10 +76,13 @@ export class ServerProxyInstanceManager {
         );
 
         this.instanceById.set(instanceId, instance);
+        const contextKey = JSON.stringify({ serverProxyId: serverProxy.id, context: context });
+        this.instanceByContext.set(contextKey, instance);
 
         const maybeCleanup = () => {
             if (ServerProxyInstanceStatus.isCompleted(instance.status)) {
                 this.instanceById.delete(instanceId);
+                this.instanceByContext.delete(contextKey);
                 instance.dispose();
             }
         }
@@ -87,14 +99,13 @@ export class ServerProxyInstanceManager {
     }
 
     public getInstanceStatus(
-        instanceId: number
+        instanceId: string
     ): ServerProxyInstanceStatus | undefined {
         return this.instanceById.get(instanceId)?.status;
     }
 
-    public async stopInstance(id: number): Promise<Boolean> {
+    public async stopInstance(id: string): Promise<Boolean> {
         const instance = this.instanceById.get(id);
-        this.instanceById.delete(id);
 
         if (instance) {
             await instance.stop();

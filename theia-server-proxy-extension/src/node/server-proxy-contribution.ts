@@ -33,7 +33,7 @@ export interface ServerProxyContribution {
 }
 
 export interface ServerProxyInstanceBuilder {
-    build(instanceId: number, relativeUrl: string, context: any): Promise<ServerProxyInstance>
+    build(instanceId: string, url: string, context: any): Promise<ServerProxyInstance>
 }
 
 export interface ServerProxyCommand {
@@ -54,15 +54,15 @@ export abstract class BaseServerProxyInstanceBuilder<T> implements ServerProxyIn
     @inject(RawProcessFactory)
     private readonly rawProcessFactory: RawProcessFactory;
 
-    abstract getCommand(relativeUrl: string, context: any): Promise<ServerProxyCommand>;
+    abstract getCommand(url: string, context: any): Promise<ServerProxyCommand>;
 
     protected async findAvailablePort(): Promise<number> {
         return await getAvailablePort();
     }
 
-    async build(instanceId: number, relativeUrl: string, context: T): Promise<ServerProxyInstance> {
+    async build(instanceId: string, url: string, context: T): Promise<ServerProxyInstance> {
         const { command, env, port } = await this.getCommand(
-            relativeUrl,
+            url,
             context
         );
 
@@ -88,6 +88,7 @@ export abstract class BaseServerProxyInstanceBuilder<T> implements ServerProxyIn
             context,
             this.id,
             port,
+            url,
             rawProcess
         );
     }

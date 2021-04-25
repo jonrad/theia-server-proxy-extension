@@ -58,7 +58,7 @@ export class ServerProxyExpressContribution implements BackendApplicationContrib
                     if (!split || split.length < 4) {
                         return;
                     }
-                    const instanceId = Number(split[3]);
+                    const instanceId = split[3];
                     const port = this.instanceManager.getInstancePort(instanceId);
                     if (!port) {
                         throw Error(`Server Proxy with id ${instanceId} does not exist`);

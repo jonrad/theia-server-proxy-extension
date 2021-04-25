@@ -35,10 +35,11 @@ export class ServerProxyInstance implements Disposable {
     private disposables: Disposable[] = [];
 
     constructor(
-        public readonly instanceId: number,
+        public readonly id: string,
         public readonly context: any,
         public readonly serverProxyId: string,
         public readonly port: number,
+        public readonly url: string,
         private readonly process: RawProcess
     ) {
         this.statusChangedEmitter = new Emitter<ServerProxyInstanceStatus>();
@@ -57,7 +58,7 @@ export class ServerProxyInstance implements Disposable {
 
     private setStatus(statusId: StatusId, message?: string) {
         this._status = {
-            instanceId: this.instanceId,
+            instanceId: this.id,
             statusId: statusId,
             statusMessage: message,
             timeMs: new Date().getTime()
@@ -69,7 +70,7 @@ export class ServerProxyInstance implements Disposable {
     private async isAccessible(): Promise<Boolean> {
         return new Promise((resolve) => {
             // TODO 0 share this
-            const request = http.get(`http://localhost:${this.port}/server-proxy/${this.serverProxyId}/${this.instanceId}/`);
+            const request = http.get(`http://localhost:${this.port}/server-proxy/${this.serverProxyId}/${this.id}/`);
 
             request.on('error', () => resolve(false));
             request.on('response', () => resolve(true));

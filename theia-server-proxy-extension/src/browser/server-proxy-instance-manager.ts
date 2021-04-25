@@ -14,25 +14,27 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { injectable, inject } from 'inversify';
+import { injectable, inject, postConstruct } from 'inversify';
 import { ServerProxyRpcClient, ServerProxyRpcServer } from '../common/rpc';
-import { ServerProxy, ServerProxyInstanceStatus } from '../common/server-proxy';
+import { ServerProxy, ServerProxyInstanceStatus, ServerProxyInstance as ServerProxyInstanceDto } from '../common/server-proxy';
 import { Disposable, Emitter, Event } from '@theia/core';
 import { ServerProxyInstance } from './server-proxy-instance';
+import { ServerProxyManager } from './server-proxy-manager';
 
 @injectable()
 export class ServerProxyInstanceManager implements Disposable {
     private readonly disposable: Disposable;
 
-    private readonly instancesById: Map<number, { instance: ServerProxyInstance, instanceEmitter: Emitter<ServerProxyInstanceStatus> }> =
-        new Map<number, { instance: ServerProxyInstance, instanceEmitter: Emitter<ServerProxyInstanceStatus> }>();
+    private readonly instancesById: Map<string, { instance: ServerProxyInstance, instanceEmitter: Emitter<ServerProxyInstanceStatus> }> =
+        new Map<string, { instance: ServerProxyInstance, instanceEmitter: Emitter<ServerProxyInstanceStatus> }>();
 
     public readonly updated: Event<ServerProxyInstance>;
     private readonly updatedEmitter: Emitter<ServerProxyInstance>;
 
     constructor(
         @inject(ServerProxyRpcServer) private readonly serverProxyRpcServer: ServerProxyRpcServer,
-        @inject(ServerProxyRpcClient) private readonly serverProxyRpcClient: ServerProxyRpcClient
+        @inject(ServerProxyRpcClient) private readonly serverProxyRpcClient: ServerProxyRpcClient,
+        @inject(ServerProxyManager) private readonly serverProxyManager: ServerProxyManager
     ) {
         this.updatedEmitter = new Emitter<ServerProxyInstance>();
         this.updated = this.updatedEmitter.event;
@@ -58,26 +60,41 @@ export class ServerProxyInstanceManager implements Disposable {
         });
     }
 
-    private async buildServerProxyInstance(serverProxy: ServerProxy, context: any, instanceStatus: ServerProxyInstanceStatus): Promise<ServerProxyInstance> {
-        const instanceId = instanceStatus.instanceId;
+    @postConstruct()
+    protected async init(): Promise<void> {
+        const instances = await this.serverProxyRpcServer.getInstances();
+        instances.forEach(dto => this.buildServerProxyInstance(dto));
+    }
+
+    private async buildServerProxyInstance(
+        dto: ServerProxyInstanceDto
+    ): Promise<ServerProxyInstance> {
+        const instanceId = dto.id;
+        const status = dto.lastStatus;
 
         const instanceEmitter = new Emitter<ServerProxyInstanceStatus>();
+        const serverProxy = this.serverProxyManager.getServerProxyById(dto.serverProxyId);
+
+        if (!serverProxy) {
+            throw Error("Something is misconfigured");
+        }
 
         const instance = new ServerProxyInstance(
-            instanceStatus,
+            instanceId,
             serverProxy,
-            context,
+            JSON.parse(dto.context),
+            status,
             this.serverProxyRpcServer,
             instanceEmitter.event
         );
 
         // At this point, the status checker will be able to refresh our new instance
-        this.instancesById.set(instanceStatus.instanceId, { instance, instanceEmitter });
+        this.instancesById.set(instance.id, { instance, instanceEmitter });
         this.updatedEmitter.fire(instance);
 
         // The status may have updated before we added it to the dictionary. So let's verify we have the latest
         const latestStatus = await this.serverProxyRpcServer.getInstanceStatus(
-            instanceId
+            instance.id
         )
 
         if (!latestStatus) {
@@ -95,25 +112,25 @@ export class ServerProxyInstanceManager implements Disposable {
     }
 
     public async getOrCreateInstance(serverProxy: ServerProxy, context: any): Promise<ServerProxyInstance> {
-        const currentInstanceStatus = await this.serverProxyRpcServer.getInstance(
+        const instanceDto = await this.serverProxyRpcServer.getInstance(
             serverProxy.id,
-            context
+            JSON.stringify(context)
         );
 
-        if (currentInstanceStatus) {
-            return this.buildServerProxyInstance(serverProxy, context, currentInstanceStatus);
+        if (instanceDto) {
+            return this.buildServerProxyInstance(instanceDto);
         }
 
         return this.startInstance(serverProxy, context);
     }
 
     public async startInstance(serverProxy: ServerProxy, context: any): Promise<ServerProxyInstance> {
-        const instanceStatus = await this.serverProxyRpcServer.startInstance(
+        const instanceDto = await this.serverProxyRpcServer.startInstance(
             serverProxy.id,
-            context
+            JSON.stringify(context)
         );
 
-        return this.buildServerProxyInstance(serverProxy, context, instanceStatus);
+        return this.buildServerProxyInstance(instanceDto);
     }
 
     public async getInstances(): Promise<ServerProxyInstance[]> {

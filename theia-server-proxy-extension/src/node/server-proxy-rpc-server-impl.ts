@@ -18,8 +18,9 @@ import { Disposable } from '@theia/core';
 import { injectable, inject } from 'inversify';
 import { ServerProxyRpcClient } from '../common/rpc';
 import { ServerProxyRpcServer } from '../common/rpc';
-import { ServerProxy, ServerProxyInstanceStatus } from '../common/server-proxy';
+import { ServerProxy, ServerProxyInstanceStatus, ServerProxyInstance as ServerProxyInstanceDto } from '../common/server-proxy';
 import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
+import { ServerProxyInstance } from './server-proxy-instance';
 import { ServerProxyManager } from './server-proxy-manager';
 
 @injectable()
@@ -41,17 +42,26 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
         });
     }
 
-    async getInstance(serverProxyId: string, context: any): Promise<ServerProxyInstanceStatus | undefined> {
-        return (await this.instanceManager.getInstance(serverProxyId, context))?.status;
+    async getInstance(serverProxyId: string, context: string): Promise<ServerProxyInstanceDto | undefined> {
+        const instance = await this.instanceManager.getInstance(serverProxyId, context);
+        if (!instance) {
+            return undefined;
+        }
+
+        return this.toDto(instance);
     }
 
-    async startInstance(serverProxyId: string, context: any): Promise<ServerProxyInstanceStatus> {
+    async getInstances(): Promise<ServerProxyInstanceDto[]> {
+        return (await this.instanceManager.getInstances()).map(instance => this.toDto(instance));
+    }
+
+    async startInstance(serverProxyId: string, context: string): Promise<ServerProxyInstanceDto> {
         const serverProxy = this.serverProxyManager.getById(serverProxyId);
         if (!serverProxy) {
             throw Error(`Invalid server proxy id ${serverProxyId}`)
         }
 
-        const instance = (await this.instanceManager.startInstance(serverProxy, context));
+        const instance = (await this.instanceManager.startInstance(serverProxy, JSON.parse(context)));
 
         let disposable: Disposable | undefined = undefined;
 
@@ -62,15 +72,25 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
             }
         });
 
-        return instance.status;
+        return this.toDto(instance);
     }
 
-    async getInstanceStatus(id: number): Promise<ServerProxyInstanceStatus | undefined> {
+    async getInstanceStatus(id: string): Promise<ServerProxyInstanceStatus | undefined> {
         return this.instanceManager.getInstanceStatus(id);
     }
 
-    stopInstance(id: number): Promise<Boolean> {
+    stopInstance(id: string): Promise<Boolean> {
         return this.instanceManager.stopInstance(id);
+    }
+
+    private toDto(instance: ServerProxyInstance): ServerProxyInstanceDto {
+        return {
+            id: instance.id,
+            serverProxyId: instance.serverProxyId,
+            port: instance.port,
+            context: JSON.stringify(instance.context),
+            lastStatus: instance.status
+        };
     }
 
     setClient(client: ServerProxyRpcClient | undefined): void {

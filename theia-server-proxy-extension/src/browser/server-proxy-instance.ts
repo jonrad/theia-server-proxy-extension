@@ -19,8 +19,6 @@ import { ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxy, ServerProxyInstanceStatus } from '../common/server-proxy';
 
 export class ServerProxyInstance implements Disposable {
-    public readonly id: number;
-
     public readonly serverProxy: ServerProxy;
 
     public readonly context: any;
@@ -37,13 +35,13 @@ export class ServerProxyInstance implements Disposable {
     private readonly disposable: Disposable;
 
     constructor(
-        initialStatus: ServerProxyInstanceStatus,
+        public readonly id: string,
         serverProxy: ServerProxy,
         context: any,
+        initialStatus: ServerProxyInstanceStatus,
         serverProxyRpcServer: ServerProxyRpcServer,
         statusChangedEvent: Event<ServerProxyInstanceStatus>
     ) {
-        this.id = initialStatus.instanceId;
         this.serverProxy = serverProxy;
         this.context = context;
         this._status = initialStatus;

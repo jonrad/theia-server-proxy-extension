@@ -28,16 +28,18 @@ export enum StatusId {
 }
 
 export interface ServerProxyInstanceStatus {
-    instanceId: number
+    instanceId: string
     timeMs: number
     statusId: StatusId
     statusMessage?: string
 }
 
 export interface ServerProxyInstance {
-    id: number
-    serverProxy: ServerProxy
-    status: ServerProxyInstanceStatus
+    id: string
+    serverProxyId: string
+    context: string
+    port: number
+    lastStatus: ServerProxyInstanceStatus
 }
 
 export namespace StatusId {
