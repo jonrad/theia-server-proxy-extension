@@ -25,6 +25,7 @@ import { ServerProxyManager } from './server-proxy-manager';
 
 import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
 import { ServerProxyInstance } from './server-proxy-instance';
+import { ServerProxyRpcServerProxy } from './server-proxy-rpc-server-proxy';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
     bind(ServerProxyWidget).to(ServerProxyWidget);
@@ -48,9 +49,11 @@ export default new ContainerModule((bind: interfaces.Bind) => {
     bind(ServerProxyInstanceManager).toSelf().inSingletonScope();
 
     bind(ServerProxyRpcClient).to(ServerProxyRpcClientImpl).inSingletonScope();
-    bind(ServerProxyRpcServer).toDynamicValue(ctx => {
+    bind(ServerProxyRpcServerProxy).toDynamicValue(ctx => {
         const client = ctx.container.get<ServerProxyRpcClient>(ServerProxyRpcClient);
         const connection = ctx.container.get(WebSocketConnectionProvider);
         return connection.createProxy<ServerProxyRpcServer>('/services/server-proxy', client);
     }).inSingletonScope();
+
+    bind(ServerProxyRpcServer).toDynamicValue(ctx => ctx.container.get(ServerProxyRpcServerProxy));
 });
