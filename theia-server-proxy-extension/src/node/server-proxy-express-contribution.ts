@@ -18,7 +18,7 @@ import * as express from 'express';
 import * as http from 'http';
 import * as https from 'https';
 import * as net from 'net';
-import { injectable, inject, postConstruct } from 'inversify';
+import { injectable, inject } from 'inversify';
 import { BackendApplicationContribution } from '@theia/core/lib/node/backend-application';
 import { createProxyMiddleware, Options, RequestHandler } from 'http-proxy-middleware';
 import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
@@ -33,11 +33,6 @@ export class ServerProxyExpressContribution implements BackendApplicationContrib
     private readonly serverProxyManager: ServerProxyManager
 
     private middlewaresById: Map<string, RequestHandler> = new Map<string, RequestHandler>();
-
-    @postConstruct()
-    async initialize(): Promise<void> {
-        this.serverProxyManager.init();
-    }
 
     configure(app: express.Application): void {
         this.serverProxyManager.get().forEach(serverProxy => {
@@ -88,12 +83,27 @@ export class ServerProxyExpressContribution implements BackendApplicationContrib
     }
 
     async onStart(server: http.Server | https.Server): Promise<void> {
+        // this is brittle and needs to be fixed. how do we know the order things are registered?
+
+        const fallbackListeners = server.rawListeners('upgrade').slice(0);
+        server.removeAllListeners('upgrade');
+
+        const callFallback = (req: express.Request, socket: net.Socket, head: any) => {
+            fallbackListeners.forEach(l => l(req, socket, head));
+        }
+
+        // let our proxy handle the upgrade if possible. if not, use the fallback
         server.on('upgrade', (req: express.Request, socket: net.Socket, head: any) => {
-            for (const middleware of this.middlewaresById.values()) {
-                if (middleware.upgrade) {
-                    middleware.upgrade(req, socket, head);
-                }
+            const path = req.path || req.url;
+            const split = path.split('/');
+            if (!split || split.length < 4 || split[1] != 'server-proxy') {
+                callFallback(req, socket, head);
+                return;
             }
+            const serverProxyId = split[2];
+            const middlewares = this.middlewaresById;
+            const middleware = middlewares.get(serverProxyId);
+            middleware?.upgrade?.(req, socket, head);
         });
     }
 }
