@@ -20,6 +20,7 @@ import { inject, injectable, postConstruct } from 'inversify';
 import { ApplicationShell, ReactWidget, WidgetManager } from '@theia/core/lib/browser';
 import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
 import { ServerProxyInstance } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance';
+import { ServerProxyWidget } from 'theia-server-proxy-extension/lib/browser/server-proxy-widget';
 import { WindowService } from "@theia/core/lib/browser/window/window-service";
 import { ServerProxyInstanceStatus } from "theia-server-proxy-extension/lib/common/server-proxy";
 
@@ -63,7 +64,7 @@ export class ServerProxyListWidget extends ReactWidget {
     protected async onOpen(instance: ServerProxyInstance): Promise<void> {
         //todo use open handler
         const widget = await this.widgetManager.getOrCreateWidget(
-            ServerProxyListWidget.ID,
+            ServerProxyWidget.ID,
             {
                 serverProxy: instance.serverProxy,
                 context: instance.context

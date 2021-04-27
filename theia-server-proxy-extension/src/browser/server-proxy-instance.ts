@@ -58,7 +58,6 @@ export class ServerProxyInstance implements Disposable {
     }
 
     dispose(): void {
-        this.stop();
         this.disposable.dispose();
     }
 }
