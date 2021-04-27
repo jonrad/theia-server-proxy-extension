@@ -112,7 +112,6 @@ TODO
 * Test with different port/url
 * widget context should have instance of app
 * Close window if express doesn't know about it
-* Port listing
 
 ## Roadmap of nice to haves
 
