@@ -106,10 +106,10 @@ export class ServerProxyInstanceManager {
 
     public async stopInstance(id: string): Promise<Boolean> {
         const instance = this.instanceById.get(id);
+        console.log("Called stopInstance");
 
         if (instance) {
-            await instance.stop();
-            return true;
+            return await instance.stop();
         } else {
             return false;
         }

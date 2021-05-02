@@ -77,9 +77,46 @@ export class ServerProxyInstance implements Disposable {
         });
     }
 
-    public stop(): void {
-        // TODO 0 what if it doesn't listen
+    private async doStop(signal?: number): Promise<boolean> {
+        const timeout = 10_000;
+
+        this.setStatus(StatusId.stopping)
         this.process.kill();
+
+        await new Promise<void>((resolve) => {
+            let disposable: Disposable | undefined;
+            disposable = this.statusChanged(status => {
+                if (status.statusId == StatusId.stopped) {
+                    resolve();
+                    disposable?.dispose();
+                }
+            });
+
+            setTimeout(() => {
+                resolve();
+                disposable?.dispose();
+            }, timeout);
+        });
+
+        if (this.process.killed) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public async stop(): Promise<boolean> {
+        if (ServerProxyInstanceStatus.isCompleted(this.status)) {
+            return true;
+        }
+
+        await this.doStop();
+        if (this.process.killed) {
+            return true;
+        }
+
+        return await this.doStop(9);
+
     }
 
     public async init(): Promise<void> {
@@ -99,7 +136,7 @@ export class ServerProxyInstance implements Disposable {
 
             this.setStatus(StatusId.started);
         } catch (e) {
-            this.stop();
+            await this.stop();
             this.setStatus(StatusId.errored, e.toString());
         }
     }

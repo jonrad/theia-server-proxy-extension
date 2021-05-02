@@ -106,12 +106,9 @@ TODO
 
 * Handle statuses/failures/etc on app start
 * Remove all todo 0 and 1s
-* Settings for binaries?
 * Browser package.json update versions?
 * Debug command output
 * Test with different port/url
-* widget context should have instance of app
-* Close window if express doesn't know about it
 
 ## Roadmap of nice to haves
 

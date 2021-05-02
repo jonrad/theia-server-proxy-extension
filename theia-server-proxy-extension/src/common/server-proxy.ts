@@ -21,8 +21,9 @@ export interface ServerProxy {
 
 export enum StatusId {
     starting = "starting",
-    waitingForPort = "waiting-for-port",
+    waitingForPort = "waiting-for-app",
     started = "started",
+    stopping = "stopping",
     stopped = "stopped",
     errored = "errored"
 }
@@ -44,7 +45,7 @@ export interface ServerProxyInstance {
 
 export namespace StatusId {
     export function isCompleted(statusId: StatusId): boolean {
-        return statusId == StatusId.stopped || statusId == StatusId.errored;
+        return statusId == StatusId.stopped || statusId == StatusId.errored || statusId == StatusId.stopping;
     }
     export function isLoading(statusId: StatusId): boolean {
         return statusId == StatusId.starting || statusId == StatusId.waitingForPort;
