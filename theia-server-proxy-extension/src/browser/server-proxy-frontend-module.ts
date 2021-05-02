@@ -21,7 +21,7 @@ import { ServerProxyWidget, ServerProxyWidgetOptions } from './server-proxy-widg
 import { ServerProxyRpcClientImpl } from './server-proxy-rpc-client-impl';
 import { ServerProxyManager } from './server-proxy-manager';
 import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
-import { ServerProxyInstance } from './server-proxy-instance';
+import { ServerProxyInstance, ServerProxyInstanceImpl, ServerProxyInstanceImplFactory, ServerProxyInstanceProps } from './server-proxy-instance';
 import { ServerProxyRpcServerProxy } from './server-proxy-rpc-server-proxy';
 import { ServerProxyOpenHandler } from './server-proxy-open-handler';
 
@@ -47,6 +47,17 @@ export default new ContainerModule((bind: interfaces.Bind) => {
             }
         }
     }).inSingletonScope();
+
+    bind(ServerProxyInstanceImpl).toSelf();
+    bind<interfaces.Factory<ServerProxyInstanceImpl>>(ServerProxyInstanceImplFactory).toFactory(ctx => {
+        const { container } = ctx;
+        return (props: ServerProxyInstanceProps) => {
+            const child = container.createChild();
+            child.bind(ServerProxyInstanceProps).toConstantValue(props);
+
+            return child.get(ServerProxyInstanceImpl);
+        };
+    });
 
     bind(ServerProxyManager).toSelf().inSingletonScope();
     bind(ServerProxyInstanceManager).toSelf().inSingletonScope();

@@ -14,50 +14,74 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { Disposable, Event } from '@theia/core';
+import { inject, injectable } from 'inversify';
+import { Event, Emitter } from '@theia/core';
 import { ServerProxyRpcServer } from '../common/rpc';
 import { ServerProxy, ServerProxyInstanceStatus } from '../common/server-proxy';
 
-export class ServerProxyInstance implements Disposable {
+export const ServerProxyInstance = Symbol('ServerProxyInstance');
+export interface ServerProxyInstance {
+    readonly id: string;
+
+    readonly serverProxy: ServerProxy;
+
+    readonly context: any;
+
+    readonly status: ServerProxyInstanceStatus;
+
+    readonly statusChangedEvent: Event<ServerProxyInstanceStatus>;
+
+    stop(): Promise<Boolean>;
+}
+
+export const ServerProxyInstanceProps = Symbol('ServerProxyInstanceProps');
+export interface ServerProxyInstanceProps {
+    readonly id: string;
+    readonly serverProxy: ServerProxy;
+    readonly context: any;
+    readonly status: ServerProxyInstanceStatus;
+}
+
+export const ServerProxyInstanceImplFactory = Symbol('ServerProxyInstanceImplFactory')
+
+@injectable()
+export class ServerProxyInstanceImpl implements ServerProxyInstance {
+    public readonly id: string;
+
     public readonly serverProxy: ServerProxy;
 
     public readonly context: any;
+
+    public readonly statusChangedEventEmitter: Emitter<ServerProxyInstanceStatus> = new Emitter<ServerProxyInstanceStatus>();
+    public readonly statusChangedEvent: Event<ServerProxyInstanceStatus> = this.statusChangedEventEmitter.event;
 
     private _status: ServerProxyInstanceStatus
     public get status(): ServerProxyInstanceStatus {
         return this._status;
     }
 
-    public readonly statusChangedEvent: Event<ServerProxyInstanceStatus>;
-
-    private readonly serverProxyRpcServer: ServerProxyRpcServer;
-
-    private readonly disposable: Disposable;
-
     constructor(
-        public readonly id: string,
-        serverProxy: ServerProxy,
-        context: any,
-        initialStatus: ServerProxyInstanceStatus,
-        serverProxyRpcServer: ServerProxyRpcServer,
-        statusChangedEvent: Event<ServerProxyInstanceStatus>
+        @inject(ServerProxyInstanceProps) props: ServerProxyInstanceProps,
+        @inject(ServerProxyRpcServer) protected readonly serverProxyRpcServer: ServerProxyRpcServer
     ) {
-        this.serverProxy = serverProxy;
-        this.context = context;
-        this._status = initialStatus;
-        this.statusChangedEvent = statusChangedEvent;
-        this.serverProxyRpcServer = serverProxyRpcServer;
+        this.id = props.id;
+        this.serverProxy = props.serverProxy;
+        this.context = props.context;
+        this._status = props.status;
 
-        this.disposable = statusChangedEvent((status) => {
-            this._status = status;
-        })
+        this.serverProxyRpcServer = serverProxyRpcServer;
     }
 
     public stop(): Promise<Boolean> {
         return this.serverProxyRpcServer.stopInstance(this.id);
     }
 
-    dispose(): void {
-        this.disposable.dispose();
+    public setStatus(status: ServerProxyInstanceStatus): void {
+        if (this._status == status) {
+            return;
+        }
+
+        this._status = status;
+        this.statusChangedEventEmitter.fire(status);
     }
 }
