@@ -37,7 +37,7 @@ export class ServerProxyListWidget extends ReactWidget {
     protected readonly windowService: WindowService;
 
     @inject(OpenerService)
-    protected readonly openerServer: OpenerService;
+    protected readonly openerService: OpenerService;
 
     protected serverProxyInstances: ServerProxyInstance[] = [];
 
@@ -60,7 +60,7 @@ export class ServerProxyListWidget extends ReactWidget {
 
     protected async onOpen(instance: ServerProxyInstance): Promise<void> {
         await ServerProxyOpenHandler.open(
-            this.openerServer,
+            this.openerService,
             instance
         );
     }
