@@ -16,13 +16,13 @@
 
 import { ContainerModule, interfaces } from 'inversify';
 import { OpenHandler } from '@theia/core/lib/browser';
-import { JupyterOpenHandler } from './jupyter-open-handler';
+import { JupyterFileOpenHandler } from './jupyter-file-open-handler';
 import { JupyterCommandContribution } from './jupyter-command-contribution';
 import { CommandContribution } from '@theia/core';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
     bind(CommandContribution).to(JupyterCommandContribution);
 
-    bind(JupyterOpenHandler).toSelf();
-    bind(OpenHandler).toService(JupyterOpenHandler);
+    bind(JupyterFileOpenHandler).toSelf();
+    bind(OpenHandler).toService(JupyterFileOpenHandler);
 });

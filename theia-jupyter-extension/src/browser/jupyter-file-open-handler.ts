@@ -16,18 +16,18 @@
 
 import URI from '@theia/core/lib/common/uri';
 import { inject, injectable } from 'inversify';
-import { OpenHandler, FrontendApplication, OpenerService } from '@theia/core/lib/browser';
-import { IFrameWidget } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-widget'
-import { IFrameModel, IFrameModelStatus } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-model';
+import { OpenHandler, FrontendApplication, OpenerService, WidgetManager } from '@theia/core/lib/browser';
+import { IFrameWidget, IFrameWidgetMode } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-widget'
 import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
 import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
 import { Path } from '@theia/core';
 import { Extension } from '../common/const';
+import { IFrameStatus } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-status';
 
 @injectable()
-export class JupyterOpenHandler implements OpenHandler {
+export class JupyterFileOpenHandler implements OpenHandler {
 
-    readonly id = 'jupyter.openhandler';
+    readonly id = 'jupyter.file.openhandler';
     readonly label = 'Open in Jupyter';
 
     @inject(FrontendApplication)
@@ -41,6 +41,9 @@ export class JupyterOpenHandler implements OpenHandler {
 
     @inject(OpenerService)
     protected readonly openerService: OpenerService;
+
+    @inject(WidgetManager)
+    protected readonly widgetManager: WidgetManager;
 
     canHandle(uri: URI): number {
         try {
@@ -91,15 +94,15 @@ export class JupyterOpenHandler implements OpenHandler {
             return appWidget;
         }
 
-        const widget = new IFrameWidget(
-            widgetId,
-            new IFrameModel(
-                uri.path.name,
-                iframeUri,
-                IFrameModelStatus.ready,
-                false
-            )
-        );
+        const widget = await this.widgetManager.getOrCreateWidget(
+            IFrameWidget.ID,
+            {
+                id: widgetId,
+                name: uri.path.name,
+                mode: IFrameWidgetMode.MiniBrowser,
+                startUrl: path.toString(),
+                status: IFrameStatus.ready
+            });
 
         await this.app.shell.addWidget(widget, { area: 'main' });
         await this.app.shell.activateWidget(widget.id);

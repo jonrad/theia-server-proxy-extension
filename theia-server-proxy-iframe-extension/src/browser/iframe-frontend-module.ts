@@ -15,13 +15,22 @@
  ********************************************************************************/
 
 import { ContainerModule, interfaces } from 'inversify';
-import { IFrameWidget } from "./iframe-widget";
-import { IFrameModel } from "./iframe-model";
+import { IFrameWidget, IFrameWidgetOptions } from './iframe-widget';
 
 import '../../src/browser/style/index.css';
+import { WidgetFactory } from '@theia/core/lib/browser';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
-    bind<interfaces.Factory<IFrameWidget>>(IFrameWidget.ID).toFactory<IFrameWidget>(() => {
-        return (model: IFrameModel) => new IFrameWidget(IFrameWidget.buildWidgetId(model.url), model);
-    });
+    bind(IFrameWidget).toSelf();
+    bind(WidgetFactory).toDynamicValue(context => ({
+        id: IFrameWidget.ID,
+        async createWidget(options: IFrameWidgetOptions): Promise<IFrameWidget> {
+            const { container } = context;
+
+            const child = container.createChild();
+            child.bind(IFrameWidgetOptions).toConstantValue(options);
+
+            return child.get(IFrameWidget);
+        }
+    })).inSingletonScope();
 });

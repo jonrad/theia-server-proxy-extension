@@ -17,21 +17,22 @@
 import { injectable, inject } from 'inversify';
 import { CommandContribution, CommandRegistry } from '@theia/core';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
-import { ApplicationShell, WidgetManager } from '@theia/core/lib/browser';
+import { OpenerService } from '@theia/core/lib/browser';
 import { Extension } from '../common/const';
 import ServerProxyContext from '../common/server-proxy-context';
-import { ServerProxyWidget } from 'theia-server-proxy-extension/lib/browser/server-proxy-widget';
+import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
+import { ServerProxyOpenHandler } from 'theia-server-proxy-extension/lib/browser/server-proxy-open-handler';
 
 @injectable()
 export class JupyterCommandContribution implements CommandContribution {
     @inject(WorkspaceService)
     protected readonly workspaceService: WorkspaceService;
 
-    @inject(WidgetManager)
-    protected readonly widgetManager: WidgetManager;
+    @inject(ServerProxyInstanceManager)
+    protected readonly serverProxyInstanceManager: ServerProxyInstanceManager;
 
-    @inject(ApplicationShell)
-    protected readonly shell: ApplicationShell;
+    @inject(OpenerService)
+    protected readonly openerService: OpenerService;
 
     registerCommands(registry: CommandRegistry): void {
         registry.registerCommand({
@@ -55,17 +56,15 @@ export class JupyterCommandContribution implements CommandContribution {
                     path: roots[0].resource.path.toString()
                 }
 
-                const widget = await this.widgetManager.getOrCreateWidget(
-                    ServerProxyWidget.ID,
-                    {
-                        serverProxy: Extension.ServerProxy,
-                        context
-                    });
+                const instance = await this.serverProxyInstanceManager.getOrCreateInstance(
+                    Extension.ServerProxy,
+                    context
+                );
 
-                await this.shell.addWidget(widget);
-                if (widget.isAttached) {
-                    await this.shell.activateWidget(widget.id);
-                }
+                await ServerProxyOpenHandler.open(
+                    this.openerService,
+                    instance
+                );
             }
         });
     }

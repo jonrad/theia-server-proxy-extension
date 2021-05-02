@@ -17,7 +17,10 @@
 import { ContainerModule, interfaces } from 'inversify';
 import { CommandContribution } from '@theia/core';
 import { RstudioCommandContribution } from './rstudio-command-contribution';
+import { RStudioServerProxyOpenHandler } from './rstudio-server-proxy-open-handler';
+import { OpenHandler } from '@theia/core/lib/browser';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
     bind(CommandContribution).to(RstudioCommandContribution);
+    bind(OpenHandler).to(RStudioServerProxyOpenHandler);
 });

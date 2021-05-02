@@ -14,21 +14,8 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { Widget, WidgetFactory } from '@theia/core/lib/browser';
-import { injectable, inject } from 'inversify';
-import { IFrameWidget } from "./iframe-widget";
-import { IFrameModel } from "./iframe-model";
-
-@injectable()
-export class IFrameWidgetFactory implements WidgetFactory {
-    public id: string = IFrameWidget.ID;
-
-    public constructor(
-        @inject(IFrameWidget.ID) private readonly factory: (model: IFrameModel) => IFrameWidget
-    ) {
-    }
-
-    async createWidget(model: IFrameModel): Promise<Widget> {
-        return this.factory(model);
-    }
+export enum IFrameStatus {
+    loading = "loading",
+    stopped = "stopped",
+    ready = "ready"
 }

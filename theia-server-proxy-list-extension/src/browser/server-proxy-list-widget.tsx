@@ -17,10 +17,10 @@
 import "../../styles/server-proxy-list.css"
 import * as React from 'react';
 import { inject, injectable, postConstruct } from 'inversify';
-import { ApplicationShell, ReactWidget, WidgetManager } from '@theia/core/lib/browser';
+import { OpenerService, ReactWidget } from '@theia/core/lib/browser';
 import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
 import { ServerProxyInstance } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance';
-import { ServerProxyWidget } from 'theia-server-proxy-extension/lib/browser/server-proxy-widget';
+import { ServerProxyOpenHandler } from 'theia-server-proxy-extension/lib/browser/server-proxy-open-handler';
 import { WindowService } from "@theia/core/lib/browser/window/window-service";
 import { ServerProxyInstanceStatus } from "theia-server-proxy-extension/lib/common/server-proxy";
 
@@ -36,11 +36,8 @@ export class ServerProxyListWidget extends ReactWidget {
     @inject(WindowService)
     protected readonly windowService: WindowService;
 
-    @inject(WidgetManager)
-    protected readonly widgetManager: WidgetManager;
-
-    @inject(ApplicationShell)
-    protected readonly shell: ApplicationShell;
+    @inject(OpenerService)
+    protected readonly openerServer: OpenerService;
 
     protected serverProxyInstances: ServerProxyInstance[] = [];
 
@@ -62,18 +59,10 @@ export class ServerProxyListWidget extends ReactWidget {
     }
 
     protected async onOpen(instance: ServerProxyInstance): Promise<void> {
-        //todo use open handler
-        const widget = await this.widgetManager.getOrCreateWidget(
-            ServerProxyWidget.ID,
-            {
-                serverProxy: instance.serverProxy,
-                context: instance.context
-            });
-
-        await this.shell.addWidget(widget);
-        if (widget.isAttached) {
-            await this.shell.activateWidget(widget.id);
-        }
+        await ServerProxyOpenHandler.open(
+            this.openerServer,
+            instance
+        );
     }
 
     protected render(): React.ReactNode {

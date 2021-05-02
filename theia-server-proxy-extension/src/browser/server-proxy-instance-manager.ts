@@ -126,6 +126,10 @@ export class ServerProxyInstanceManager implements Disposable {
         );
     }
 
+    public getInstanceById(instanceId: string): ServerProxyInstance | undefined {
+        return this.instancesById.get(instanceId)?.instance;
+    }
+
     public async getInstancesByType(serverProxyId: string): Promise<ServerProxyInstance[]> {
         return (await this.getInstances()).filter(s => s.serverProxy.id == serverProxyId);
     }
