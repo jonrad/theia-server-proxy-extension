@@ -30,6 +30,8 @@ export interface ServerProxyContribution {
     readonly serverProxyInstanceBuilder: ServerProxyInstanceBuilder;
 
     getMiddleware?(basePath: string, baseOptions: Options): RequestHandler
+
+    getDetails?(): any;
 }
 
 export interface ServerProxyInstanceBuilder {
@@ -98,6 +100,4 @@ export abstract class BaseServerProxyInstanceBuilder<T> implements ServerProxyIn
     }
 
     getMiddleware?(basePath: string, baseOptions: Options): RequestHandler
-
-    getDetails?(): any;
 }

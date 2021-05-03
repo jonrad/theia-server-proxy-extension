@@ -60,6 +60,7 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
 
     async getTemp(): Promise<any[]> {
         return this.serverProxyManager.get().map(c => {
+            console.log(`Details: ${c.getDetails}`);
             return {
                 id: c.id,
                 name: c.name,

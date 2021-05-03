@@ -102,11 +102,7 @@ export class RStudioOpenHandler implements OpenHandler {
         const widget = await this.widgetManager.getWidget(
             ServerProxyWidget.ID,
             {
-                serverProxy: {
-                    id: Extension.ID,
-                    name: Extension.Name
-                },
-                path: workspace.path.toString()
+                serverProxyInstanceId: instance.id
             }
         )
 
@@ -122,7 +118,7 @@ export class RStudioOpenHandler implements OpenHandler {
             clientVersion,
             method: "console_input",
             // TODO: needs escaping
-            params: [`rstudioapi::navigateToFile("${relativeFilePath}")`, "", 0],
+            params: [`rstudioapi::navigateToFile("${uri.path.toString()}")`, "", 0],
         });
 
         let resolve: ((_: any) => void) | undefined = undefined;
