@@ -56,23 +56,17 @@ export class JupyterServerProxyInstanceBuilder extends BaseServerProxyInstanceBu
 
             return { command, port: port };
         } else {
-            const jupyterPath = (await this.envVariablesServer.getValue(ENV_JUPYTER_PATH))?.value || "jupyter";
+            const jupyterPath = (await this.envVariablesServer.getValue(ENV_JUPYTER_PATH))?.value || "jupyter-notebook";
 
             const command = [
                 jupyterPath,
-                "notebook",
-                '--NotebookApp.port',
-                port.toString(),
-                '--NotebookApp.notebook_dir',
-                workspacePath,
-                '--NotebookApp.base_url',
-                relativeUrl,
-                `--NotebookApp.token`,
-                '',
-                '--NotebookApp.tornado_settings',
-                `{'headers': {'Content-Security-Policy': "frame-ancestors * 'self' "}}`,
-                '--NotebookApp.open_browser',
-                'False'
+                `--NotebookApp.ip=0.0.0.0`,
+                `--NotebookApp.port=${port.toString()}`,
+                `--NotebookApp.notebook_dir=${workspacePath}`,
+                `--NotebookApp.base_url=${relativeUrl}`,
+                `--NotebookApp.token=`,
+                `--NotebookApp.tornado_settings={'headers': {'Content-Security-Policy': \"frame-ancestors * 'self' \"}}`,
+                '--NotebookApp.open_browser=False'
             ];
 
             // sigh... is there a better way to do this?
