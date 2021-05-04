@@ -61,7 +61,7 @@ export class IFrameWidget extends BaseWidget {
             this.node.hidden = this.isHidden;
         }));
 
-        this.node.hidden = this.isHidden;
+        this.node.hidden = true;
     }
 
     public updateStatus(status: IFrameStatus) {
