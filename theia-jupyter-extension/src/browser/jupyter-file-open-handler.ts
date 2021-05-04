@@ -16,7 +16,7 @@
 
 import URI from '@theia/core/lib/common/uri';
 import { inject, injectable } from 'inversify';
-import { OpenHandler, FrontendApplication, OpenerService, WidgetManager } from '@theia/core/lib/browser';
+import { OpenHandler, FrontendApplication, OpenerService, WidgetManager, Endpoint } from '@theia/core/lib/browser';
 import { IFrameWidget, IFrameWidgetMode } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-widget'
 import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
 import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
@@ -94,13 +94,14 @@ export class JupyterFileOpenHandler implements OpenHandler {
             return appWidget;
         }
 
+        const endpoint = new Endpoint({ path: path.toString() });
         const widget = await this.widgetManager.getOrCreateWidget(
             IFrameWidget.ID,
             {
                 id: widgetId,
                 name: uri.path.name,
                 mode: IFrameWidgetMode.MiniBrowser,
-                startUrl: path.toString(),
+                startUrl: endpoint.getRestUrl().toString(),
                 status: IFrameStatus.ready
             });
 
