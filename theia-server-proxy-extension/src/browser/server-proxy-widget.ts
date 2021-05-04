@@ -89,6 +89,12 @@ export class ServerProxyWidget extends BaseWidget {
         this.toDispose.push(this.instance.statusChangedEvent((status) => {
             widget.updateStatus(ServerProxyWidget.buildIFrameStatus(status));
         }));
+
+        this.toDispose.push(this.onDidChangeVisibility(() => {
+            this.node.hidden = this.isHidden;
+        }));
+
+        this.node.hidden = true;
     }
 
     storeState(): object {
