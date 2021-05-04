@@ -34,11 +34,12 @@ export default new ContainerModule((bind: interfaces.Bind) => {
     bindContributionProvider(bind, ServerProxyContribution);
     bind(ServerProxyManager).toSelf().inSingletonScope();
 
-    bind(ServerProxyRpcServer).to(ServerProxyRpcServerImpl);
+    bind(ServerProxyRpcServer).to(ServerProxyRpcServerImpl).inSingletonScope();
     bind(ConnectionHandler).toDynamicValue(ctx =>
-        new JsonRpcConnectionHandler<ServerProxyRpcClient>("/services/server-proxy", (client: ServerProxyRpcClient) => {
+        new JsonRpcConnectionHandler<ServerProxyRpcClient>("/services/server-proxy", client => {
             const server = ctx.container.get<ServerProxyRpcServer>(ServerProxyRpcServer);
             server.setClient(client);
+            client.onDidCloseConnection(() => server.unsetClient(client));
             return server;
         })
     ).inSingletonScope();

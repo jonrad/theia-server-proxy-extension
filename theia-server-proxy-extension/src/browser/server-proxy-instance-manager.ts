@@ -51,8 +51,8 @@ export class ServerProxyInstanceManager implements Disposable {
         });
 
 
-        this.toDispose.push(this.serverProxyRpcClient.statusChanged(status => {
-            const instance = this.tryUpdateInstanceStatus(status.instanceId, status);
+        this.toDispose.push(this.serverProxyRpcClient.statusChanged(async status => {
+            const instance = await this.tryUpdateInstanceStatus(status.instanceId, status);
 
             this.updatedEmitter.fire(instance);
         }));
@@ -166,7 +166,7 @@ export class ServerProxyInstanceManager implements Disposable {
                 return undefined;
             }
 
-            this.tryUpdateInstanceStatus(instanceId, latestStatus);
+            await this.tryUpdateInstanceStatus(instanceId, latestStatus);
 
             return instance;
         } finally {
@@ -183,9 +183,16 @@ export class ServerProxyInstanceManager implements Disposable {
         return await this.tryUpdateInstanceStatus(serverInstance.id, serverInstance.lastStatus);
     }
 
-    private tryUpdateInstanceStatus(instanceId: string, status: ServerProxyInstanceStatus): ServerProxyInstance | undefined {
-        const instance = this.instancesById.get(instanceId);
+    private async tryUpdateInstanceStatus(instanceId: string, status: ServerProxyInstanceStatus): Promise<ServerProxyInstance | undefined> {
+        let instance = this.instancesById.get(instanceId);
         if (!instance) {
+            const instanceDto = await this.serverProxyRpcServer.getInstanceById(instanceId);
+            if (!instanceDto) {
+                return;
+            }
+
+            await this.buildServerProxyInstance(instanceDto)
+
             return;
         }
 

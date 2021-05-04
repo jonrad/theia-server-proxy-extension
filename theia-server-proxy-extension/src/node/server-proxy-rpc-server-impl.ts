@@ -25,7 +25,7 @@ import { ServerProxyManager } from './server-proxy-manager';
 
 @injectable()
 export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
-    client: ServerProxyRpcClient | undefined;
+    clients: ServerProxyRpcClient[] = [];
 
     @inject(ServerProxyInstanceManager)
     private readonly instanceManager: ServerProxyInstanceManager
@@ -40,6 +40,15 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
                 name: c.name
             }
         });
+    }
+
+    async getInstanceById(instanceId: string): Promise<ServerProxyInstanceDto | undefined> {
+        const instance = this.instanceManager.getInstanceById(instanceId);
+        if (!instance) {
+            return;
+        }
+
+        return this.toDto(instance);
     }
 
     async getInstance(serverProxyId: string, context: string): Promise<ServerProxyInstanceDto | undefined> {
@@ -66,11 +75,13 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
         let disposable: Disposable | undefined = undefined;
 
         disposable = instance.statusChanged((status: ServerProxyInstanceStatus) => {
-            this.client?.fireStatusChanged(status);
+            this.clients.forEach(c => c.fireStatusChanged(status));
             if (ServerProxyInstanceStatus.isCompleted(status)) {
                 disposable?.dispose();
             }
         });
+
+        this.clients.forEach(c => c.fireStatusChanged(instance.status));
 
         return this.toDto(instance);
     }
@@ -94,11 +105,24 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
     }
 
     setClient(client: ServerProxyRpcClient | undefined): void {
-        this.client = client;
+        if (!client) {
+            return;
+        }
+
+        this.clients.push(client);
+    }
+
+    unsetClient(client: ServerProxyRpcClient): void {
+        const index = this.clients.indexOf(client);
+        if (index < 0) {
+            return;
+        }
+
+        this.clients.splice(index, 1);
     }
 
     getClient(): ServerProxyRpcClient | undefined {
-        return this.client;
+        return undefined;
     }
 
     dispose(): void {

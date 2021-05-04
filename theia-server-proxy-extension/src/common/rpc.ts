@@ -19,6 +19,8 @@ import { ServerProxy, ServerProxyInstance, ServerProxyInstanceStatus } from "./s
 
 export const ServerProxyRpcServer = Symbol('ServerProxyRpcServer');
 export interface ServerProxyRpcServer extends JsonRpcServer<ServerProxyRpcClient> {
+    getInstanceById(instanceId: string): Promise<ServerProxyInstance | undefined>
+
     getInstance(serverProxyId: string, context: string): Promise<ServerProxyInstance | undefined>
 
     getInstances(): Promise<ServerProxyInstance[]>
@@ -30,10 +32,13 @@ export interface ServerProxyRpcServer extends JsonRpcServer<ServerProxyRpcClient
     stopInstance(id: string): Promise<Boolean>
 
     getServerProxies(): Promise<ServerProxy[]>
+
+    unsetClient(client: ServerProxyRpcClient): void;
 }
 
 export const ServerProxyRpcClient = Symbol('ServerProxyRpcClient');
 export interface ServerProxyRpcClient {
     readonly statusChanged: Event<ServerProxyInstanceStatus>;
+
     fireStatusChanged(status: ServerProxyInstanceStatus): void;
 }
