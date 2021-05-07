@@ -35,6 +35,7 @@ export class ServerProxyExpressContribution implements BackendApplicationContrib
     private middlewaresById: Map<string, RequestHandler> = new Map<string, RequestHandler>();
 
     configure(app: express.Application): void {
+        // const searchStartIndex = `server-proxy/${Extension.ID}/`.length + 1;
         this.serverProxyManager.get().forEach(serverProxy => {
             // TODO share code
             const basePath = `/server-proxy/${serverProxy.id}/`;
@@ -43,7 +44,8 @@ export class ServerProxyExpressContribution implements BackendApplicationContrib
                 target: "http://localhost:31337", // not used, but is required by http-proxy-middleware
                 ws: true,
                 changeOrigin: true,
-                router: (req: express.Request) => {
+                router: (req) => {
+                    //TODO optimize
                     const path = req.path || req.url;
                     if (!path) {
                         return;
@@ -62,6 +64,7 @@ export class ServerProxyExpressContribution implements BackendApplicationContrib
                     const hostname = `http://localhost:${port}`;
                     req.hostname = hostname;
                     req.headers.origin = hostname;
+                    (<any>req).serverProxyBasePath = split.slice(0, 4).join('/') + '/';
 
                     return hostname;
                 }

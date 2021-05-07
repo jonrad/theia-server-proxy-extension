@@ -8670,7 +8670,7 @@ npmlog@^4.0.1, npmlog@^4.1.2:
     gauge "~2.7.3"
     set-blocking "~2.0.0"
 
-nsfw@^1.2.9:
+nsfw@1.2.9, nsfw@^1.2.9:
   version "1.2.9"
   resolved "https://registry.yarnpkg.com/nsfw/-/nsfw-1.2.9.tgz#e49ff5c12593cbcce3fcc90c533947eb4f15a99a"
   integrity sha512-/2o89nygBRTTnGRxSHt2wjagbszyh36HlgF61Ec2iaJBTIIQ6QKcqp92EzVxxZX9U/6Qpy+LZL5i8532hXzAHg==

@@ -9,6 +9,9 @@
   "devDependencies": {
     "lerna": "2.4.0"
   },
+   "resolutions": {
+    "**/**/nsfw": "1.2.9"
+  },
   "workspaces": [
     "theia-server-proxy-iframe-extension",
     "theia-server-proxy-extension",
