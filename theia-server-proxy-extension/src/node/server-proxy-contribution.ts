@@ -16,7 +16,7 @@
 
 import { Options, RequestHandler } from "http-proxy-middleware";
 import { ServerProxyInstance } from "./server-proxy-instance";
-import { RawProcessFactory } from '@theia/process/lib/node';
+import { RawProcessFactory, RawProcessOptions } from '@theia/process/lib/node';
 import { inject, injectable } from 'inversify';
 import * as getAvailablePort from 'get-port';
 import { ILogger } from '@theia/core';
@@ -75,13 +75,16 @@ export abstract class BaseServerProxyInstanceBuilder<T> implements ServerProxyIn
         const envDict: { [name: string]: string | undefined } =
             env ? { ...process.env, ...env } : process.env;
 
-        const rawProcess = this.rawProcessFactory({
+        const options: RawProcessOptions = {
             command: command[0],
             args: command.slice(1),
             options: {
-                env: envDict
+                env: envDict,
+                stdio: 'inherit'
             }
-        });
+        };
+
+        const rawProcess = this.rawProcessFactory(options);
 
         return new ServerProxyInstance(
             instanceId,
