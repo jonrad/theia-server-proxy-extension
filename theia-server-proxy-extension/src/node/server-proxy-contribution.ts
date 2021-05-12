@@ -80,6 +80,7 @@ export abstract class BaseServerProxyInstanceBuilder<T> implements ServerProxyIn
             args: command.slice(1),
             options: {
                 env: envDict,
+                // TODO: ideally we'd make this log with details about the instance id etc
                 stdio: 'inherit'
             }
         };
