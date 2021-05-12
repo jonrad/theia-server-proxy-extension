@@ -106,15 +106,14 @@ TODO
 
 * Handle statuses/failures/etc on app start
 * Remove all todo 0 and 1s
-* Browser package.json update versions?
-* Debug command output
+* Change theia version to latest
+* Output command text to console/logger
 * Test with different port/url
 
 ## Roadmap of nice to haves
 
-* Open using minibrowser
 * Customizable loading logo
 * Fading of loading logo
-* Jupyter open files via theia
 * Do we really need to include src in the files?
 * Add cancellation to stop widget
+* Right click on file to open in jupyter/rstudio
