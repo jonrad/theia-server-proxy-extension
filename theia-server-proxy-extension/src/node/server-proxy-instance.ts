@@ -77,11 +77,11 @@ export class ServerProxyInstance implements Disposable {
         });
     }
 
-    private async doStop(signal?: number): Promise<boolean> {
+    private async doStop(signal?: NodeJS.Signals): Promise<boolean> {
         const timeout = 10_000;
 
         this.setStatus(StatusId.stopping)
-        this.process.kill();
+        this.process.kill(signal);
 
         await new Promise<void>((resolve) => {
             let disposable: Disposable | undefined;
@@ -115,8 +115,7 @@ export class ServerProxyInstance implements Disposable {
             return true;
         }
 
-        return await this.doStop(9);
-
+        return await this.doStop('SIGKILL');
     }
 
     public async init(): Promise<void> {
