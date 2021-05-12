@@ -18,13 +18,15 @@ import { injectable, inject } from 'inversify';
 import { CommandContribution, CommandRegistry } from '@theia/core';
 import { WorkspaceService } from '@theia/workspace/lib/browser';
 import { OpenerService } from '@theia/core/lib/browser';
+import { FileNavigatorContribution } from '@theia/navigator/lib/browser/navigator-contribution';
 import { Extension } from '../common/const';
 import ServerProxyContext from '../common/server-proxy-context';
 import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
 import { ServerProxyOpenHandler } from 'theia-server-proxy-extension/lib/browser/server-proxy-open-handler';
+import { TabBarToolbarContribution } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
 
 @injectable()
-export class JupyterCommandContribution implements CommandContribution {
+export class JupyterCommandContribution implements CommandContribution, TabBarToolbarContribution {
     @inject(WorkspaceService)
     protected readonly workspaceService: WorkspaceService;
 
@@ -34,11 +36,15 @@ export class JupyterCommandContribution implements CommandContribution {
     @inject(OpenerService)
     protected readonly openerService: OpenerService;
 
+    @inject(FileNavigatorContribution)
+    protected readonly fileNavigatorContribution: FileNavigatorContribution;
+
     registerCommands(registry: CommandRegistry): void {
         registry.registerCommand({
             id: Extension.ID,
-            label: `Open For Current Workspace`,
-            category: Extension.Name
+            label: `Open Jupyter`,
+            category: 'Jupyter',
+            iconClass: "refresh"
         }, {
             execute: async () => {
                 const roots = await this.workspaceService.roots
@@ -66,6 +72,15 @@ export class JupyterCommandContribution implements CommandContribution {
                     instance
                 );
             }
+        });
+    }
+
+    registerToolbarItems(): void {
+        this.fileNavigatorContribution.registerMoreToolbarItem({
+            id: Extension.ID,
+            command: Extension.ID,
+            tooltip: "Open in Jupyter",
+            group: "Jupyter",
         });
     }
 }

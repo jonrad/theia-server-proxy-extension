@@ -19,9 +19,13 @@ import { OpenHandler } from '@theia/core/lib/browser';
 import { JupyterFileOpenHandler } from './jupyter-file-open-handler';
 import { JupyterCommandContribution } from './jupyter-command-contribution';
 import { CommandContribution } from '@theia/core';
+import { TabBarToolbarContribution } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
-    bind(CommandContribution).to(JupyterCommandContribution);
+    bind(JupyterCommandContribution).toSelf().inSingletonScope();
+
+    bind(CommandContribution).toService(JupyterCommandContribution);
+    bind(TabBarToolbarContribution).toService(JupyterCommandContribution);
 
     bind(JupyterFileOpenHandler).toSelf();
     bind(OpenHandler).toService(JupyterFileOpenHandler);
