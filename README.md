@@ -117,3 +117,26 @@ TODO
 * Do we really need to include src in the files?
 * Add cancellation to stop widget
 * Right click on file to open in jupyter/rstudio
+
+## Developing
+
+### Building docker image
+
+    docker build . -t jonrad/theia-datascience
+
+### Iterating with RStudio Server on Mac
+
+It's not worth the effort getting rstudio server to work on mac. So I found it best to just iterate within the docker container. Follow the following steps
+
+Build the docker image from above
+
+In this directory start up the container
+
+    docker run -it --rm -p 3000:3000 -v $PWD:/app jonrad/theia-datascience bash
+    cd /app # root dir, note this is shared with your mac
+    yarn install # Install the proper binaries since they're not compatible with your mac binaries
+    yarn start:browser --hostname 0.0.0.0
+
+Now you can still develop locally and even run `yarn watch` but you'll have to start the main app in the docker container
+
+Note that once you want to iterate locally again, you'll have to re-run `yarn install` on your local machine
