@@ -16,13 +16,12 @@
 
 import URI from '@theia/core/lib/common/uri';
 import { inject, injectable } from 'inversify';
-import { OpenHandler, FrontendApplication, OpenerService, WidgetManager, Endpoint } from '@theia/core/lib/browser';
-import { IFrameWidget, IFrameWidgetMode } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-widget'
+import { OpenHandler, FrontendApplication, OpenerService, WidgetManager } from '@theia/core/lib/browser';
 import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
 import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
 import { Path } from '@theia/core';
 import { Extension } from '../common/const';
-import { IFrameStatus } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-status';
+import { ServerProxyOpenHandler } from 'theia-server-proxy-extension/lib/browser/server-proxy-open-handler';
 
 @injectable()
 export class JupyterFileOpenHandler implements OpenHandler {
@@ -75,39 +74,18 @@ export class JupyterFileOpenHandler implements OpenHandler {
             return this.fallback(uri);
         }
 
-        const instance = (await this.serverProxyInstanceManager.getInstancesByType(Extension.ID))
-            .filter(w => workspace.relative(new URI(w.context.path)))[0]; //TODO can we strongly type this
+        const instance = await this.serverProxyInstanceManager.getOrCreateInstance(Extension.ServerProxy, {
+            path: workspace.path.toString()
+        });
 
-        if (!instance) {
-            return this.fallback(uri);
-        }
-
-        const path = new Path(`server-proxy/${Extension.ID}/${instance.id}/notebooks/`)
+        const path = new Path('notebooks/')
             .join(relativeFilePath.toString())
+            .toString();
 
-        const iframeUri = path.toString();
-
-        const widgetId = IFrameWidget.buildWidgetId(iframeUri);
-
-        const appWidget = await this.app.shell.activateWidget(widgetId) as IFrameWidget;
-        if (appWidget) {
-            return appWidget;
-        }
-
-        const endpoint = new Endpoint({ path: path.toString() });
-        const widget = await this.widgetManager.getOrCreateWidget(
-            IFrameWidget.ID,
-            {
-                id: widgetId,
-                name: uri.path.name,
-                mode: IFrameWidgetMode.MiniBrowser,
-                startUrl: endpoint.getRestUrl().toString(),
-                status: IFrameStatus.ready
-            });
-
-        await this.app.shell.addWidget(widget, { area: 'main' });
-        await this.app.shell.activateWidget(widget.id);
-
-        return widget;
+        return await ServerProxyOpenHandler.open(
+            this.openerService,
+            instance,
+            path
+        )
     }
 }

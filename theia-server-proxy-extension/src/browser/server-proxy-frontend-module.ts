@@ -42,6 +42,7 @@ export default new ContainerModule((bind: interfaces.Bind) => {
 
                 const child = container.createChild();
                 child.bind(ServerProxyInstance).toConstantValue(instance);
+                child.bind(ServerProxyWidgetOptions).toConstantValue(options);
 
                 return child.get(ServerProxyWidget);
             }

@@ -14,7 +14,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { injectable, inject } from 'inversify';
+import { injectable, inject, postConstruct } from 'inversify';
 import { ServerProxyInstance } from './server-proxy-instance';
 import { ServerProxyInstanceStatus, StatusId } from '../common/server-proxy';
 import { IFrameContentStyle } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-content-style';
@@ -24,18 +24,15 @@ import { BaseWidget, SingletonLayout, Endpoint, WidgetManager } from '@theia/cor
 
 export const ServerProxyWidgetOptions = Symbol('ServerProxyWidgetOptions')
 export interface ServerProxyWidgetOptions {
-    serverProxyInstanceId: string
-}
-
-export interface ServerProxyWidgetProps {
-    mode: IFrameWidgetMode
+    serverProxyInstanceId: string,
+    mode: IFrameWidgetMode,
+    startPath?: string,
+    title?: string
 }
 
 @injectable()
 export class ServerProxyWidget extends BaseWidget {
     public static readonly ID: string = "server.proxy.widget";
-
-    protected props: ServerProxyWidgetProps | undefined;
 
     private static buildIFrameStatus(status: ServerProxyInstanceStatus): IFrameStatus {
         if (status.statusId == StatusId.started) {
@@ -51,27 +48,24 @@ export class ServerProxyWidget extends BaseWidget {
 
     constructor(
         @inject(ServerProxyInstance) private readonly instance: ServerProxyInstance,
+        @inject(ServerProxyWidgetOptions) private readonly options: ServerProxyWidgetOptions
     ) {
         super();
 
-        this.id = IFrameWidget.buildWidgetId(`server-proxy/${instance.serverProxy.id}/${instance.id}/`);
+        this.id = IFrameWidget.buildWidgetId(`server-proxy/${instance.serverProxy.id}/${instance.id}/${options.startPath}`);
 
-        const name = instance.serverProxy.name;
+        const name = options.title || instance.serverProxy.name;
         this.title.label = name;
         this.title.caption = name;
         this.title.closable = true;
     }
 
-    async setProps(props: ServerProxyWidgetProps): Promise<void> {
-        // TODO we should be able to change this if we want
-        if (this.props) {
-            return;
-        }
-
-        this.props = props;
-
+    @postConstruct()
+    protected async init(): Promise<void> {
         const layout = this.layout = new SingletonLayout();
-        const endpoint = new Endpoint({ path: `server-proxy/${this.instance.serverProxy.id}/${this.instance.id}/` });
+        const endpoint = new Endpoint({
+            path: `server-proxy/${this.instance.serverProxy.id}/${this.instance.id}/` + (this.options.startPath?.replace(/^\//, '') || '')
+        });
 
         const widget = await this.widgetManager.getOrCreateWidget<IFrameWidget>(
             IFrameWidget.ID,
@@ -79,7 +73,7 @@ export class ServerProxyWidget extends BaseWidget {
                 id: this.id + ":content",
                 name: this.instance.serverProxy.name,
                 startUrl: endpoint.getRestUrl().toString(),
-                mode: props.mode,
+                mode: this.options.mode,
                 status: ServerProxyWidget.buildIFrameStatus(this.instance.status)
             });
 
@@ -95,16 +89,5 @@ export class ServerProxyWidget extends BaseWidget {
         }));
 
         this.node.hidden = true;
-    }
-
-    storeState(): object {
-        return { props: this.props };
-    }
-
-    restoreState(oldState: object): void {
-        if ('props' in oldState) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            this.setProps((oldState as any)['props']);
-        }
     }
 }

@@ -21,6 +21,7 @@ import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
 import { ServerProxyInstance } from './server-proxy-instance';
 import { ServerProxyWidget, ServerProxyWidgetOptions } from './server-proxy-widget';
 import { IFrameWidgetMode } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-widget';
+import { Path } from '@theia/core';
 
 @injectable()
 export class ServerProxyOpenHandler extends WidgetOpenHandler<ServerProxyWidget> {
@@ -43,29 +44,21 @@ export class ServerProxyOpenHandler extends WidgetOpenHandler<ServerProxyWidget>
         }
 
         return {
-            serverProxyInstanceId: id
-        }
-    }
-
-    protected async getOrCreateWidget(uri: URI): Promise<ServerProxyWidget> {
-        const widget = await super.getOrCreateWidget(uri);
-        await this.setProps(widget);
-
-        return widget;
-    }
-
-    protected setProps(widget: ServerProxyWidget): Promise<void> {
-        return widget.setProps({
+            serverProxyInstanceId: id,
             mode: IFrameWidgetMode.MiniBrowser
-        });
+        }
     }
 }
 
 export namespace ServerProxyOpenHandler {
     export const scheme = "server-proxy";
 
-    export function getOpenUri(instance: ServerProxyInstance): URI {
-        return new URI().withScheme(scheme).withAuthority(instance.serverProxy.id).withPath(`/${instance.id}`);
+    export function getOpenUri(instance: ServerProxyInstance, path?: string): URI {
+        const fullPath = new Path('/').join(instance.id).join(path || '')
+        return new URI()
+            .withScheme(scheme)
+            .withAuthority(instance.serverProxy.id)
+            .withPath(fullPath);
     }
 
     export function isServerProxyUri(uri: URI): boolean {
@@ -77,13 +70,39 @@ export namespace ServerProxyOpenHandler {
     }
 
     export function getInstanceId(uri: URI): string | undefined {
-        return isServerProxyUri(uri) ? uri.path?.toString()?.substring(1) : undefined;
+        if (!isServerProxyUri(uri) || !uri.path) {
+            return undefined;
+        }
+
+        const path = uri.path.toString();
+
+        return path.split('/', 2)[1];
     }
 
-    export function open(openerService: OpenerService, instance: ServerProxyInstance) {
+    export function getPath(uri: URI): Path | undefined {
+        if (!isServerProxyUri(uri) || !uri.path) {
+            return undefined;
+        }
+
+        const path = uri.path.toString();
+
+        const slashIndex = path.indexOf('/', 1);
+        if (slashIndex < 0) {
+            return undefined;
+        }
+
+        const result = path.substring(slashIndex + 1);
+        if (result === '') {
+            return undefined;
+        }
+
+        return new Path(result);
+    }
+
+    export function open(openerService: OpenerService, instance: ServerProxyInstance, path?: string) {
         return genericOpen(
             openerService,
-            getOpenUri(instance)
+            getOpenUri(instance, path)
         );
     }
 }

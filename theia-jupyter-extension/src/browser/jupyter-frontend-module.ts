@@ -20,6 +20,7 @@ import { JupyterFileOpenHandler } from './jupyter-file-open-handler';
 import { JupyterCommandContribution } from './jupyter-command-contribution';
 import { CommandContribution } from '@theia/core';
 import { TabBarToolbarContribution } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
+import { JupyterServerProxyOpenHandler } from './jupyter-server-proxy-open-handler';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
     bind(JupyterCommandContribution).toSelf().inSingletonScope();
@@ -27,6 +28,7 @@ export default new ContainerModule((bind: interfaces.Bind) => {
     bind(CommandContribution).toService(JupyterCommandContribution);
     bind(TabBarToolbarContribution).toService(JupyterCommandContribution);
 
-    bind(JupyterFileOpenHandler).toSelf();
-    bind(OpenHandler).toService(JupyterFileOpenHandler);
+    bind(OpenHandler).to(JupyterFileOpenHandler);
+
+    bind(OpenHandler).to(JupyterServerProxyOpenHandler);
 });

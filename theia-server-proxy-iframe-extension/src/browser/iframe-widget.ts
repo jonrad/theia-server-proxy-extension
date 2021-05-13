@@ -40,7 +40,6 @@ export class IFrameWidget extends BaseWidget {
 
     private widget: Widget | undefined;
 
-
     constructor(
         @inject(IFrameWidgetOptions) protected readonly options: IFrameWidgetOptions,
         @inject(WidgetManager) protected readonly widgetManager: WidgetManager

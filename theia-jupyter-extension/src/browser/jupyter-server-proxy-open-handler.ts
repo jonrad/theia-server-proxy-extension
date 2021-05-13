@@ -17,21 +17,32 @@
 import URI from '@theia/core/lib/common/uri';
 import { injectable } from 'inversify';
 import { Extension } from '../common/const';
+import { ServerProxyWidgetOptions } from 'theia-server-proxy-extension/lib/browser/server-proxy-widget';
 import { ServerProxyOpenHandler } from 'theia-server-proxy-extension/lib/browser/server-proxy-open-handler';
 import { IFrameWidgetMode } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-widget';
-import { ServerProxyWidgetOptions } from 'theia-server-proxy-extension/lib/browser/server-proxy-widget';
 
 @injectable()
-export class RStudioServerProxyOpenHandler extends ServerProxyOpenHandler {
+export class JupyterServerProxyOpenHandler extends ServerProxyOpenHandler {
 
     canHandle(uri: URI): number {
         return super.canHandle(uri) > 0 && ServerProxyOpenHandler.getServerProxyId(uri) == Extension.ID ? this.openerPriority + 100 : -1;
     }
 
     protected createWidgetOptions(uri: URI): ServerProxyWidgetOptions {
-        return {
-            ...super.createWidgetOptions(uri),
-            mode: IFrameWidgetMode.IFrame
+        const path = ServerProxyOpenHandler.getPath(uri);
+
+        const baseOptions = super.createWidgetOptions(uri);
+        if (!path) {
+            return baseOptions;
+        }
+
+        const options: ServerProxyWidgetOptions = {
+            ...baseOptions,
+            mode: IFrameWidgetMode.IFrame,
+            startPath: path.toString(),
+            title: path.name
         };
+
+        return options;
     }
 }
