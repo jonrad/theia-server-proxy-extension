@@ -52,7 +52,7 @@ export class ServerProxyWidget extends BaseWidget {
     ) {
         super();
 
-        this.id = IFrameWidget.buildWidgetId(`server-proxy/${instance.serverProxy.id}/${instance.id}/${options.startPath}`);
+        this.id = `server-proxy/${instance.serverProxy.id}/${instance.id}/${options.startPath}`;
 
         const name = options.title || instance.serverProxy.name;
         this.title.label = name;

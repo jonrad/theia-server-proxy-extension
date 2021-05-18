@@ -124,9 +124,4 @@ export class IFrameWidget extends BaseWidget {
 
 export namespace IFrameWidget {
     export const ID: string = "iframe.widget";
-
-    // TODO delete me
-    export function buildWidgetId(uri: string): string {
-        return ID + `- ${uri}`;
-    }
 }
