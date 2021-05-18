@@ -20,14 +20,19 @@ import { OpenerService } from '@theia/core/lib/browser';
 import { Extension } from '../common/const';
 import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
 import { ServerProxyOpenHandler } from 'theia-server-proxy-extension/lib/browser/server-proxy-open-handler';
+import { TabBarToolbarContribution } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
+import { FileNavigatorContribution } from '@theia/navigator/lib/browser/navigator-contribution';
 
 @injectable()
-export class RstudioCommandContribution implements CommandContribution {
+export class RstudioCommandContribution implements CommandContribution, TabBarToolbarContribution {
     @inject(ServerProxyInstanceManager)
     protected readonly serverProxyInstanceManager: ServerProxyInstanceManager;
 
     @inject(OpenerService)
     protected readonly openerService: OpenerService;
+
+    @inject(FileNavigatorContribution)
+    protected readonly fileNavigatorContribution: FileNavigatorContribution;
 
     registerCommands(registry: CommandRegistry): void {
         registry.registerCommand({
@@ -46,6 +51,15 @@ export class RstudioCommandContribution implements CommandContribution {
                     instance
                 );
             }
+        });
+    }
+
+    registerToolbarItems(): void {
+        this.fileNavigatorContribution.registerMoreToolbarItem({
+            id: Extension.ID,
+            command: Extension.ID,
+            tooltip: "Open in RStudio",
+            group: "RStudio",
         });
     }
 }

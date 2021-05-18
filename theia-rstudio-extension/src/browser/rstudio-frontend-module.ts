@@ -18,9 +18,13 @@ import { ContainerModule, interfaces } from 'inversify';
 import { CommandContribution } from '@theia/core';
 import { RstudioCommandContribution } from './rstudio-command-contribution';
 import { RStudioServerProxyOpenHandler } from './rstudio-server-proxy-open-handler';
+import { TabBarToolbarContribution } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
 import { OpenHandler } from '@theia/core/lib/browser';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
-    bind(CommandContribution).to(RstudioCommandContribution);
+    bind(RstudioCommandContribution).toSelf().inSingletonScope();
+    bind(CommandContribution).toService(RstudioCommandContribution);
+    bind(TabBarToolbarContribution).toService(RstudioCommandContribution);
+
     bind(OpenHandler).to(RStudioServerProxyOpenHandler);
 });
