@@ -101,23 +101,31 @@ export class RStudioServerProxyContribution implements ServerProxyContribution {
         const baseOnProxyReq = baseOptions.onProxyReq;
         baseOptions.onProxyReq = (proxyReq, request, response) => {
             if (request.url == "/rpc/set_user_state") {
-                request.on('readable', () => {
-                    let body = "";
-                    let data = "";
-                    while (data = request.read()) {
-                        body += data;
-                    }
+                const json = request.body;
+                this.clientId = json.clientId;
+                this.clientVersion = json.clientVersion;
+                this.csrfToken = request.headers["x-csrf-token"]?.toString();
+            } else if (request.url == '/rpc/theia_remote') {
+                if (!request.body || !this.csrfToken || !this.clientVersion || !this.clientId) {
+                    // TODO return an unhandled or something
+                    baseOnProxyReq?.(proxyReq, request, response);
+                    return;
+                }
 
-                    if (!body) {
-                        return;
-                    }
+                const body = request.body;
+                delete request.body;
 
-                    const json = JSON.parse(body);
+                body.clientId = this.clientId;
+                body.clientVersion = this.clientVersion;
 
-                    this.clientId = json.clientId;
-                    this.clientVersion = json.clientVersion;
-                    this.csrfToken = request.headers["x-csrf-token"]?.toString();
-                })
+                const bodyStringified = JSON.stringify(body);
+                proxyReq.setHeader('Content-Length', bodyStringified.length);
+
+                proxyReq.setHeader('X-CSRF-Token', this.csrfToken);
+
+                proxyReq.path = '/rpc/console_input';
+                proxyReq.write(bodyStringified);
+                return;
             }
 
             baseOnProxyReq?.(proxyReq, request, response);
@@ -125,13 +133,5 @@ export class RStudioServerProxyContribution implements ServerProxyContribution {
 
 
         return createProxyMiddleware(basePath, baseOptions);
-    }
-
-    getDetails(): any {
-        return {
-            clientId: this.clientId,
-            clientVersion: this.clientVersion,
-            csrfToken: this.csrfToken
-        };
     }
 }

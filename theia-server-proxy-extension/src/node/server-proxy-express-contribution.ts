@@ -23,6 +23,7 @@ import { BackendApplicationContribution } from '@theia/core/lib/node/backend-app
 import { createProxyMiddleware, Options, RequestHandler } from 'http-proxy-middleware';
 import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
 import { ServerProxyManager } from './server-proxy-manager';
+import * as querystring from 'querystring';
 
 @injectable()
 export class ServerProxyExpressContribution implements BackendApplicationContribution {
@@ -62,24 +63,42 @@ export class ServerProxyExpressContribution implements BackendApplicationContrib
                     }
 
                     const hostname = `http://localhost:${port}`;
-                    req.hostname = hostname;
-                    req.headers.origin = hostname;
                     (<any>req).serverProxyBasePath = split.slice(0, 4).join('/') + '/';
+                    (<any>req).target = hostname;
 
                     return hostname;
+                },
+                onProxyReq: (proxyReq, req) => {
+                    const target = (<any>req).target;
+
+                    proxyReq.setHeader('Hostname', target);
+                    proxyReq.setHeader('Origin', target);
+
+                    // https://github.com/chimurai/http-proxy-middleware/blob/6fd75f7187924702e1da769210f58761b19ad40a/src/handlers/fix-request-body.ts
+                    if (!req.body || !Object.keys(req.body).length) {
+                        return;
+                    }
+
+                    const contentType = proxyReq.getHeader('Content-Type') as string;
+                    const writeBody = (bodyData: string) => {
+                        // deepcode ignore ContentLengthInCode: bodyParser fix
+                        proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+                        proxyReq.write(bodyData);
+                    };
+
+                    if (contentType && contentType.includes('application/json')) {
+                        writeBody(JSON.stringify(req.body));
+                    }
+
+                    if (contentType === 'application/x-www-form-urlencoded') {
+                        writeBody(querystring.stringify(req.body));
+                    }
                 }
             };
 
             const middleware = serverProxy.getMiddleware?.(basePath, baseOptions) || createProxyMiddleware(basePath, baseOptions);
 
             app.use(basePath, middleware);
-
-            // Terrible no good very bad hack
-            // proxy middleware needs to have priority otherwise it tends to clash with certain other middlewares
-            // in particular body-parser
-            // So we move the newly added middleware to the front using an undocument api
-            const stack: Array<Object> = app._router.stack;
-            stack.unshift(stack.pop()!);
 
             this.middlewaresById.set(serverProxy.id, middleware)
         });
@@ -103,7 +122,14 @@ export class ServerProxyExpressContribution implements BackendApplicationContrib
                 callFallback(req, socket, head);
                 return;
             }
+
             const serverProxyId = split[2];
+            const instanceId = split[3];
+
+            const port = this.instanceManager.getInstancePort(instanceId);
+            req.hostname = `http://localhost:${port}`;
+            req.headers.origin = `http://localhost:${port}`;
+
             const middlewares = this.middlewaresById;
             const middleware = middlewares.get(serverProxyId);
             middleware?.upgrade?.(req, socket, head);

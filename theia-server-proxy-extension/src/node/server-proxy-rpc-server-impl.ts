@@ -14,7 +14,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { Disposable } from '@theia/core';
+import { Disposable, ILogger } from '@theia/core';
 import { injectable, inject } from 'inversify';
 import { ServerProxyRpcClient } from '../common/rpc';
 import { ServerProxyRpcServer } from '../common/rpc';
@@ -28,10 +28,13 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
     clients: ServerProxyRpcClient[] = [];
 
     @inject(ServerProxyInstanceManager)
-    private readonly instanceManager: ServerProxyInstanceManager
+    private readonly instanceManager: ServerProxyInstanceManager;
 
     @inject(ServerProxyManager)
-    private readonly serverProxyManager: ServerProxyManager
+    private readonly serverProxyManager: ServerProxyManager;
+
+    @inject(ILogger)
+    private readonly logger: ILogger;
 
     async getServerProxies(): Promise<ServerProxy[]> {
         return this.serverProxyManager.get().map(c => {
@@ -58,17 +61,6 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
         }
     }
 
-    async getTemp(): Promise<any[]> {
-        return this.serverProxyManager.get().map(c => {
-            console.log(`Details: ${c.getDetails}`);
-            return {
-                id: c.id,
-                name: c.name,
-                details: c.getDetails?.()
-            }
-        });
-    }
-
     async getInstances(): Promise<ServerProxyInstanceDto[]> {
         return (await this.instanceManager.getInstances()).map(instance => this.toDto(instance));
     }
@@ -84,15 +76,23 @@ export class ServerProxyRpcServerImpl implements ServerProxyRpcServer {
         let disposable: Disposable | undefined = undefined;
 
         disposable = instance.statusChanged((status: ServerProxyInstanceStatus) => {
-            this.clients.forEach(c => c.fireStatusChanged(status));
+            this.sendStatusChanged(status);
             if (ServerProxyInstanceStatus.isCompleted(status)) {
                 disposable?.dispose();
             }
         });
 
-        this.clients.forEach(c => c.fireStatusChanged(instance.status));
+        this.sendStatusChanged(instance.status);
 
         return this.toDto(instance);
+    }
+
+    private sendStatusChanged(status: ServerProxyInstanceStatus) {
+        this.logger.info(
+            `Received status changed event of instance id ${status.instanceId} to ${status.statusId} with message '${status.statusMessage || ''}'`
+        );
+
+        this.clients.forEach(c => c.fireStatusChanged(status));
     }
 
     async getInstanceStatus(id: string): Promise<ServerProxyInstanceStatus | undefined> {

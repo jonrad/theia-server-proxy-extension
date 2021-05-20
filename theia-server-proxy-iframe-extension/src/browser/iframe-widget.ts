@@ -61,6 +61,12 @@ export class IFrameWidget extends BaseWidget {
         }));
 
         this.node.hidden = true;
+        this.node.tabIndex = -1;
+    }
+
+    protected onActivateRequest(msg: any): void {
+        super.onActivateRequest(msg);
+        this.node.focus();
     }
 
     public updateStatus(status: IFrameStatus) {

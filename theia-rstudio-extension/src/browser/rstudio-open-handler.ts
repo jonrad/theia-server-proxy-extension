@@ -25,6 +25,8 @@ import { ServerProxyWidget } from 'theia-server-proxy-extension/lib/browser/serv
 import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
 import { Extension } from '../common/const';
 import { ServerProxyRpcServer } from 'theia-server-proxy-extension/lib/common/rpc';
+import { IFrameWidgetMode } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-widget';
+import { ServerProxyOpenHandler } from 'theia-server-proxy-extension/lib/browser/server-proxy-open-handler';
 
 @injectable()
 export class RStudioOpenHandler implements OpenHandler {
@@ -85,40 +87,29 @@ export class RStudioOpenHandler implements OpenHandler {
             return this.fallback(uri);
         }
 
-        const instance = (await this.serverProxyInstanceManager.getInstancesByType(Extension.ID))[0];
+        const instance = await this.serverProxyInstanceManager.getOrCreateInstance(Extension.ServerProxy, {});
 
         if (!instance) {
-            this.logger.info("RStudio not running");
+            this.logger.warn("RStudio instance did not start properly");
             return this.fallback(uri);
         }
 
-        const { clientId, clientVersion, csrfToken } = (await this.serverProxyRpcServer.getTemp()).find(t => !!t.details).details;
-
-        if (!clientId || !clientVersion || !csrfToken) {
-            this.logger.info("No clientId/clientVersion/csrfToken")
-            return this.fallback(uri);
-        }
-
-        const widget = await this.widgetManager.getWidget(
-            ServerProxyWidget.ID,
-            {
-                serverProxyInstanceId: instance.id
-            }
-        )
+        const widget = await ServerProxyOpenHandler.open(
+            this.openerService,
+            instance
+        );
 
         if (!widget) {
-            this.logger.info("Couldn't find widget");
+            this.logger.warn("RStudio widget did not open");
             return this.fallback(uri);
         }
 
         const activatePromise = this.app.shell.activateWidget(widget.id);
 
         const data = JSON.stringify({
-            clientId,
-            clientVersion,
             method: "console_input",
-            // TODO: needs escaping
-            params: [`rstudioapi::navigateToFile("${uri.path.toString()}")`, "", 0],
+            //TODO: is this the proper escaping
+            params: [`rstudioapi::navigateToFile("${uri.path.toString().replace('"', '\\"')}")`, "", 0],
         });
 
         let resolve: ((_: any) => void) | undefined = undefined;
@@ -130,11 +121,10 @@ export class RStudioOpenHandler implements OpenHandler {
             hostname: 'localhost',
             port: 3000,
             method: 'POST',
-            path: `/server-proxy/${Extension.ID}/${instance.id}/rpc/console_input`,
+            path: `/server-proxy/${Extension.ID}/${instance.id}/rpc/theia_remote`,
             headers: {
                 'Content-Type': 'application/json',
                 'Content-Length': data.length,
-                'X-CSRF-Token': csrfToken
             }
         }, res => {
             res.on('end', () => {

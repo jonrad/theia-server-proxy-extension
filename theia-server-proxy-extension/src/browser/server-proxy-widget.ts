@@ -20,7 +20,7 @@ import { ServerProxyInstanceStatus, StatusId } from '../common/server-proxy';
 import { IFrameContentStyle } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-content-style';
 import { IFrameWidget, IFrameWidgetMode } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-widget';
 import { IFrameStatus } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-status';
-import { BaseWidget, SingletonLayout, Endpoint, WidgetManager } from '@theia/core/lib/browser';
+import { BaseWidget, SingletonLayout, Endpoint, WidgetManager, Widget } from '@theia/core/lib/browser';
 
 export const ServerProxyWidgetOptions = Symbol('ServerProxyWidgetOptions')
 export interface ServerProxyWidgetOptions {
@@ -46,18 +46,25 @@ export class ServerProxyWidget extends BaseWidget {
 
     @inject(WidgetManager) protected readonly widgetManager: WidgetManager;
 
+    private widget: Widget | undefined;
+
     constructor(
         @inject(ServerProxyInstance) private readonly instance: ServerProxyInstance,
         @inject(ServerProxyWidgetOptions) private readonly options: ServerProxyWidgetOptions
     ) {
         super();
 
-        this.id = `server-proxy/${instance.serverProxy.id}/${instance.id}/${options.startPath}`;
+        this.id = `server-proxy/${instance.serverProxy.id}/${instance.id}/${options.startPath || ''}`;
 
         const name = options.title || instance.serverProxy.name;
         this.title.label = name;
         this.title.caption = name;
         this.title.closable = true;
+    }
+
+    protected onActivateRequest(msg: any): void {
+        super.onActivateRequest(msg);
+        this.widget?.activate();
     }
 
     @postConstruct()
@@ -67,7 +74,7 @@ export class ServerProxyWidget extends BaseWidget {
             path: `server-proxy/${this.instance.serverProxy.id}/${this.instance.id}/` + (this.options.startPath?.replace(/^\//, '') || '')
         });
 
-        const widget = await this.widgetManager.getOrCreateWidget<IFrameWidget>(
+        const widget = this.widget = await this.widgetManager.getOrCreateWidget<IFrameWidget>(
             IFrameWidget.ID,
             {
                 id: this.id + ":content",

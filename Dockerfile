@@ -13,6 +13,9 @@ RUN apt-get install -y gdebi-core
 RUN wget https://download2.rstudio.org/server/debian9/x86_64/rstudio-server-1.4.1106-amd64.deb
 RUN gdebi rstudio-server-1.4.1106-amd64.deb -n
 
+# R package to allow remote control
+RUN R -e "install.packages('rstudioapi', repos='https://cran.rstudio.com/')"
+
 # FROM base
 RUN mkdir -p /app
 WORKDIR /app

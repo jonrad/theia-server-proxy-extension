@@ -13,8 +13,8 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
-import { Emitter, Event, ILogger } from '@theia/core';
-import { injectable, inject } from 'inversify';
+import { Emitter, Event } from '@theia/core';
+import { injectable } from 'inversify';
 import { ServerProxyRpcClient } from '../common/rpc';
 import { ServerProxyInstanceStatus } from '../common/server-proxy';
 
@@ -23,19 +23,12 @@ export class ServerProxyRpcClientImpl implements ServerProxyRpcClient {
     private readonly statusChangedEmitter: Emitter<ServerProxyInstanceStatus>;
     public readonly statusChanged: Event<ServerProxyInstanceStatus>;
 
-    @inject(ILogger)
-    private readonly logger: ILogger;
-
     constructor() {
         this.statusChangedEmitter = new Emitter<ServerProxyInstanceStatus>();
         this.statusChanged = this.statusChangedEmitter.event;
     }
 
     fireStatusChanged(status: ServerProxyInstanceStatus): void {
-        this.logger.info(
-            `Received status changed event of instance id ${status.instanceId} to ${status.statusId} with message '${status.statusMessage || ''}'`
-        );
-
         this.statusChangedEmitter.fire(status);
     }
 }

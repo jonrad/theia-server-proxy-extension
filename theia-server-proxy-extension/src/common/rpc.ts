@@ -34,8 +34,6 @@ export interface ServerProxyRpcServer extends JsonRpcServer<ServerProxyRpcClient
     getServerProxies(): Promise<ServerProxy[]>
 
     unsetClient(client: ServerProxyRpcClient): void;
-
-    getTemp(): Promise<any[]>
 }
 
 export const ServerProxyRpcClient = Symbol('ServerProxyRpcClient');

@@ -99,10 +99,12 @@ export namespace ServerProxyOpenHandler {
         return new Path(result);
     }
 
-    export function open(openerService: OpenerService, instance: ServerProxyInstance, path?: string) {
-        return genericOpen(
+    export async function open(openerService: OpenerService, instance: ServerProxyInstance, path?: string): Promise<ServerProxyWidget | undefined> {
+        const result = await genericOpen(
             openerService,
             getOpenUri(instance, path)
         );
+
+        return result as ServerProxyWidget;
     }
 }
