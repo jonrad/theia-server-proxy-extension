@@ -16,7 +16,7 @@
 
 import URI from '@theia/core/lib/common/uri';
 import { inject, injectable } from 'inversify';
-import { OpenHandler, FrontendApplication, OpenerService, WidgetManager } from '@theia/core/lib/browser';
+import { OpenHandler, OpenerService } from '@theia/core/lib/browser';
 import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
 import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
 import { Path } from '@theia/core';
@@ -29,9 +29,6 @@ export class JupyterFileOpenHandler implements OpenHandler {
     readonly id = 'jupyter.file.openhandler';
     readonly label = 'Open in Jupyter';
 
-    @inject(FrontendApplication)
-    protected readonly app: FrontendApplication;
-
     @inject(WorkspaceService)
     protected readonly workspaceService: WorkspaceService;
 
@@ -40,9 +37,6 @@ export class JupyterFileOpenHandler implements OpenHandler {
 
     @inject(OpenerService)
     protected readonly openerService: OpenerService;
-
-    @inject(WidgetManager)
-    protected readonly widgetManager: WidgetManager;
 
     canHandle(uri: URI): number {
         try {

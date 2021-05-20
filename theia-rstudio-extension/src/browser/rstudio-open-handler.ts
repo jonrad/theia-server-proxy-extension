@@ -17,7 +17,7 @@
 import URI from '@theia/core/lib/common/uri';
 import { ILogger } from '@theia/core';
 import { inject, injectable } from 'inversify';
-import { OpenHandler, FrontendApplication, OpenerService, WidgetManager } from '@theia/core/lib/browser';
+import { OpenHandler, OpenerService, WidgetManager } from '@theia/core/lib/browser';
 import * as http from 'http';
 import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
 import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
@@ -31,20 +31,11 @@ export class RStudioOpenHandler implements OpenHandler {
     readonly id = 'rstudio.openhandler';
     readonly label = 'Open in RStudio';
 
-    @inject(FrontendApplication)
-    protected readonly app: FrontendApplication;
-
     @inject(WorkspaceService)
     protected readonly workspaceService: WorkspaceService;
 
     @inject(ServerProxyInstanceManager)
     protected readonly serverProxyInstanceManager: ServerProxyInstanceManager;
-
-    @inject(ServerProxyRpcServer)
-    protected readonly serverProxyRpcServer: ServerProxyRpcServer;
-
-    @inject(WidgetManager)
-    protected readonly widgetManager: WidgetManager;
 
     @inject(OpenerService)
     protected readonly openerService: OpenerService;
@@ -101,8 +92,6 @@ export class RStudioOpenHandler implements OpenHandler {
             return this.fallback(uri);
         }
 
-        const activatePromise = this.app.shell.activateWidget(widget.id);
-
         const data = JSON.stringify({
             method: "console_input",
             //TODO: is this the proper escaping
@@ -133,7 +122,5 @@ export class RStudioOpenHandler implements OpenHandler {
         request.end();
 
         await promise;
-        await activatePromise;
     }
-
 }
