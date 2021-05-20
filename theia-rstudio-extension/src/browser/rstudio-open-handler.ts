@@ -17,12 +17,11 @@
 import URI from '@theia/core/lib/common/uri';
 import { ILogger } from '@theia/core';
 import { inject, injectable } from 'inversify';
-import { OpenHandler, OpenerService, WidgetManager } from '@theia/core/lib/browser';
+import { OpenHandler, OpenerService } from '@theia/core/lib/browser';
 import * as http from 'http';
 import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
 import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
 import { Extension } from '../common/const';
-import { ServerProxyRpcServer } from 'theia-server-proxy-extension/lib/common/rpc';
 import { ServerProxyOpenHandler } from 'theia-server-proxy-extension/lib/browser/server-proxy-open-handler';
 
 @injectable()

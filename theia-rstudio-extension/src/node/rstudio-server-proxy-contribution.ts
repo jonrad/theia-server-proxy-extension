@@ -23,6 +23,7 @@ import { Request, Response } from 'express'
 import * as http from 'http';
 import * as os from 'os';
 import { Extension } from '../common/const';
+import { Endpoint } from '@theia/core/lib/browser';
 
 @injectable()
 export class RStudioServerProxyInstanceBuilder extends BaseServerProxyInstanceBuilder<void> {
@@ -70,14 +71,16 @@ export class RStudioServerProxyContribution implements ServerProxyContribution {
 
     instance: ServerProxyInstance | undefined;
 
+    private clientId: string | undefined;
+
+    private clientVersion: string | undefined;
+
+    private csrfToken: string | undefined;
+
     constructor(
         @inject(RStudioServerProxyInstanceBuilder) public readonly serverProxyInstanceBuilder: RStudioServerProxyInstanceBuilder
     ) {
     }
-
-    private clientId: string | undefined;
-    private clientVersion: string | undefined;
-    private csrfToken: string | undefined;
 
     getMiddleware(basePath: string, baseOptions: Options): RequestHandler {
         baseOptions.pathRewrite = { '^(/[^ /]*){3}': '' };
@@ -89,11 +92,14 @@ export class RStudioServerProxyContribution implements ServerProxyContribution {
             }
 
             const serverProxyBasePath = (<any>req).serverProxyBasePath as string;
-            const hostname = req.headers["host"];
 
             // TODO https
             // this should probably be changed altogether to not depend on the user's request
-            redirect = redirect.replace('http://localhost:8787/', `http://${hostname}${serverProxyBasePath}`);
+            const endpoint = new Endpoint({
+                path: serverProxyBasePath
+            }).getRestUrl();
+
+            redirect = redirect.replace('http://localhost:8787/', endpoint.toString());
             console.log(`Settings redirect from '${proxyRes.headers.location}' to '${redirect}'`);
             proxyRes.headers.location = redirect
         };
