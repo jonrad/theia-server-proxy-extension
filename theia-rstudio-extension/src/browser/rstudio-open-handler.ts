@@ -14,18 +14,15 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-// install.packages("rstudioapi", type = "source")
 import URI from '@theia/core/lib/common/uri';
 import { ILogger } from '@theia/core';
 import { inject, injectable } from 'inversify';
 import { OpenHandler, FrontendApplication, OpenerService, WidgetManager } from '@theia/core/lib/browser';
 import * as http from 'http';
 import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
-import { ServerProxyWidget } from 'theia-server-proxy-extension/lib/browser/server-proxy-widget';
 import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
 import { Extension } from '../common/const';
 import { ServerProxyRpcServer } from 'theia-server-proxy-extension/lib/common/rpc';
-import { IFrameWidgetMode } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-widget';
 import { ServerProxyOpenHandler } from 'theia-server-proxy-extension/lib/browser/server-proxy-open-handler';
 
 @injectable()
