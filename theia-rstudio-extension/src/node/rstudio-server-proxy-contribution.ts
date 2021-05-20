@@ -23,7 +23,6 @@ import { Request, Response } from 'express'
 import * as http from 'http';
 import * as os from 'os';
 import { Extension } from '../common/const';
-import { Endpoint } from '@theia/core/lib/browser';
 
 @injectable()
 export class RStudioServerProxyInstanceBuilder extends BaseServerProxyInstanceBuilder<void> {
@@ -92,14 +91,11 @@ export class RStudioServerProxyContribution implements ServerProxyContribution {
             }
 
             const serverProxyBasePath = (<any>req).serverProxyBasePath as string;
+            const hostname = req.headers["host"];
 
             // TODO https
             // this should probably be changed altogether to not depend on the user's request
-            const endpoint = new Endpoint({
-                path: serverProxyBasePath
-            }).getRestUrl();
-
-            redirect = redirect.replace('http://localhost:8787/', endpoint.toString());
+            redirect = redirect.replace('http://localhost:8787/', `http://${hostname}${serverProxyBasePath}`);
             console.log(`Settings redirect from '${proxyRes.headers.location}' to '${redirect}'`);
             proxyRes.headers.location = redirect
         };
