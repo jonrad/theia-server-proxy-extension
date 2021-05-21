@@ -17,7 +17,7 @@
 import URI from '@theia/core/lib/common/uri';
 import { ILogger } from '@theia/core';
 import { inject, injectable } from 'inversify';
-import { OpenHandler, OpenerService, Endpoint } from '@theia/core/lib/browser';
+import { OpenHandler, OpenerService } from '@theia/core/lib/browser';
 import * as http from 'http';
 import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
 import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
