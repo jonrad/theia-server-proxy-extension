@@ -1,8 +1,14 @@
 .git
+
 node_modules
+**/node_modules/
 .browser_modules
 lib
+**/lib
+
 *.log
-*-app/*
-!*-app/package.json
+
+yarn.lock
+
 Dockerfile
+tmp

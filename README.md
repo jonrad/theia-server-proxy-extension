@@ -1,13 +1,25 @@
 # Theia Server Proxy Extension Monorepo
 
-Monorepo containing:
-* [Theia Server Proxy Extension](./theia-server-proxy-extension) - Library enabling third party applications to be served via Theia
+This is a monorepo containing:
+* [Theia Server Proxy Extension](./theia-server-proxy-extension) - Library enabling third party web applications to be served via Theia
+* [Theia Server Proxy IFrame](./theia-server-proxy-iframe) - Widget/UI elements for generic iframe support in theia
 * [Theia Server Proxy List Extension](./theia-server-proxy-list-extension) - UI to show all running server proxies. Optional but useful
-* [Theia Server Proxy IFrame](./theia-server-proxy-iframe) - Widget/UI elements for generic iframe support
 * [Theia Jupyter Extension](./theia-jupyter-extension) - Jupyter Notebook extension for Theia
 * [Theia RStudio Extension](./theia-rstudio-extension) - RStudio extension for Theia
 
-## Getting started
+## Demo
+
+Quick demo:
+
+    docker run -it --rm -p 3000:3000 jonrad/theia-datascience
+    # Then go to http://localhost:3000
+
+To use your own files, mount the directory you want to work with:
+
+    docker run -it --rm -p 3000:3000 -v <YOUR_DIRECTORY>:/home/project jonrad/theia-datascience
+    # Then go to http://localhost:3000
+
+## Development
 
 Install [nvm](https://github.com/creationix/nvm#install-script).
 
@@ -135,5 +147,6 @@ In this directory start up the container
 
     docker run -it --rm -p 3000:3000 $(fd -d 1 | sed "s#^\(.*\)#-v $PWD/\1:/app/\1#" | tr '\n' ' ') jonrad/theia-datascience bash
     yarn start:browser --hostname 0.0.0.0
+
 
 Now you can still develop locally and even run `yarn watch` but you'll have to start the main app in the docker container

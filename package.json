@@ -1,15 +1,19 @@
 {
   "private": true,
   "scripts": {
-    "prepare": "lerna run prepare",
+    "preinstall": "node-gyp install",
+    "bootstrap": "lerna bootstrap",
+    "build": "lerna run build",
     "rebuild:browser": "theia rebuild:browser",
     "start:browser": "yarn rebuild:browser && yarn --cwd browser-app start",
-    "watch": "lerna run --parallel watch"
+    "watch": "lerna run --parallel watch",
+    "build:docker": "docker build . -t jonrad/theia-datascience",
+    "publish:docker": "yarn build:docker && docker push jonrad/theia-datascience"
   },
   "devDependencies": {
     "lerna": "2.4.0"
   },
-   "resolutions": {
+  "resolutions": {
     "**/**/nsfw": "1.2.9"
   },
   "workspaces": [
