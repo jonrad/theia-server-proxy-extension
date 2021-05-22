@@ -104,7 +104,7 @@ Build the docker image from above
 
 In this directory start up the container
 
-    docker run -it --rm -p 3000:3000 $(fd -d 1 | sed "s#^\(.*\)#-v $PWD/\1:/app/\1#" | tr '\n' ' ') jonrad/theia-datascience bash
+    docker run -it --rm -p 3000:3000 $(fd -d 1 | sed "s#^\(.*\)#-v $PWD/\1:/home/theia/\1#" | tr '\n' ' ') jonrad/theia-datascience bash
     yarn start:browser --hostname 0.0.0.0
 
 
