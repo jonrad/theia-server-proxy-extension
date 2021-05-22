@@ -1,6 +1,6 @@
 # Theia Server Proxy Extension
 
-This extension provides the ability for users to start "applications" and show them in a tab within theia.
+This extension provides the ability for users to embed web based applications within a theia tab
 
 This extension does nothing by itself. It provides contribution points for other extensions to provide the applications.
 

@@ -1,9 +1,3 @@
-# Theia Server Proxy Extension
+# Theia RStudio Server Extension
 
-This extension provides the ability for users to start "applications" and show them in a tab within theia.
-
-This extension does nothing by itself. It provides contribution points for other extensions to provide the applications.
-
-## Definitions
-
-...
+Theia extension providing built in RStudio support
