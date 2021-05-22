@@ -7,8 +7,11 @@ RUN apt-get update && \
     apt-get clean autoclean && apt-get autoremove --yes
 
 # Jupyter
-RUN apt-get update && apt-get install -y jupyter-notebook && \
+RUN apt-get update && apt-get install -y jupyter-notebook python3-pip && \
     apt-get clean autoclean && apt-get autoremove --yes
+
+# Jupyter nice to have modules
+RUN pip3 install matplotlib
 
 # RStudio
 RUN apt-get install -y r-base gdebi-core && \
