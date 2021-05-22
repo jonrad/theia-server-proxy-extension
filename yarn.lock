@@ -1110,7 +1110,7 @@
     anser "^2.0.1"
     dompurify "^2.0.11"
 
-"@theia/core@1.13.0", "@theia/core@latest":
+"@theia/core@1.13.0":
   version "1.13.0"
   resolved "https://registry.yarnpkg.com/@theia/core/-/core-1.13.0.tgz#86e5a03988977f85ffa20c2c1e9978f2c2ec73cf"
   integrity sha512-ZR0cwYgsWn9FxjyxgShm4WeWhea19VG18abKIeqm+1noNYfUidUQw1AT90Zk5c3HVxUuafmVllIXZvGQJniRuQ==
@@ -1223,7 +1223,7 @@
     "@theia/workspace" "1.13.0"
     vscode-ripgrep "^1.2.4"
 
-"@theia/filesystem@1.13.0", "@theia/filesystem@latest":
+"@theia/filesystem@1.13.0":
   version "1.13.0"
   resolved "https://registry.yarnpkg.com/@theia/filesystem/-/filesystem-1.13.0.tgz#041f4a268a2762317cd3fb582726c8091a6ead93"
   integrity sha512-G36bT5sonnCjhwAIN2CXu2Q1cn40Bsn1XihbM1btVdC+zcjxMERlHgRR55Idi6tUDxRJJTYj7zhy6OZ1Fkq0uA==
@@ -1242,7 +1242,7 @@
     uuid "^8.0.0"
     vscode-languageserver-textdocument "^1.0.1"
 
-"@theia/keymaps@1.13.0", "@theia/keymaps@latest":
+"@theia/keymaps@1.13.0":
   version "1.13.0"
   resolved "https://registry.yarnpkg.com/@theia/keymaps/-/keymaps-1.13.0.tgz#552d910269d29c5652ba4d2a9204ee735161d944"
   integrity sha512-UjB5fJkwDWGwWIQKD+Jr6gTtRcALxUs5s3R63sF6LczUcsWCUEowtiYMG9SqJRFXxlBwOLjVPbUQ1jVHu9k52Q==
@@ -1275,7 +1275,7 @@
     react-perfect-scrollbar "^1.5.3"
     ts-md5 "^1.2.2"
 
-"@theia/mini-browser@1.13.0", "@theia/mini-browser@latest":
+"@theia/mini-browser@1.13.0":
   version "1.13.0"
   resolved "https://registry.yarnpkg.com/@theia/mini-browser/-/mini-browser-1.13.0.tgz#a3b6259d45508f3b9de25f4c714d7fa13812543b"
   integrity sha512-XAZ8au8J5ZNRrnUdfeaplCcMe1f3l0ByninHn3ZzFxsRRp9kwpvGyd+SgAG/C1wcegxJj17rmffPaksrz1Bcyw==
@@ -1347,7 +1347,7 @@
     "@types/p-queue" "^2.3.1"
     p-queue "^2.4.2"
 
-"@theia/plugin-ext@1.13.0", "@theia/plugin-ext@latest":
+"@theia/plugin-ext@1.13.0":
   version "1.13.0"
   resolved "https://registry.yarnpkg.com/@theia/plugin-ext/-/plugin-ext-1.13.0.tgz#2a4c773eff11df756a78bfc30f7e89a8768e9cdd"
   integrity sha512-XkYYIHy09Lhynf79JoYaambji5IXicO85cHJbfcLZjhrNiD3KFg4I6H+xGlfRq3EUfK8Zo0jjC79j7mon0Tzag==
@@ -1502,7 +1502,7 @@
   dependencies:
     "@theia/core" "1.13.0"
 
-"@theia/workspace@1.13.0", "@theia/workspace@latest":
+"@theia/workspace@1.13.0":
   version "1.13.0"
   resolved "https://registry.yarnpkg.com/@theia/workspace/-/workspace-1.13.0.tgz#0285703dd7379ff7d8914c5779a6b6291e379227"
   integrity sha512-bCTIlj8ZD0sHEueyEM16IN61SqIlVxEcdS2tpoEQsniw7M+a8B9ZwVYQ3OPdn/veY90Zc+bjw9jX+qkhDOO6aQ==
@@ -11415,18 +11415,6 @@ textextensions@^2.5.0:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/textextensions/-/textextensions-2.6.0.tgz#d7e4ab13fe54e32e08873be40d51b74229b00fc4"
   integrity sha512-49WtAWS+tcsy93dRt6P0P3AMD2m5PvXRhuEA0kaXos5ZLlujtYmpmFsB+QvWUSxE1ZsstmYXfQ7L40+EcQgpAQ==
-
-theia-server-proxy-iframe-extension@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/theia-server-proxy-iframe-extension/-/theia-server-proxy-iframe-extension-0.0.1.tgz#142a5aad38a1000850300a410fb8ed2e6a8addc8"
-  integrity sha512-NlMWt/DTtaue6WW639dLvtrLtq+McDhYibvuULLS8StJsZYy6n8KsNb90UXPo5JMJMlpYcWEoQMuZBckmYO9Sw==
-  dependencies:
-    "@theia/core" latest
-    "@theia/filesystem" latest
-    "@theia/keymaps" latest
-    "@theia/mini-browser" latest
-    "@theia/plugin-ext" latest
-    "@theia/workspace" latest
 
 through2@^2.0.0, through2@^2.0.2:
   version "2.0.5"
