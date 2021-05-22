@@ -15,7 +15,7 @@
     "@theia/navigator": "1.13.0",
     "http-proxy-middleware": "^1.0.6",
     "theia-server-proxy-extension": "^0.0.7",
-    "theia-server-proxy-iframe-extension": "^0.0.1"
+    "theia-server-proxy-iframe-extension": "^0.0.7"
   },
   "devDependencies": {
     "rimraf": "latest",
