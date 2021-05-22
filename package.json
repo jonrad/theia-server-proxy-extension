@@ -4,7 +4,7 @@
     "preinstall": "node-gyp install",
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
-    "rebuild:browser": "theia rebuild:browser",
+    "rebuild:browser": "lerna --scope browser-app run build",
     "start:browser": "yarn rebuild:browser && yarn --cwd browser-app start",
     "watch": "lerna run --parallel watch",
     "build:docker": "docker build . -t jonrad/theia-datascience",
