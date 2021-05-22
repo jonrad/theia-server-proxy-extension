@@ -6,6 +6,7 @@ This is a monorepo containing:
 * [Theia Server Proxy List Extension](./theia-server-proxy-list-extension) - UI to show all running server proxies. Optional but useful
 * [Theia Jupyter Extension](./theia-jupyter-extension) - Jupyter Notebook extension for Theia
 * [Theia RStudio Extension](./theia-rstudio-extension) - RStudio extension for Theia
+* [Example](./browser-app) - Browser example
 
 ## Demo
 
