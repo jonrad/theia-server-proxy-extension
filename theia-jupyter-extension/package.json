@@ -3,7 +3,7 @@
   "keywords": [
     "theia-extension"
   ],
-  "version": "0.0.0",
+  "version": "0.0.1",
   "files": [
     "lib",
     "src",
@@ -13,9 +13,9 @@
   "dependencies": {
     "@theia/core": "latest",
     "@theia/navigator": "latest",
-    "theia-server-proxy-extension": "0.0.0",
-    "theia-server-proxy-iframe-extension": "0.0.0",
-    "http-proxy-middleware": "^1.0.6"
+    "http-proxy-middleware": "^1.0.6",
+    "theia-server-proxy-extension": "^0.0.1",
+    "theia-server-proxy-iframe-extension": "^0.0.1"
   },
   "devDependencies": {
     "rimraf": "latest",

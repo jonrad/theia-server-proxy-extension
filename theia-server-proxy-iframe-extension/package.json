@@ -4,7 +4,7 @@
     "theia-extension"
   ],
   "license": "EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "files": [
     "lib",
     "src"
@@ -14,8 +14,8 @@
     "@theia/filesystem": "latest",
     "@theia/keymaps": "latest",
     "@theia/mini-browser": "latest",
-    "@theia/workspace": "latest",
-    "@theia/plugin-ext": "latest"
+    "@theia/plugin-ext": "latest",
+    "@theia/workspace": "latest"
   },
   "devDependencies": {
     "rimraf": "latest",

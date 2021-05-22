@@ -3,7 +3,7 @@
   "keywords": [
     "theia-extension"
   ],
-  "version": "0.0.0",
+  "version": "0.0.1",
   "files": [
     "lib",
     "src"
@@ -12,13 +12,13 @@
   "dependencies": {
     "@theia/core": "latest",
     "@theia/filesystem": "latest",
-    "@theia/mini-browser": "latest",
     "@theia/keymaps": "latest",
-    "@theia/workspace": "latest",
+    "@theia/mini-browser": "latest",
     "@theia/plugin-ext": "latest",
-    "theia-server-proxy-iframe-extension": "0.0.0",
+    "@theia/workspace": "latest",
     "get-port": "^5.1.1",
-    "http-proxy-middleware": "^1.0.6"
+    "http-proxy-middleware": "^1.0.6",
+    "theia-server-proxy-iframe-extension": "^0.0.1"
   },
   "devDependencies": {
     "rimraf": "latest",
