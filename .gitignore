@@ -5,3 +5,4 @@ lib
 *-app/*
 !*-app/package.json
 tmp
+**/src-gen

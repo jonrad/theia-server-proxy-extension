@@ -5,6 +5,7 @@ node_modules
 .browser_modules
 lib
 **/lib
+**/src-gen
 
 *.log
 
