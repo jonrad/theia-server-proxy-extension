@@ -36,7 +36,8 @@ COPY theia-server-proxy-extension/*.json ./theia-server-proxy-extension/
 COPY theia-server-proxy-iframe-extension/*.json ./theia-server-proxy-iframe-extension/
 COPY theia-server-proxy-list-extension/*.json ./theia-server-proxy-list-extension/
 COPY browser-app/*.json ./browser-app/
-RUN yarn install && \
+
+RUN IGNORE_PREPARE=1 yarn install && \
     yarn autoclean --init && \
     yarn autoclean --force && \
     yarn cache clean
@@ -44,9 +45,7 @@ RUN yarn install && \
 # Build the app itself
 # Note: Everything after this should be optimized for iteration. Make it build fast
 COPY ./ ./
-# TODO: why is my docker not ignoring these...
-RUN rm -rf */node_modules
-RUN yarn build --frozen-lockfile
+RUN yarn prepare --frozen-lockfile
 
 # Some demo files for the lazy
 RUN mkdir -p /home/project && mv demo/* /home/project/ && rm -rf demo

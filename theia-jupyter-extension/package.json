@@ -10,6 +10,7 @@
     "assets"
   ],
   "license": "EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0",
+  "homepage": "https://github.com/jonrad/theia-server-proxy-extension",
   "dependencies": {
     "@theia/core": "1.13.0",
     "@theia/navigator": "1.13.0",
@@ -22,6 +23,7 @@
     "typescript": "latest"
   },
   "scripts": {
+    "prepare": "test -n \"$IGNORE_PREPARE\" || (yarn run clean && yarn run build)",
     "clean": "rimraf lib",
     "build": "tsc",
     "watch": "tsc -w"

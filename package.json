@@ -3,8 +3,8 @@
   "scripts": {
     "preinstall": "node-gyp install",
     "bootstrap": "lerna bootstrap",
-    "build": "lerna run build",
-    "rebuild:browser": "lerna --scope browser-app run build",
+    "prepare": "lerna run prepare",
+    "rebuild:browser": "theia rebuild --target=browser",
     "start:browser": "yarn rebuild:browser && yarn --cwd browser-app start --hostname 0.0.0.0",
     "watch": "lerna run --parallel watch",
     "build:docker": "docker build . -t jonrad/theia-datascience",
@@ -24,5 +24,6 @@
     "theia-rstudio-extension",
     "browser-app"
   ],
+  "homepage": "https://github.com/jonrad/theia-server-proxy-extension",
   "version": "0.0.1"
 }

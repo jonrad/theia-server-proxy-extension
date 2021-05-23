@@ -25,6 +25,7 @@
     "typescript": "latest"
   },
   "scripts": {
+    "prepare": "test -n \"$IGNORE_PREPARE\" || (yarn run clean && yarn run build)",
     "clean": "rimraf lib",
     "build": "tsc",
     "watch": "tsc -w"
