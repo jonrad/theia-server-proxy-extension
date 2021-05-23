@@ -28,7 +28,7 @@ export class ServerProxyOpenHandler extends WidgetOpenHandler<ServerProxyWidget>
 
     public readonly id = ServerProxyWidget.ID;
 
-    protected readonly openerPriority = 200;
+    protected readonly openerPriority = 500;
 
     @inject(ServerProxyInstanceManager)
     protected readonly serverProxyInstanceManager: ServerProxyInstanceManager;

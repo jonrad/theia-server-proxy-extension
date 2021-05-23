@@ -46,7 +46,7 @@ export class RStudioOpenHandler implements OpenHandler {
         try {
             const lowercaseExtension = uri.path.ext.toLocaleLowerCase();
             if (lowercaseExtension == ".rmd" || lowercaseExtension == ".r") {
-                return 200;
+                return 500;
             }
 
             return 0;

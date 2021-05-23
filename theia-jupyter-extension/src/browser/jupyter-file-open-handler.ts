@@ -41,7 +41,7 @@ export class JupyterFileOpenHandler implements OpenHandler {
     canHandle(uri: URI): number {
         try {
             if (uri.path.ext.toLocaleLowerCase() == ".ipynb") {
-                return 200;
+                return 500;
             }
 
             return 0;
