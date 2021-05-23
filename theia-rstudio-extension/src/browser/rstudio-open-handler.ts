@@ -18,7 +18,6 @@ import URI from '@theia/core/lib/common/uri';
 import { ILogger } from '@theia/core';
 import { inject, injectable } from 'inversify';
 import { OpenHandler, OpenerService } from '@theia/core/lib/browser';
-import * as http from 'http';
 import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
 import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
 import { Extension } from '../common/const';
@@ -97,27 +96,13 @@ export class RStudioOpenHandler implements OpenHandler {
             params: [`rstudioapi::navigateToFile("${uri.path.toString().replace('"', '\\"')}")`, "", 0],
         });
 
-        let resolve: ((_: any) => void) | undefined = undefined;
-        const promise = new Promise((r) => {
-            resolve = r;
-        });
-
-        const request = http.request({
+        await fetch(`/server-proxy/${Extension.ID}/${instance.id}/rpc/theia_remote`, {
             method: 'POST',
-            path: `/server-proxy/${Extension.ID}/${instance.id}/rpc/theia_remote`,
             headers: {
                 'Content-Type': 'application/json',
-                'Content-Length': data.length,
-            }
-        }, res => {
-            res.on('end', () => {
-                resolve?.(true);
-            })
+                'Content-Length': data.length.toString(),
+            },
+            body: data
         });
-
-        request.write(data);
-        request.end();
-
-        await promise;
     }
 }

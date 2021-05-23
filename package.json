@@ -5,7 +5,7 @@
     "bootstrap": "lerna bootstrap",
     "build": "lerna run build",
     "rebuild:browser": "lerna --scope browser-app run build",
-    "start:browser": "yarn rebuild:browser && yarn --cwd browser-app start",
+    "start:browser": "yarn rebuild:browser && yarn --cwd browser-app start --hostname 0.0.0.0",
     "watch": "lerna run --parallel watch",
     "build:docker": "docker build . -t jonrad/theia-datascience",
     "publish:docker": "yarn build:docker && docker push jonrad/theia-datascience"
