@@ -20,6 +20,8 @@ import { RawProcessFactory, RawProcessOptions } from '@theia/process/lib/node';
 import { inject, injectable } from 'inversify';
 import * as getAvailablePort from 'get-port';
 import { ILogger } from '@theia/core';
+import { ServerProxyUrlManager } from "../common/server-proxy-url-manager";
+import { ServerProxy } from "../common/server-proxy";
 
 export const ServerProxyContribution = Symbol('ServerProxyContribution');
 export interface ServerProxyContribution {
@@ -33,7 +35,7 @@ export interface ServerProxyContribution {
 }
 
 export interface ServerProxyInstanceBuilder {
-    build(instanceId: string, url: string, context: any): Promise<ServerProxyInstance>
+    build(instanceId: string, context: any): Promise<ServerProxyInstance>
 }
 
 export interface ServerProxyCommand {
@@ -41,12 +43,14 @@ export interface ServerProxyCommand {
 
     port: number
 
+    validationPath?: string
+
     env?: { [name: string]: string | undefined }
 }
 
 @injectable()
 export abstract class BaseServerProxyInstanceBuilder<T> implements ServerProxyInstanceBuilder {
-    abstract id: string
+    abstract serverProxy: ServerProxy;
 
     @inject(ILogger)
     protected readonly logger: ILogger;
@@ -54,23 +58,26 @@ export abstract class BaseServerProxyInstanceBuilder<T> implements ServerProxyIn
     @inject(RawProcessFactory)
     private readonly rawProcessFactory: RawProcessFactory;
 
-    abstract getCommand(url: string, context: any): Promise<ServerProxyCommand>;
+    @inject(ServerProxyUrlManager)
+    protected readonly serverProxyUrlManager: ServerProxyUrlManager;
+
+    abstract getCommand(instanceId: string, context: any): Promise<ServerProxyCommand>;
 
     protected async findAvailablePort(): Promise<number> {
         return await getAvailablePort();
     }
 
-    async build(instanceId: string, url: string, context: T): Promise<ServerProxyInstance> {
-        const { command, env, port } = await this.getCommand(
-            url,
+    async build(instanceId: string, context: T): Promise<ServerProxyInstance> {
+        const { command, env, port, validationPath } = await this.getCommand(
+            instanceId,
             context
         );
 
         if (command.length == 0) {
-            throw Error(`Improperly configured server proxy ${this.id}. Returned empty command`);
+            throw Error(`Improperly configured server proxy ${this.serverProxy.id}. Returned empty command`);
         }
 
-        this.logger.info(`server-proxy mapping instance id ${instanceId} for ${this.id} to port ${port}`);
+        this.logger.info(`server-proxy mapping instance id ${instanceId} for ${this.serverProxy.id} to port ${port}`);
 
         const envDict: { [name: string]: string | undefined } =
             env ? { ...process.env, ...env } : process.env;
@@ -90,9 +97,9 @@ export abstract class BaseServerProxyInstanceBuilder<T> implements ServerProxyIn
         return new ServerProxyInstance(
             instanceId,
             context,
-            this.id,
+            this.serverProxy.id,
             port,
-            url,
+            `http://localhost:${port}${validationPath || ''}`,
             rawProcess
         );
     }

@@ -39,6 +39,9 @@ export class JupyterCommandContribution implements CommandContribution, TabBarTo
     @inject(FileNavigatorContribution)
     protected readonly fileNavigatorContribution: FileNavigatorContribution;
 
+    @inject(ServerProxyOpenHandler)
+    protected readonly serverProxyOpenHandler: ServerProxyOpenHandler;
+
     registerCommands(registry: CommandRegistry): void {
         registry.registerCommand({
             id: Extension.ID,
@@ -67,8 +70,7 @@ export class JupyterCommandContribution implements CommandContribution, TabBarTo
                     context
                 );
 
-                await ServerProxyOpenHandler.open(
-                    this.openerService,
+                await this.serverProxyOpenHandler.openInstance(
                     instance
                 );
             }

@@ -22,6 +22,7 @@ import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/bro
 import { WorkspaceService } from '@theia/workspace/lib/browser/workspace-service';
 import { Extension } from '../common/const';
 import { ServerProxyOpenHandler } from 'theia-server-proxy-extension/lib/browser/server-proxy-open-handler';
+import { ServerProxyUrlManager } from 'theia-server-proxy-extension/lib/common/server-proxy-url-manager';
 
 @injectable()
 export class RStudioOpenHandler implements OpenHandler {
@@ -34,6 +35,12 @@ export class RStudioOpenHandler implements OpenHandler {
 
     @inject(ServerProxyInstanceManager)
     protected readonly serverProxyInstanceManager: ServerProxyInstanceManager;
+
+    @inject(ServerProxyOpenHandler)
+    protected readonly serverProxyOpenHandler: ServerProxyOpenHandler;
+
+    @inject(ServerProxyUrlManager)
+    protected readonly serverProxyUrlManager: ServerProxyUrlManager;
 
     @inject(OpenerService)
     protected readonly openerService: OpenerService;
@@ -80,8 +87,7 @@ export class RStudioOpenHandler implements OpenHandler {
             return this.fallback(uri);
         }
 
-        const widget = await ServerProxyOpenHandler.open(
-            this.openerService,
+        const widget = await this.serverProxyOpenHandler.openInstance(
             instance
         );
 
@@ -96,7 +102,13 @@ export class RStudioOpenHandler implements OpenHandler {
             params: [`rstudioapi::navigateToFile("${uri.path.toString().replace('"', '\\"')}")`, "", 0],
         });
 
-        await fetch(`/server-proxy/${Extension.ID}/${instance.id}/rpc/theia_remote`, {
+        const url = this.serverProxyUrlManager.getPublicPath(
+            Extension.ServerProxy,
+            instance.id,
+            "rpc/theia_remote"
+        );
+
+        await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

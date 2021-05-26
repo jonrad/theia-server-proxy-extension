@@ -20,7 +20,8 @@ import { ServerProxyInstanceStatus, StatusId } from '../common/server-proxy';
 import { IFrameContentStyle } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-content-style';
 import { IFrameWidget, IFrameWidgetMode } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-widget';
 import { IFrameStatus } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-status';
-import { BaseWidget, SingletonLayout, Endpoint, WidgetManager, Widget } from '@theia/core/lib/browser';
+import { BaseWidget, SingletonLayout, WidgetManager, Widget, Endpoint } from '@theia/core/lib/browser';
+import { ServerProxyUrlManager } from '../common/server-proxy-url-manager';
 
 export const ServerProxyWidgetOptions = Symbol('ServerProxyWidgetOptions')
 export interface ServerProxyWidgetOptions {
@@ -45,6 +46,8 @@ export class ServerProxyWidget extends BaseWidget {
     }
 
     @inject(WidgetManager) protected readonly widgetManager: WidgetManager;
+
+    @inject(ServerProxyUrlManager) protected readonly serverProxyUrlManager: ServerProxyUrlManager;
 
     private widget: Widget | undefined;
 
@@ -71,7 +74,12 @@ export class ServerProxyWidget extends BaseWidget {
     protected async init(): Promise<void> {
         const layout = this.layout = new SingletonLayout();
         const endpoint = new Endpoint({
-            path: `server-proxy/${this.instance.serverProxy.id}/${this.instance.id}/` + (this.options.startPath?.replace(/^\//, '') || '')
+            // note that Endpoint prepend the theia home path already, so we can just use the internal path here
+            path: this.serverProxyUrlManager.getInternalPath(
+                this.instance.serverProxy,
+                this.instance.id,
+                this.options.startPath
+            )
         });
 
         const widget = this.widget = await this.widgetManager.getOrCreateWidget<IFrameWidget>(

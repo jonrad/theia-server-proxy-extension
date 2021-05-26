@@ -20,14 +20,18 @@ import * as path from 'path';
 import { EnvVariablesServer } from '@theia/core/lib/common/env-variables';
 import { Extension } from '../common/const';
 import ServerProxyContext from '../common/server-proxy-context';
+import { ServerProxyUrlManager } from 'theia-server-proxy-extension/lib/common/server-proxy-url-manager';
+import { ServerProxy } from 'theia-server-proxy-extension/lib/common/server-proxy';
+import { createProxyMiddleware, Options, RequestHandler } from 'http-proxy-middleware';
+import * as http from 'http';
+import { Request, Response } from 'express'
 
 const ENV_JUPYTER_CUSTOM_PROCESS: string = 'ENV_JUPYTER_CUSTOM_PROCESS';
 const ENV_JUPYTER_PATH: string = 'ENV_JUPYTER_PATH';
 
 @injectable()
 export class JupyterServerProxyInstanceBuilder extends BaseServerProxyInstanceBuilder<ServerProxyContext> {
-    id: string = Extension.ID
-
+    serverProxy: ServerProxy = Extension.ServerProxy;
 
     constructor(
         @inject(EnvVariablesServer) private readonly envVariablesServer: EnvVariablesServer
@@ -35,8 +39,10 @@ export class JupyterServerProxyInstanceBuilder extends BaseServerProxyInstanceBu
         super();
     }
 
-    async getCommand(relativeUrl: string, context: ServerProxyContext): Promise<ServerProxyCommand> {
+    async getCommand(instanceId: string, context: ServerProxyContext): Promise<ServerProxyCommand> {
         const configDir = path.join(__dirname, "../../assets/.jupyter");
+
+        const publicPath: string = this.serverProxyUrlManager.getPublicPath(Extension.ServerProxy, instanceId);
 
         const workspacePath: string = context.path;
 
@@ -50,11 +56,11 @@ export class JupyterServerProxyInstanceBuilder extends BaseServerProxyInstanceBu
                 customProcess,
                 port.toString(),
                 workspacePath,
-                relativeUrl,
+                publicPath,
                 configDir
             ]
 
-            return { command, port: port };
+            return { command, port };
         } else {
             const jupyterPath = (await this.envVariablesServer.getValue(ENV_JUPYTER_PATH))?.value || "jupyter-notebook";
 
@@ -63,7 +69,7 @@ export class JupyterServerProxyInstanceBuilder extends BaseServerProxyInstanceBu
                 `--NotebookApp.ip=0.0.0.0`,
                 `--NotebookApp.port=${port.toString()}`,
                 `--NotebookApp.notebook_dir=${workspacePath}`,
-                `--NotebookApp.base_url=${relativeUrl}`,
+                `--NotebookApp.base_url=${publicPath}`,
                 `--NotebookApp.token=`,
                 `--NotebookApp.tornado_settings={'headers': {'Content-Security-Policy': \"frame-ancestors * 'self' \"}}`,
                 '--NotebookApp.open_browser=False'
@@ -74,8 +80,9 @@ export class JupyterServerProxyInstanceBuilder extends BaseServerProxyInstanceBu
 
             return {
                 command,
-                port: port,
-                env
+                port,
+                env,
+                validationPath: publicPath
             }
         }
     }
@@ -87,7 +94,31 @@ export class JupyterServerProxyContribution implements ServerProxyContribution {
 
     name: string = Extension.Name;
 
+    @inject(ServerProxyUrlManager)
+    protected readonly serverProxyUrlManager: ServerProxyUrlManager;
+
     constructor(
         @inject(JupyterServerProxyInstanceBuilder) public readonly serverProxyInstanceBuilder: JupyterServerProxyInstanceBuilder) {
+    }
+
+    getMiddleware(basePath: string, baseOptions: Options): RequestHandler {
+        baseOptions.onProxyRes = (proxyRes: http.IncomingMessage, req: Request, res: Response) => {
+            var redirect = proxyRes.headers.location;
+            if (!redirect) {
+                return;
+            }
+
+            const serverProxyBasePath = (<any>req).serverProxyBasePath as string;
+            const hostname = req.headers["host"];
+
+            // TODO https
+            // this should probably be changed altogether to not depend on the user's request
+            redirect = redirect.replace('http://localhost:8787/', `http://${hostname}${serverProxyBasePath}`);
+            proxyRes.headers.location = redirect
+        };
+
+        return createProxyMiddleware((path: string, req) => {
+            return path.startsWith(basePath);
+        }, baseOptions);
     }
 }

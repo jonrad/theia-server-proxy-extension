@@ -17,7 +17,7 @@
 import "../../styles/server-proxy-list.css"
 import * as React from 'react';
 import { inject, injectable, postConstruct } from 'inversify';
-import { OpenerService, ReactWidget } from '@theia/core/lib/browser';
+import { ReactWidget } from '@theia/core/lib/browser';
 import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
 import { ServerProxyInstance } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance';
 import { ServerProxyOpenHandler } from 'theia-server-proxy-extension/lib/browser/server-proxy-open-handler';
@@ -36,8 +36,8 @@ export class ServerProxyListWidget extends ReactWidget {
     @inject(WindowService)
     protected readonly windowService: WindowService;
 
-    @inject(OpenerService)
-    protected readonly openerService: OpenerService;
+    @inject(ServerProxyOpenHandler)
+    protected readonly serverProxyOpenHandler: ServerProxyOpenHandler;
 
     protected serverProxyInstances: ServerProxyInstance[] = [];
 
@@ -59,8 +59,7 @@ export class ServerProxyListWidget extends ReactWidget {
     }
 
     protected async onOpen(instance: ServerProxyInstance): Promise<void> {
-        await ServerProxyOpenHandler.open(
-            this.openerService,
+        await this.serverProxyOpenHandler.openInstance(
             instance
         );
     }

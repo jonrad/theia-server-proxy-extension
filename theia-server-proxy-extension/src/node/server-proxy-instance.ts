@@ -39,7 +39,7 @@ export class ServerProxyInstance implements Disposable {
         public readonly context: any,
         public readonly serverProxyId: string,
         public readonly port: number,
-        public readonly url: string,
+        private readonly validationUrl: string,
         private readonly process: RawProcess
     ) {
         this.statusChangedEmitter = new Emitter<ServerProxyInstanceStatus>();
@@ -67,13 +67,19 @@ export class ServerProxyInstance implements Disposable {
         this.statusChangedEmitter.fire(this._status);
     }
 
-    private async isAccessible(): Promise<Boolean> {
+    private isAccessible(): Promise<Boolean> {
         return new Promise((resolve) => {
-            // TODO 0 share this
-            const request = http.get(`http://localhost:${this.port}/server-proxy/${this.serverProxyId}/${this.id}/`);
+            const request = http.get(this.validationUrl);
 
             request.on('error', () => resolve(false));
-            request.on('response', () => resolve(true));
+            request.on('response', (msg) => {
+                const code = msg.statusCode;
+                if (!code || code < 200 || code >= 400) {
+                    return resolve(false);
+                }
+
+                resolve(true);
+            });
         });
     }
 
