@@ -52,4 +52,4 @@ RUN mkdir -p /home/project && mv demo/* /home/project/ && rm -rf demo
 
 # And away we go
 EXPOSE 3000
-CMD node /home/theia/browser-app/src-gen/backend/main.js /home/project --hostname 0.0.0.0
+ENTRYPOINT ["node", "/home/theia/browser-app/src-gen/backend/main.js", "/home/project", "--hostname", "0.0.0.0"]

@@ -101,12 +101,12 @@ It's not worth the effort getting rstudio server to work on mac. So I found it b
 
 Prerequisite: Install https://github.com/sharkdp/fd
 
-Build the docker image from above
+Build the docker image from above (Alternatively, if you haven't changed the packages, you can just use the already published docker image)
 
 In this directory start up the container
 
-    docker run -it --rm -p 3000:3000 $(fd -d 1 | sed "s#^\(.*\)#-v $PWD/\1:/home/theia/\1#" | tr '\n' ' ') jonrad/theia-datascience bash
-    yarn start:browser --hostname 0.0.0.0
+    docker run -it --rm -p 3000:3000 $(fd -d 1 | sed "s#^\(.*\)#-v $PWD/\1:/home/theia/\1#" | tr '\n' ' ') --entrypoint bash jonrad/theia-datascience
+    yarn start:browser
 
 
 Now you can still develop locally and even run `yarn watch` but you'll have to start the main app in the docker container
