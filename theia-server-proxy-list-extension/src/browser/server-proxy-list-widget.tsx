@@ -17,12 +17,13 @@
 import "../../styles/server-proxy-list.css"
 import * as React from 'react';
 import { inject, injectable, postConstruct } from 'inversify';
-import { OpenerService, ReactWidget } from '@theia/core/lib/browser';
+import { ReactWidget } from '@theia/core/lib/browser';
 import { ServerProxyInstanceManager } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance-manager';
 import { ServerProxyInstance } from 'theia-server-proxy-extension/lib/browser/server-proxy-instance';
 import { ServerProxyOpenHandler } from 'theia-server-proxy-extension/lib/browser/server-proxy-open-handler';
 import { WindowService } from "@theia/core/lib/browser/window/window-service";
 import { ServerProxyInstanceStatus } from "theia-server-proxy-extension/lib/common/server-proxy";
+import { ServerProxyUrlManager } from "theia-server-proxy-extension/lib/common/server-proxy-url-manager";
 
 @injectable()
 export class ServerProxyListWidget extends ReactWidget {
@@ -36,8 +37,11 @@ export class ServerProxyListWidget extends ReactWidget {
     @inject(WindowService)
     protected readonly windowService: WindowService;
 
-    @inject(OpenerService)
-    protected readonly openerService: OpenerService;
+    @inject(ServerProxyOpenHandler)
+    protected readonly serverProxyOpenHandler: ServerProxyOpenHandler;
+
+    @inject(ServerProxyUrlManager)
+    protected readonly serverProxyUrlManager: ServerProxyUrlManager;
 
     protected serverProxyInstances: ServerProxyInstance[] = [];
 
@@ -59,8 +63,7 @@ export class ServerProxyListWidget extends ReactWidget {
     }
 
     protected async onOpen(instance: ServerProxyInstance): Promise<void> {
-        await ServerProxyOpenHandler.open(
-            this.openerService,
+        await this.serverProxyOpenHandler.openInstance(
             instance
         );
     }
@@ -72,7 +75,10 @@ export class ServerProxyListWidget extends ReactWidget {
                     instance,
                     onStop: () => instance.stop(),
                     onOpen: () => this.onOpen(instance),
-                    onOpenBrowser: () => this.windowService.openNewWindow(`/server-proxy/${instance.serverProxy.id}/${instance.id}/`, { external: true })
+                    onOpenBrowser: () => this.windowService.openNewWindow(
+                        this.serverProxyUrlManager.getPublicPath(instance.serverProxy, instance.id),
+                        { external: true }
+                    )
                 }} />
             })}
         </div >);

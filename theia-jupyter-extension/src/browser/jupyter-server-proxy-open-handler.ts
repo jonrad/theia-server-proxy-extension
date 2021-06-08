@@ -23,13 +23,12 @@ import { IFrameWidgetMode } from 'theia-server-proxy-iframe-extension/lib/browse
 
 @injectable()
 export class JupyterServerProxyOpenHandler extends ServerProxyOpenHandler {
-
     canHandle(uri: URI): number {
-        return super.canHandle(uri) > 0 && ServerProxyOpenHandler.getServerProxyId(uri) == Extension.ID ? this.openerPriority + 100 : -1;
+        return super.canHandle(uri) > 0 && this.getServerProxyId(uri) == Extension.ID ? this.openerPriority + 100 : -1;
     }
 
     protected createWidgetOptions(uri: URI): ServerProxyWidgetOptions {
-        const path = ServerProxyOpenHandler.getPath(uri);
+        const path = this.getPath(uri);
 
         const baseOptions = super.createWidgetOptions(uri);
         if (!path) {

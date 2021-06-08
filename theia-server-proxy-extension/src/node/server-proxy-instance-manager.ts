@@ -67,11 +67,8 @@ export class ServerProxyInstanceManager {
 
         const instanceId = (++this.lastInstanceId).toString();
 
-        const relativeUrl = `/server-proxy/${serverProxy.id}/${instanceId}`;
-
         const instance = await serverProxy.serverProxyInstanceBuilder.build(
             instanceId,
-            relativeUrl,
             context
         );
 

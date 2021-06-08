@@ -13,24 +13,27 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
+import { CliContribution } from '@theia/core/lib/node';
+import { injectable } from '@theia/core/shared/inversify';
+import { ServerProxyConfiguration } from '../common/server-proxy-configuration';
+import * as yargs from 'yargs';
+import { MaybePromise } from '@theia/core';
 
-import URI from '@theia/core/lib/common/uri';
-import { injectable } from 'inversify';
-import { Extension } from '../common/const';
-import { ServerProxyOpenHandler } from 'theia-server-proxy-extension/lib/browser/server-proxy-open-handler';
-import { IFrameWidgetMode } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-widget';
-import { ServerProxyWidgetOptions } from 'theia-server-proxy-extension/lib/browser/server-proxy-widget';
+const ARG_THEIA_HOME_PATH = 'theia-home-path';
 
 @injectable()
-export class RStudioServerProxyOpenHandler extends ServerProxyOpenHandler {
-    canHandle(uri: URI): number {
-        return super.canHandle(uri) > 0 && this.getServerProxyId(uri) == Extension.ID ? this.openerPriority + 100 : -1;
+export class ServerProxyConfigurationImpl implements CliContribution, ServerProxyConfiguration {
+    private theiaHomePath: string;
+
+    public getTheiaHomePath(): MaybePromise<string> {
+        return this.theiaHomePath;
     }
 
-    protected createWidgetOptions(uri: URI): ServerProxyWidgetOptions {
-        return {
-            ...super.createWidgetOptions(uri),
-            mode: IFrameWidgetMode.IFrame
-        };
+    public configure(conf: yargs.Argv): void {
+        conf.option(ARG_THEIA_HOME_PATH, { description: 'Root path where theia is served', type: 'string', default: '' });
+    }
+
+    public async setArguments(args: yargs.Arguments): Promise<void> {
+        this.theiaHomePath = args[ARG_THEIA_HOME_PATH] as string;
     }
 }

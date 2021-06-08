@@ -35,6 +35,9 @@ export class JupyterFileOpenHandler implements OpenHandler {
     @inject(ServerProxyInstanceManager)
     protected readonly serverProxyInstanceManager: ServerProxyInstanceManager;
 
+    @inject(ServerProxyOpenHandler)
+    protected readonly serverProxyOpenHandler: ServerProxyOpenHandler;
+
     @inject(OpenerService)
     protected readonly openerService: OpenerService;
 
@@ -76,8 +79,7 @@ export class JupyterFileOpenHandler implements OpenHandler {
             .join(relativeFilePath.toString())
             .toString();
 
-        return await ServerProxyOpenHandler.open(
-            this.openerService,
+        return await this.serverProxyOpenHandler.openInstance(
             instance,
             path
         )

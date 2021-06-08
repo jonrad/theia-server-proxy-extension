@@ -25,8 +25,22 @@ import { ServerProxyContribution } from './server-proxy-contribution';
 import { ServerProxyExpressContribution } from './server-proxy-express-contribution';
 import { ServerProxyRpcServerImpl } from './server-proxy-rpc-server-impl';
 import { ServerProxyManager } from './server-proxy-manager';
+import { ServerProxyConfiguration, serverProxyConfigurationPath } from '../common/server-proxy-configuration';
+import { ServerProxyUrlManager } from '../common/server-proxy-url-manager';
+import { ServerProxyConfigurationImpl } from './server-proxy-configuration-impl';
+import { CliContribution } from '@theia/core/lib/node';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
+    bind(ServerProxyConfigurationImpl).toSelf().inSingletonScope();
+
+    bind(ServerProxyConfiguration).toService(ServerProxyConfigurationImpl);
+    bind(CliContribution).toService(ServerProxyConfigurationImpl);
+
+    bind(ConnectionHandler).toDynamicValue(ctx =>
+        new JsonRpcConnectionHandler(serverProxyConfigurationPath, () => ctx.container.get<ServerProxyConfiguration>(ServerProxyConfiguration))
+    ).inSingletonScope();
+    bind(ServerProxyUrlManager).toSelf().inSingletonScope();
+
     bind(ServerProxyInstanceManager).toSelf().inSingletonScope();
     bind(ServerProxyExpressContribution).toSelf();
     bind(BackendApplicationContribution).toService(ServerProxyExpressContribution);

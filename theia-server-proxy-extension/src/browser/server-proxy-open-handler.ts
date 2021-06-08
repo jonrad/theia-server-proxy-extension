@@ -22,23 +22,36 @@ import { ServerProxyInstance } from './server-proxy-instance';
 import { ServerProxyWidget, ServerProxyWidgetOptions } from './server-proxy-widget';
 import { IFrameWidgetMode } from 'theia-server-proxy-iframe-extension/lib/browser/iframe-widget';
 import { Path } from '@theia/core';
+import { ServerProxyUrlManager } from '../common/server-proxy-url-manager';
+
+export interface UriDetails {
+    instanceId: string,
+    serverProxyId: string
+}
 
 @injectable()
 export class ServerProxyOpenHandler extends WidgetOpenHandler<ServerProxyWidget> {
-
     public readonly id = ServerProxyWidget.ID;
 
+    public readonly scheme = "server-proxy";
+
     protected readonly openerPriority = 500;
+
+    @inject(ServerProxyUrlManager)
+    protected readonly serverProxyUrlManager: ServerProxyUrlManager;
 
     @inject(ServerProxyInstanceManager)
     protected readonly serverProxyInstanceManager: ServerProxyInstanceManager;
 
+    @inject(OpenerService)
+    protected readonly openerService: OpenerService;
+
     canHandle(uri: URI): number {
-        return ServerProxyOpenHandler.isServerProxyUri(uri) ? this.openerPriority : -1;
+        return this.isServerProxyUri(uri) ? this.openerPriority : -1;
     }
 
     protected createWidgetOptions(uri: URI, options?: WidgetOpenerOptions): ServerProxyWidgetOptions {
-        const id = ServerProxyOpenHandler.getInstanceId(uri);
+        const id = this.getInstanceId(uri);
         if (!id) {
             throw new Error('Malformed path');
         }
@@ -48,39 +61,50 @@ export class ServerProxyOpenHandler extends WidgetOpenHandler<ServerProxyWidget>
             mode: IFrameWidgetMode.MiniBrowser
         }
     }
-}
 
-export namespace ServerProxyOpenHandler {
-    export const scheme = "server-proxy";
-
-    export function getOpenUri(instance: ServerProxyInstance, path?: string): URI {
+    public getOpenUri(instance: ServerProxyInstance, path?: string): URI {
         const fullPath = new Path('/').join(instance.id).join(path || '')
         return new URI()
-            .withScheme(scheme)
+            .withScheme(this.scheme)
             .withAuthority(instance.serverProxy.id)
             .withPath(fullPath);
     }
 
-    export function isServerProxyUri(uri: URI): boolean {
-        return uri.scheme == scheme;
-    }
-
-    export function getServerProxyId(uri: URI): string {
-        return uri.authority;
-    }
-
-    export function getInstanceId(uri: URI): string | undefined {
-        if (!isServerProxyUri(uri) || !uri.path) {
-            return undefined;
+    // server-proxy://SERVER_PROXY_ID/SERVER_PROXY_INSTANCE_ID/
+    public getDetailsFromUri(uri: URI): UriDetails | undefined {
+        if (uri.scheme != this.scheme) {
+            return this.serverProxyUrlManager.getDetailsFromPath(uri.path?.toString())
         }
 
-        const path = uri.path.toString();
+        const serverProxyId = uri.authority;
 
-        return path.split('/', 2)[1];
+        const split = uri.path.toString().split('/');
+        if (!split || split.length < 2) {
+            return;
+        }
+
+        return {
+            serverProxyId,
+            instanceId: split[1]
+        };
     }
 
-    export function getPath(uri: URI): Path | undefined {
-        if (!isServerProxyUri(uri) || !uri.path) {
+    private isServerProxyUri(uri: URI): boolean {
+        return uri.scheme == this.scheme;
+    }
+
+    public getServerProxyId(uri: URI): string {
+        return uri.authority;;
+    }
+
+    public getInstanceId(uri: URI): string | undefined {
+        const details = this.getDetailsFromUri(uri);
+
+        return details?.instanceId;
+    }
+
+    public getPath(uri: URI): Path | undefined {
+        if (!this.isServerProxyUri(uri) || !uri.path) {
             return undefined;
         }
 
@@ -99,10 +123,10 @@ export namespace ServerProxyOpenHandler {
         return new Path(result);
     }
 
-    export async function open(openerService: OpenerService, instance: ServerProxyInstance, path?: string): Promise<ServerProxyWidget | undefined> {
+    public async openInstance(instance: ServerProxyInstance, path?: string): Promise<ServerProxyWidget | undefined> {
         const result = await genericOpen(
-            openerService,
-            getOpenUri(instance, path)
+            this.openerService,
+            this.getOpenUri(instance, path)
         );
 
         return result as ServerProxyWidget;
