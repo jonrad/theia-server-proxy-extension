@@ -101,7 +101,7 @@ export class RStudioServerProxyContribution implements ServerProxyContribution {
 
             // TODO https
             // this should probably be changed altogether to not depend on the user's request
-            redirect = redirect.replace('http://localhost:8787/', `http://${hostname}${serverProxyBasePath}`);
+            redirect = redirect.replace('http://localhost:8787/', `http://${hostname}${this.serverProxyUrlManager.toPublicPath(serverProxyBasePath)}`);
             console.log(`Settings redirect from '${proxyRes.headers.location}' to '${redirect}'`);
             proxyRes.headers.location = redirect
         };

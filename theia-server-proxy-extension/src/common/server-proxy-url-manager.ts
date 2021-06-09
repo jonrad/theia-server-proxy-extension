@@ -87,6 +87,10 @@ export class ServerProxyUrlManager {
         return `${this.serverProxyPublicRootPath}/${serverProxy.id}/`;
     }
 
+    public toPublicPath(path: string): string {
+        return `${this.theiaHomePath || '/'}${path}`;
+    }
+
     public getPublicPath(serverProxy: ServerProxy, serverProxyInstanceId: string, subPath?: string): string {
         return `${this.serverProxyPublicRootPath}/${serverProxy.id}/${serverProxyInstanceId}/${subPath?.replace(/^\//, '') || ''}`;
     }
