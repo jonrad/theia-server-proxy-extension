@@ -18,13 +18,14 @@ import * as express from 'express';
 import * as http from 'http';
 import * as https from 'https';
 import * as net from 'net';
-import { injectable, inject } from 'inversify';
+import { injectable, inject, postConstruct } from 'inversify';
 import { BackendApplicationCliContribution, BackendApplicationContribution } from '@theia/core/lib/node/backend-application';
 import { createProxyMiddleware, Options, RequestHandler } from 'http-proxy-middleware';
 import { ServerProxyInstanceManager } from './server-proxy-instance-manager';
 import { ServerProxyManager } from './server-proxy-manager';
 import * as querystring from 'querystring';
 import { ServerProxyUrlManager } from '../common/server-proxy-url-manager';
+import { ILogger, LogLevel } from '@theia/core';
 
 @injectable()
 export class ServerProxyExpressContribution implements BackendApplicationContribution {
@@ -40,11 +41,36 @@ export class ServerProxyExpressContribution implements BackendApplicationContrib
     @inject(ServerProxyUrlManager)
     private readonly serverProxyUrlManager: ServerProxyUrlManager;
 
+    @inject(ILogger)
+    private readonly logger: ILogger;
+
     private middlewaresByServerProxyId: Map<string, RequestHandler> = new Map<string, RequestHandler>();
 
     private homePathProxy: RequestHandler | undefined;
 
     private theiaHomePath: string;
+
+    private middlewareLogLevel: 'debug' | 'info' | 'warn' | 'error' | 'silent' = 'info';
+
+    @postConstruct()
+    public async init(): Promise<void> {
+        const logLevel = await this.logger.getLogLevel();
+        switch (logLevel) {
+            case LogLevel.DEBUG:
+            case LogLevel.TRACE:
+                this.middlewareLogLevel = 'debug';
+                break;
+            case LogLevel.WARN:
+                this.middlewareLogLevel = 'warn';
+                break;
+            case LogLevel.ERROR:
+                this.middlewareLogLevel = 'error';
+                break;
+            case LogLevel.FATAL:
+                this.middlewareLogLevel = 'silent';
+                break;
+        }
+    }
 
     configure(app: express.Application): void {
         this.theiaHomePath = this.serverProxyUrlManager.theiaHomePath;
@@ -56,6 +82,16 @@ export class ServerProxyExpressContribution implements BackendApplicationContrib
                 target: "http://localhost:31337", // not used, but is required by http-proxy-middleware
                 ws: true,
                 changeOrigin: true,
+                logLevel: this.middlewareLogLevel,
+                logProvider: () => {
+                    return {
+                        log: (...args: any[]) => this.logger.log(LogLevel.INFO, args),
+                        debug: (...args: any[]) => this.logger.debug(args[0], args.slice(1)),
+                        info: (...args: any[]) => this.logger.info(args[0], args.slice(1)),
+                        warn: (...args: any[]) => this.logger.warn(args[0], args.slice(1)),
+                        error: (...args: any[]) => this.logger.error(args[0], args.slice(1)),
+                    };
+                },
                 router: (req) => {
                     //TODO optimize
                     const path = req.path || req.url;
