@@ -108,7 +108,7 @@ export class RStudioServerProxyContribution implements ServerProxyContribution {
 
         const baseOnProxyReq = baseOptions.onProxyReq;
         baseOptions.onProxyReq = (proxyReq, request, response) => {
-            if (request.url == "/rpc/set_user_state") {
+            if (request.url == "/rpc/set_user_state" || request.url == "/rpc/set_client_state") {
                 const json = request.body;
                 this.clientId = json.clientId;
                 this.clientVersion = json.clientVersion;
