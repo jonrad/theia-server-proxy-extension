@@ -11,4 +11,4 @@ RUN yarn
 
 WORKDIR /home/gitpod
 
-RUN echo "cp /workspace/theia-server-proxy-extension/startup.sh /theia/startup.sh && chmod 755 /theia/startup.sh" >> /home/gitpod/.bashrc
+RUN echo "sudo cp /workspace/theia-server-proxy-extension/startup.sh /theia/startup.sh && sudo chmod 755 /theia/startup.sh" >> /home/gitpod/.bashrc
