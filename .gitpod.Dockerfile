@@ -10,3 +10,5 @@ RUN git init && \
 RUN yarn
 
 WORKDIR /home/gitpod
+
+RUN echo "node /home/gitpod/theia/browser-app/src-gen/backend/main.js /workspace/theia-server-proxy-extension/demo --port 23000 --hostname 0.0.0.0" >> /home/gitpod/.bashrc
