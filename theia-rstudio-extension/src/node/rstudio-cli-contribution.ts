@@ -15,18 +15,28 @@
  ********************************************************************************/
 
 import { CliContribution } from '@theia/core/lib/node';
-import { ContainerModule, interfaces } from 'inversify';
+import { injectable } from '@theia/core/shared/inversify';
+import * as yargs from 'yargs';
 
-import { ServerProxyContribution } from 'theia-server-proxy-extension/lib/node/server-proxy-contribution';
-import { RStudioCliContribution } from './rstudio-cli-contribution';
-import { RStudioServerProxyContribution, RStudioServerProxyInstanceBuilder } from './rstudio-server-proxy-contribution';
+const ARG_RSTUDIO_VERSION = 'rstudio-old-version';
 
-export default new ContainerModule((bind: interfaces.Bind) => {
-    bind(RStudioServerProxyInstanceBuilder).toSelf();
+@injectable()
+export class RStudioCliContribution implements CliContribution {
+    public rstudioOldVersion: boolean;
 
-    bind(RStudioCliContribution).toSelf().inSingletonScope();
-    bind(CliContribution).toService(RStudioCliContribution);
+    public isOldRStudio(): boolean {
+        return this.rstudioOldVersion;
+    }
 
-    bind(RStudioServerProxyContribution).toSelf();
-    bind(ServerProxyContribution).toService(RStudioServerProxyContribution);
-});
+    public isNewRStudio(): boolean {
+        return !this.isOldRStudio();
+    }
+
+    public configure(conf: yargs.Argv): void {
+        conf.option(ARG_RSTUDIO_VERSION, { description: 'Old RStudio Version', type: 'boolean', default: false });
+    }
+
+    public async setArguments(args: yargs.Arguments): Promise<void> {
+        this.rstudioOldVersion = args[ARG_RSTUDIO_VERSION] as boolean;
+    }
+}
