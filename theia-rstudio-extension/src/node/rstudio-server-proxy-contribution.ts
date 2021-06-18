@@ -171,7 +171,6 @@ export class RStudioServerProxyContribution implements ServerProxyContribution {
                 proxyReq.path = '/rpc/console_input';
 
                 proxyReq.write(bodyStringified)
-                console.log(`Sending ${bodyStringified}`)
                 return;
             }
 
