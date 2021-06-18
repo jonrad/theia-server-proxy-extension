@@ -2,6 +2,7 @@ FROM gitpod/workspace-full
 
 RUN mkdir -p /home/gitpod/theia
 WORKDIR /home/gitpod/theia
+RUN echo ok
 ARG commitId=gitpod
 RUN git init && \
   git remote add origin https://github.com/jonrad/theia-server-proxy-extension.git && \
@@ -11,4 +12,4 @@ RUN git init && \
 
 WORKDIR /home/gitpod
 
-RUN echo "bash /home/giitpod/theia/gitpod/install.sh" >> /home/gitpod/.bashrc
+RUN echo "bash /home/gitpod/theia/gitpod/install.sh" >> /home/gitpod/.bashrc
