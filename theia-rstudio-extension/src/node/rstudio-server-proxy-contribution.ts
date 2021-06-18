@@ -24,6 +24,8 @@ import * as http from 'http';
 import * as os from 'os';
 import { Extension } from '../common/const';
 import { ServerProxyUrlManager } from 'theia-server-proxy-extension/lib/common/server-proxy-url-manager';
+import { ILogger } from '@theia/core';
+import { RStudioCliContribution } from './rstudio-cli-contribution';
 
 @injectable()
 export class RStudioServerProxyInstanceBuilder extends BaseServerProxyInstanceBuilder<void> {
@@ -69,8 +71,14 @@ export class RStudioServerProxyContribution implements ServerProxyContribution {
 
     name: string = "RStudio";
 
+    @inject(ILogger)
+    protected readonly logger: ILogger;
+
     @inject(ServerProxyUrlManager)
     protected readonly serverProxyUrlManager: ServerProxyUrlManager;
+
+    @inject(RStudioCliContribution)
+    protected readonly rstudioCliContribution: RStudioCliContribution;
 
     protected instance: ServerProxyInstance | undefined;
 
@@ -123,16 +131,46 @@ export class RStudioServerProxyContribution implements ServerProxyContribution {
                 const body = request.body;
                 delete request.body;
 
-                body.clientId = this.clientId;
-                body.clientVersion = this.clientVersion;
+                if (!body.method || !body.params) {
+                    this.logger.warn(`Improperly formatted theia_remote command. Body: ${body}`)
+                    baseOnProxyReq?.(proxyReq, request, response);
+                    return;
+                }
 
-                const bodyStringified = JSON.stringify(body);
+                const newBody: any | undefined = (() => {
+                    switch (body.method) {
+                        case "navigate_to_file":
+                            const params: any[] = [`rstudioapi::navigateToFile('${body.params.file.replace("'", "\\'")}')`, ""]
+
+                            if (this.rstudioCliContribution.isNewRStudio()) {
+                                params.push(0)
+                            }
+
+                            return {
+                                method: "console_input",
+                                params: params,
+                            };
+
+                            break;
+                    }
+                })();
+
+                if (!newBody) {
+                    this.logger.warn(`Improperly formatted theia_remote command. Body: ${body}`)
+                    return;
+                }
+
+                newBody.clientId = this.clientId;
+                newBody.clientVersion = this.clientVersion;
+
+                const bodyStringified = JSON.stringify(newBody)
+
                 proxyReq.setHeader('Content-Length', bodyStringified.length);
-
                 proxyReq.setHeader('X-CSRF-Token', this.csrfToken);
 
                 proxyReq.path = '/rpc/console_input';
-                proxyReq.write(bodyStringified);
+
+                proxyReq.write(bodyStringified)
                 return;
             }
 

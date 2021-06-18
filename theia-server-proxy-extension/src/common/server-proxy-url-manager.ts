@@ -88,6 +88,10 @@ export class ServerProxyUrlManager {
     }
 
     public toPublicPath(path: string): string {
+        if (path.startsWith('/')) {
+            path = path.substring(1)
+        }
+
         return `${this.theiaHomePath || '/'}${path}`;
     }
 

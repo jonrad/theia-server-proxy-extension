@@ -97,9 +97,10 @@ export class RStudioOpenHandler implements OpenHandler {
         }
 
         const data = JSON.stringify({
-            method: "console_input",
-            //TODO: is this the proper escaping
-            params: [`rstudioapi::navigateToFile("${uri.path.toString().replace('"', '\\"')}")`, "", 0],
+            method: "navigate_to_file",
+            params: {
+                file: uri.path.toString()
+            }
         });
 
         const url = this.serverProxyUrlManager.getPublicPath(
