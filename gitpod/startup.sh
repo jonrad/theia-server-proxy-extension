@@ -31,4 +31,4 @@ export USER=gitpod
 [ -s ~/.nvm/nvm-lazy.sh ] && source ~/.nvm/nvm-lazy.sh
 
 cd /theia/theia-app/app
-cd /home/gitpod/theia/ && node /home/gitpod/theia/browser-app/src-gen/backend/main.js /workspace/theia-server-proxy-extension/demo --port 23000 --hostname 0.0.0.0
+exec node ./src-gen/backend/main.js $*
