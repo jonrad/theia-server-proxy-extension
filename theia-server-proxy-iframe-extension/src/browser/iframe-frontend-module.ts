@@ -21,26 +21,26 @@ import '../../src/browser/style/index.css';
 import { AbstractViewContribution, bindViewContribution, FrontendApplicationContribution, ViewContainer, ViewContainerTitleOptions, Widget, WidgetFactory, WidgetManager } from '@theia/core/lib/browser';
 import { IFrameStatus } from './iframe-status';
 
-// https://fontawesome.com/v4.7/icons/
-export const SCM_VIEW_CONTAINER_TITLE_OPTIONS: ViewContainerTitleOptions = {
-    label: '',
-    iconClass: 'fa fa-git',
-    closeable: false
+export namespace IFramePanel {
+    export const ID: string = "iframe.panel";
+
+    export const VIEW_ID: string = "frame.panel.view";
+}
+
+export interface IFramePanelOptions {
+    readonly id: string,
+    readonly url: string
 };
+// https://fontawesome.com/v4.7/icons/
 
 @injectable()
 export class SampleUnclosableViewContribution extends AbstractViewContribution<Widget> implements FrontendApplicationContribution {
 
-    static readonly SAMPLE_UNCLOSABLE_VIEW_TOGGLE_COMMAND_ID = 'sampleUnclosableView:toggle';
-
-    protected toolbarItemState = false;
-
     constructor() {
         super({
-            viewContainerId: "fooContainer",
-            widgetId: "fooWidget",
+            widgetId: IFramePanel.VIEW_ID,
             widgetName: 'Sample Unclosable View',
-            toggleCommandId: SampleUnclosableViewContribution.SAMPLE_UNCLOSABLE_VIEW_TOGGLE_COMMAND_ID,
+            // toggleCommandId: 'sampleUnclosableView:toggle',
             defaultWidgetOptions: {
                 area: 'left',
                 rank: 500
@@ -53,37 +53,40 @@ export class SampleUnclosableViewContribution extends AbstractViewContribution<W
     }
 }
 
-
 export default new ContainerModule((bind: interfaces.Bind) => {
     bind(WidgetFactory).toDynamicValue(ctx => ({
-        id: "fooWidget",
-        createWidget: () => {
+        id: IFramePanel.ID,
+        createWidget: (panelOptions: IFramePanelOptions) => {
             const widgetManager = ctx.container.get<WidgetManager>(WidgetManager);
-            const options: IFrameWidgetOptions = {
-                id: "fooWidget",
-                name: "fooWidget",
-                startUrl: "http://www.example.com",
+            const widgetOptions: IFrameWidgetOptions = {
+                id: panelOptions.id,
+                name: panelOptions.id,
+                startUrl: panelOptions.url,
                 mode: IFrameWidgetMode.IFrame,
                 status: IFrameStatus.ready
             };
-            console.log("Creating iframe widget")
 
-            return widgetManager.getOrCreateWidget(IFrameWidget.ID, options);
+            return widgetManager.getOrCreateWidget(IFrameWidget.ID, widgetOptions);
         }
     }));
     bind(WidgetFactory).toDynamicValue(({ container }) => ({
-        id: "fooContainer",
+        id: IFramePanel.VIEW_ID,
         createWidget: async () => {
+            console.log("in view create")
             const viewContainer = container.get<ViewContainer.Factory>(ViewContainer.Factory)({
-                id: "fooContainer",
+                id: IFramePanel.VIEW_ID,
             });
 
             viewContainer.title.label = "label here"
             viewContainer.title.closable = false
-            viewContainer.title.iconClass = SCM_VIEW_CONTAINER_TITLE_OPTIONS.iconClass!;
+            viewContainer.title.iconClass = 'fa fa-git';
 
             // viewContainer.setTitleOptions(SCM_VIEW_CONTAINER_TITLE_OPTIONS);
-            const widget = await container.get(WidgetManager).getOrCreateWidget("fooWidget");
+            const widget = await container.get(WidgetManager).getOrCreateWidget(IFramePanel.ID, {
+                id: "foo",
+                url: "http://www.example.com"
+            });
+
             viewContainer.addWidget(widget, {
                 canHide: false,
                 initiallyCollapsed: false
