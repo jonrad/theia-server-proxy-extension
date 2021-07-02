@@ -14,13 +14,90 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { ContainerModule, interfaces } from 'inversify';
-import { IFrameWidget, IFrameWidgetOptions } from './iframe-widget';
+import { ContainerModule, injectable, interfaces } from 'inversify';
+import { IFrameWidget, IFrameWidgetMode, IFrameWidgetOptions } from './iframe-widget';
 
 import '../../src/browser/style/index.css';
-import { WidgetFactory } from '@theia/core/lib/browser';
+import { AbstractViewContribution, bindViewContribution, FrontendApplicationContribution, ViewContainer, ViewContainerTitleOptions, Widget, WidgetFactory, WidgetManager } from '@theia/core/lib/browser';
+import { IFrameStatus } from './iframe-status';
+
+// https://fontawesome.com/v4.7/icons/
+export const SCM_VIEW_CONTAINER_TITLE_OPTIONS: ViewContainerTitleOptions = {
+    label: '',
+    iconClass: 'fa fa-git',
+    closeable: false
+};
+
+@injectable()
+export class SampleUnclosableViewContribution extends AbstractViewContribution<Widget> implements FrontendApplicationContribution {
+
+    static readonly SAMPLE_UNCLOSABLE_VIEW_TOGGLE_COMMAND_ID = 'sampleUnclosableView:toggle';
+
+    protected toolbarItemState = false;
+
+    constructor() {
+        super({
+            viewContainerId: "fooContainer",
+            widgetId: "fooWidget",
+            widgetName: 'Sample Unclosable View',
+            toggleCommandId: SampleUnclosableViewContribution.SAMPLE_UNCLOSABLE_VIEW_TOGGLE_COMMAND_ID,
+            defaultWidgetOptions: {
+                area: 'left',
+                rank: 500
+            }
+        });
+    }
+
+    async initializeLayout(): Promise<void> {
+        await this.openView();
+    }
+}
+
 
 export default new ContainerModule((bind: interfaces.Bind) => {
+    bind(WidgetFactory).toDynamicValue(ctx => ({
+        id: "fooWidget",
+        createWidget: () => {
+            const widgetManager = ctx.container.get<WidgetManager>(WidgetManager);
+            const options: IFrameWidgetOptions = {
+                id: "fooWidget",
+                name: "fooWidget",
+                startUrl: "http://www.example.com",
+                mode: IFrameWidgetMode.IFrame,
+                status: IFrameStatus.ready
+            };
+            console.log("Creating iframe widget")
+
+            return widgetManager.getOrCreateWidget(IFrameWidget.ID, options);
+        }
+    }));
+    bind(WidgetFactory).toDynamicValue(({ container }) => ({
+        id: "fooContainer",
+        createWidget: async () => {
+            const viewContainer = container.get<ViewContainer.Factory>(ViewContainer.Factory)({
+                id: "fooContainer",
+            });
+
+            viewContainer.title.label = "label here"
+            viewContainer.title.closable = false
+            viewContainer.title.iconClass = SCM_VIEW_CONTAINER_TITLE_OPTIONS.iconClass!;
+
+            // viewContainer.setTitleOptions(SCM_VIEW_CONTAINER_TITLE_OPTIONS);
+            const widget = await container.get(WidgetManager).getOrCreateWidget("fooWidget");
+            viewContainer.addWidget(widget, {
+                canHide: false,
+                initiallyCollapsed: false
+            });
+
+            viewContainer.getPartFor(widget)?.hideTitle();
+
+            return viewContainer;
+        }
+    })).inSingletonScope();
+
+    bindViewContribution(bind, SampleUnclosableViewContribution);
+    bind(FrontendApplicationContribution).toService(SampleUnclosableViewContribution);
+
     bind(IFrameWidget).toSelf();
     bind(WidgetFactory).toDynamicValue(context => ({
         id: IFrameWidget.ID,
