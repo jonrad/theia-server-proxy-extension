@@ -24,9 +24,7 @@ import { CommandContribution, MenuContribution } from '@theia/core';
 import { inject } from '@theia/core/shared/inversify';
 
 export namespace IFramePanel {
-    export const ID: string = "iframe.panel";
-
-    export const VIEW_ID: string = "frame.panel.view";
+    export const ID: string = "frame.panel";
 }
 
 export const IFramePanelOptions = "IFramePanelOptions"
@@ -58,8 +56,6 @@ class IFramePanelSettingsHardcoded implements IFramePanelSettings {
         }];
     }
 }
-
-// https://fontawesome.com/v4.7/icons/
 
 export abstract class AbstractViewWithOptionsContribution<T extends Widget> extends AbstractViewContribution<T> {
     constructor(
@@ -108,6 +104,7 @@ export abstract class AbstractViewWithOptionsContribution<T extends Widget> exte
             }
             return this.widget;
         }
+
         if (widget.isAttached && args.activate) {
             await widget.activate();
         }
@@ -122,7 +119,7 @@ export class IFramePanelViewContribution extends AbstractViewWithOptionsContribu
         @inject(IFramePanelOptions) options: IFramePanelOptions
     ) {
         super({
-            widgetId: IFramePanel.VIEW_ID,
+            widgetId: IFramePanel.ID,
             widgetName: options.name,
             toggleCommandId: `${options.id}:toggle`,
             defaultWidgetOptions: {
@@ -149,35 +146,28 @@ export class IFramePanelFrontendContribution implements FrontendApplicationContr
 export default new ContainerModule((bind: interfaces.Bind) => {
     bind(IFramePanelSettings).to(IFramePanelSettingsHardcoded).inSingletonScope();
 
-    bind(WidgetFactory).toDynamicValue(ctx => ({
-        id: IFramePanel.ID,
-        createWidget: (panelOptions: IFramePanelOptions) => {
-            const widgetManager = ctx.container.get<WidgetManager>(WidgetManager);
-            const widgetOptions: IFrameWidgetOptions = {
-                id: panelOptions.id,
-                name: panelOptions.id,
-                startUrl: panelOptions.url,
-                mode: IFrameWidgetMode.IFrame,
-                status: IFrameStatus.ready
-            };
-
-            return widgetManager.getOrCreateWidget(IFrameWidget.ID, widgetOptions);
-        }
-    }));
-
     bind(WidgetFactory).toDynamicValue(({ container }) => ({
-        id: IFramePanel.VIEW_ID,
+        id: IFramePanel.ID,
         createWidget: async (options: IFramePanelOptions) => {
             const viewContainer = container.get<ViewContainer.Factory>(ViewContainer.Factory)({
-                id: IFramePanel.VIEW_ID,
+                id: IFramePanel.ID,
             });
 
             viewContainer.title.label = options.name;
             viewContainer.title.closable = false
             viewContainer.title.iconClass = options.icon;
 
-            // viewContainer.setTitleOptions(SCM_VIEW_CONTAINER_TITLE_OPTIONS);
-            const widget = await container.get(WidgetManager).getOrCreateWidget(IFramePanel.ID, options);
+            // const widget = await container.get(WidgetManager).getOrCreateWidget(IFramePanel.ID, options);
+            const widgetManager = container.get<WidgetManager>(WidgetManager);
+            const widgetOptions: IFrameWidgetOptions = {
+                id: options.id,
+                name: options.id,
+                startUrl: options.url,
+                mode: IFrameWidgetMode.IFrame,
+                status: IFrameStatus.ready
+            };
+
+            const widget = await widgetManager.getOrCreateWidget(IFrameWidget.ID, widgetOptions);
 
             viewContainer.addWidget(widget, {
                 canHide: false,
