@@ -5,7 +5,7 @@
     "bootstrap": "lerna bootstrap",
     "prepare": "lerna run prepare",
     "rebuild:browser": "theia rebuild --target=browser",
-    "start:browser": "yarn rebuild:browser && yarn --cwd browser-app start --hostname 0.0.0.0",
+    "start:browser": "yarn rebuild:browser && yarn --cwd packages/browser-app start --hostname 0.0.0.0",
     "watch": "lerna run --parallel watch",
     "build:docker": "docker build . -t jonrad/theia-datascience",
     "publish:docker": "yarn build:docker && docker push jonrad/theia-datascience"
@@ -17,12 +17,7 @@
     "**/**/nsfw": "1.2.9"
   },
   "workspaces": [
-    "theia-server-proxy-iframe-extension",
-    "theia-server-proxy-extension",
-    "theia-server-proxy-list-extension",
-    "theia-jupyter-extension",
-    "theia-rstudio-extension",
-    "browser-app"
+    "packages/*"
   ],
   "homepage": "https://github.com/jonrad/theia-server-proxy-extension",
   "version": "0.0.1"
