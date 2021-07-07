@@ -20,7 +20,7 @@ import { IFrameStatus } from 'theia-server-proxy-iframe-extension/lib/browser/if
 
 import { FrontendApplicationContribution, KeybindingContribution, ViewContainer, WidgetFactory, WidgetManager } from '@theia/core/lib/browser';
 import { bindContributionProvider, CommandContribution, MenuContribution } from '@theia/core';
-import { IFramePanelOptions, IFramePanelsContribution, IFrameSidePanels, IFramePanel } from "./iframe-panels"
+import { IFramePanelOptions, IFramePanelsContribution, IFramePanels, IFramePanel } from "./iframe-panels"
 
 export default new ContainerModule((bind: interfaces.Bind) => {
     bindContributionProvider(bind, IFramePanelsContribution);
@@ -61,9 +61,9 @@ export default new ContainerModule((bind: interfaces.Bind) => {
         }
     })).inSingletonScope();
 
-    bind(IFrameSidePanels).toSelf().inSingletonScope();
-    bind(FrontendApplicationContribution).toService(IFrameSidePanels);
-    bind(CommandContribution).toService(IFrameSidePanels);
-    bind(KeybindingContribution).toService(IFrameSidePanels);
-    bind(MenuContribution).toService(IFrameSidePanels);
+    bind(IFramePanels).toSelf().inSingletonScope();
+    bind(FrontendApplicationContribution).toService(IFramePanels);
+    bind(CommandContribution).toService(IFramePanels);
+    bind(KeybindingContribution).toService(IFramePanels);
+    bind(MenuContribution).toService(IFramePanels);
 });

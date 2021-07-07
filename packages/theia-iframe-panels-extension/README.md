@@ -1,2 +1,2 @@
-# Theia Server Proxy IFrame
+# Theia Server Proxy IFrame Panel
 

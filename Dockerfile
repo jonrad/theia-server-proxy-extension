@@ -30,12 +30,13 @@ WORKDIR /home/theia
 # Install dependencies
 COPY lerna.json .
 COPY package.json .
-COPY theia-jupyter-extension/*.json ./theia-jupyter-extension/
-COPY theia-rstudio-extension/*.json ./theia-rstudio-extension/
-COPY theia-server-proxy-extension/*.json ./theia-server-proxy-extension/
-COPY theia-server-proxy-iframe-extension/*.json ./theia-server-proxy-iframe-extension/
-COPY theia-server-proxy-list-extension/*.json ./theia-server-proxy-list-extension/
-COPY browser-app/*.json ./browser-app/
+COPY packages/theia-jupyter-extension/*.json ./packages/theia-jupyter-extension/
+COPY packages/theia-rstudio-extension/*.json ./packages/theia-rstudio-extension/
+COPY packages/theia-server-proxy-extension/*.json ./packages/theia-server-proxy-extension/
+COPY packages/theia-server-proxy-iframe-extension/*.json ./packages/theia-server-proxy-iframe-extension/
+COPY packages/theia-server-proxy-list-extension/*.json ./packages/theia-server-proxy-list-extension/
+COPY packages/theia-iframe-panels-extension/*.json ./packages/theia-iframe-panels-extension/
+COPY packages/browser-app/*.json ./packages/browser-app/
 
 RUN IGNORE_PREPARE=1 yarn install && \
     yarn autoclean --init && \
@@ -52,4 +53,4 @@ RUN mkdir -p /home/project && mv demo/* /home/project/ && rm -rf demo
 
 # And away we go
 EXPOSE 3000
-ENTRYPOINT ["node", "/home/theia/browser-app/src-gen/backend/main.js", "/home/project", "--hostname", "0.0.0.0"]
+ENTRYPOINT ["node", "/home/theia/packages/browser-app/src-gen/backend/main.js", "/home/project", "--hostname", "0.0.0.0"]

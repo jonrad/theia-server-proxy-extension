@@ -42,7 +42,7 @@ export interface IFramePanelsContribution {
 }
 
 @injectable()
-export class IFrameSidePanels implements FrontendApplicationContribution, CommandContribution, MenuContribution, KeybindingContribution {
+export class IFramePanels implements FrontendApplicationContribution, CommandContribution, MenuContribution, KeybindingContribution {
     @inject(WidgetManager) protected readonly widgetManager: WidgetManager;
     @inject(ApplicationShell) protected readonly shell: ApplicationShell;
     @inject(QuickViewService) protected readonly quickView: QuickViewService;
