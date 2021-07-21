@@ -104,27 +104,22 @@ export class IFrameWidget extends BaseWidget {
     }
 
     protected async buildIframe(url: string): Promise<HTMLElement> {
-        if (this.options.mode == IFrameWidgetMode.MiniBrowser) {
-            const miniBrowser = this.widget = await this.widgetManager.getOrCreateWidget<MiniBrowser>(
-                MiniBrowser.ID,
-                {
-                    iframeId: this.id,
-                    uri: new URI(this.options.startUrl)
-                } as MiniBrowserOptions);
+        const miniBrowser = this.widget = await this.widgetManager.getOrCreateWidget<MiniBrowser>(
+            MiniBrowser.ID,
+            {
+                iframeId: this.id,
+                uri: new URI(this.options.startUrl)
+            } as MiniBrowserOptions);
 
-            this.toDispose.push(miniBrowser);
-            miniBrowser.setProps({
-                startPage: this.options.startUrl
-            });
+        this.toDispose.push(miniBrowser);
+        miniBrowser.setProps({
+            startPage: this.options.startUrl,
+            toolbar: this.options.mode == IFrameWidgetMode.MiniBrowser ? 'show' : 'hide'
+        });
 
-            miniBrowser.node.className = IFrameContentStyle.FULLSCREEN;
-            return miniBrowser.node;
-        } else {
-            const iframe = document.createElement('iframe');
-            iframe.src = url;
-            iframe.className = IFrameContentStyle.FULLSCREEN;
-            return iframe;
-        }
+        miniBrowser.node.className = IFrameContentStyle.FULLSCREEN;
+
+        return miniBrowser.node;
     }
 }
 
