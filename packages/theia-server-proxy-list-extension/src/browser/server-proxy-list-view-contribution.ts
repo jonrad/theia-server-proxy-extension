@@ -14,6 +14,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
+import { ViewContributionOptions } from "@theia/core/lib/browser";
 import { AbstractViewContribution, FrontendApplicationContribution } from "@theia/core/lib/browser";
 import { PROBLEM_KIND } from "@theia/markers/lib/common/problem-marker";
 import { ServerProxyListWidget } from "./server-proxy-list-widget";
@@ -25,7 +26,7 @@ const ServerProxyListCommand = {
 
 export class ServerProxyListViewContribution extends AbstractViewContribution<ServerProxyListWidget> implements FrontendApplicationContribution {
     constructor() {
-        super({
+        const options: ViewContributionOptions = {
             widgetId: ServerProxyListWidget.ID,
             widgetName: ServerProxyListWidget.LABEL,
             defaultWidgetOptions: {
@@ -33,7 +34,9 @@ export class ServerProxyListViewContribution extends AbstractViewContribution<Se
                 rank: 200,
             },
             toggleCommandId: ServerProxyListCommand.id
-        });
+        };
+
+        super(options);
     }
 
     async initializeLayout(): Promise<void> {

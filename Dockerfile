@@ -3,7 +3,7 @@ FROM node:14
 # Note: This Dockerfile is more optimized for iteration rather than image size
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
-    apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common yarn && \
+    apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common yarn libsecret-1-dev && \
     apt-get clean autoclean && apt-get autoremove --yes
 
 # Jupyter

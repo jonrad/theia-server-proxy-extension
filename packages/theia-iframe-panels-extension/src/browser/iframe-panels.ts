@@ -20,7 +20,7 @@ import { CommonMenus } from '@theia/core/lib/browser/common-frontend-contributio
 import { ApplicationShell, FrontendApplicationContribution, KeybindingContribution, KeybindingRegistry, Widget, WidgetManager } from '@theia/core/lib/browser';
 import { CommandContribution, CommandRegistry, ContributionProvider, MenuContribution, MenuModelRegistry } from '@theia/core';
 import { inject, named } from '@theia/core/shared/inversify';
-import { QuickViewService } from '@theia/core/lib/browser/quick-view-service';
+import { QuickViewService } from '@theia/core/lib/browser/quick-input';
 
 export namespace IFramePanel {
     export const ID: string = "iframe.panel";
