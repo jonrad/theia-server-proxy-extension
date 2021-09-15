@@ -5,7 +5,7 @@
   ],
   "license": "EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0",
   "homepage": "https://github.com/jonrad/theia-server-proxy-extension",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "files": [
     "lib",
     "src"
@@ -17,7 +17,7 @@
     "@theia/mini-browser": "1.17.2",
     "@theia/plugin-ext": "1.17.2",
     "@theia/workspace": "1.17.2",
-    "theia-server-proxy-iframe-extension": "^0.0.17"
+    "theia-server-proxy-iframe-extension": "^0.0.18"
   },
   "devDependencies": {
     "rimraf": "latest",
