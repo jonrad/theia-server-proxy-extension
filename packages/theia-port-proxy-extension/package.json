@@ -1,0 +1,35 @@
+{
+  "name": "theia-port-proxy-extension",
+  "keywords": [
+    "theia-extension"
+  ],
+  "version": "0.0.18",
+  "files": [
+    "lib",
+    "src"
+  ],
+  "license": "EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0",
+  "homepage": "https://github.com/jonrad/theia-server-proxy-extension",
+  "dependencies": {
+    "@theia/core": "1.17.2",
+    "@theia/navigator": "1.17.2",
+    "http-proxy-middleware": "^1.0.6",
+    "theia-server-proxy-extension": "^0.0.18"
+  },
+  "devDependencies": {
+    "rimraf": "latest",
+    "typescript": "latest"
+  },
+  "scripts": {
+    "prepare": "test -n \"$IGNORE_PREPARE\" || (yarn run clean && yarn run build)",
+    "clean": "rimraf lib",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "theiaExtensions": [
+    {
+      "backend": "lib/node/port-proxy-backend-module",
+      "frontend": "lib/browser/port-proxy-frontend-module"
+    }
+  ]
+}

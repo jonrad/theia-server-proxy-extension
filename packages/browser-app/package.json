@@ -19,6 +19,7 @@
     "theia-iframe-panels-extension": "^0.0.18",
     "theia-jupyter-extension": "^0.0.18",
     "theia-rstudio-extension": "^0.0.18",
+    "theia-port-proxy-extension": "^0.0.18",
     "theia-server-proxy-list-extension": "^0.0.18"
   },
   "devDependencies": {

@@ -15,7 +15,7 @@
  ********************************************************************************/
 
 import { Options, RequestHandler } from "http-proxy-middleware";
-import { ServerProxyInstance } from "./server-proxy-instance";
+import { ProcessServerProxyInstance, ServerProxyInstance } from "./server-proxy-instance";
 import { RawProcessFactory, RawProcessOptions } from '@theia/process/lib/node';
 import { inject, injectable } from 'inversify';
 import * as getAvailablePort from 'get-port';
@@ -94,7 +94,7 @@ export abstract class BaseServerProxyInstanceBuilder<T> implements ServerProxyIn
 
         const rawProcess = this.rawProcessFactory(options);
 
-        return new ServerProxyInstance(
+        return new ProcessServerProxyInstance(
             instanceId,
             context,
             this.serverProxy.id,

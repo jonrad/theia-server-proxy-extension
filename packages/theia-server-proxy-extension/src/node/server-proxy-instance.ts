@@ -22,7 +22,25 @@ import { ServerProxyInstanceStatus, StatusId } from '../common/server-proxy';
 const RETRY_TIME = 1_000;
 const TIMEOUT = 30_000;
 
-export class ServerProxyInstance implements Disposable {
+export interface ServerProxyInstance extends Disposable {
+    readonly id: string;
+
+    readonly serverProxyId: string;
+
+    readonly context: any;
+
+    readonly port: number;
+
+    get status(): ServerProxyInstanceStatus;
+
+    readonly statusChanged: Event<ServerProxyInstanceStatus>;
+
+    stop(): Promise<boolean>;
+
+    init(): Promise<void>;
+}
+
+export abstract class AbstractServerProxyInstance implements ServerProxyInstance {
     public readonly statusChanged: Event<ServerProxyInstanceStatus>;
     private readonly statusChangedEmitter: Emitter<ServerProxyInstanceStatus>;
 
@@ -32,31 +50,21 @@ export class ServerProxyInstance implements Disposable {
         return this._status;
     }
 
-    private disposables: Disposable[] = [];
+    protected disposables: Disposable[] = [];
 
     constructor(
         public readonly id: string,
         public readonly context: any,
         public readonly serverProxyId: string,
-        public readonly port: number,
-        private readonly validationUrl: string,
-        private readonly process: RawProcess
+        public readonly port: number
     ) {
         this.statusChangedEmitter = new Emitter<ServerProxyInstanceStatus>();
         this.statusChanged = this.statusChangedEmitter.event;
 
         this.setStatus(StatusId.starting);
-
-        this.disposables.push(process.onClose(() => {
-            this.setStatus(StatusId.stopped);
-        }));
-
-        this.disposables.push(process.onError((e: Error) => {
-            this.setStatus(StatusId.errored, e.message);
-        }));
     }
 
-    private setStatus(statusId: StatusId, message?: string) {
+    protected setStatus(statusId: StatusId, message?: string) {
         this._status = {
             instanceId: this.id,
             statusId: statusId,
@@ -65,6 +73,36 @@ export class ServerProxyInstance implements Disposable {
         };
 
         this.statusChangedEmitter.fire(this._status);
+    }
+
+    public abstract stop(): Promise<boolean>;
+
+    public abstract init(): Promise<void>;
+
+    public dispose(): void {
+        this.stop();
+        this.disposables.forEach(d => d.dispose());
+    }
+}
+
+export class ProcessServerProxyInstance extends AbstractServerProxyInstance {
+    constructor(
+        public readonly id: string,
+        public readonly context: any,
+        public readonly serverProxyId: string,
+        public readonly port: number,
+        private readonly validationUrl: string,
+        private readonly process: RawProcess
+    ) {
+        super(id, context, serverProxyId, port);
+
+        this.disposables.push(process.onClose(() => {
+            this.setStatus(StatusId.stopped);
+        }));
+
+        this.disposables.push(process.onError((e: Error) => {
+            this.setStatus(StatusId.errored, e.message);
+        }));
     }
 
     private isAccessible(): Promise<Boolean> {
@@ -111,7 +149,7 @@ export class ServerProxyInstance implements Disposable {
         return false;
     }
 
-    public async stop(): Promise<boolean> {
+    public override async stop(): Promise<boolean> {
         if (ServerProxyInstanceStatus.isCompleted(this.status)) {
             return true;
         }
@@ -124,7 +162,7 @@ export class ServerProxyInstance implements Disposable {
         return await this.doStop('SIGKILL');
     }
 
-    public async init(): Promise<void> {
+    public override async init(): Promise<void> {
         try {
             await this.process.onStart;
             this.setStatus(StatusId.waitingForPort);
@@ -144,10 +182,5 @@ export class ServerProxyInstance implements Disposable {
             await this.stop();
             this.setStatus(StatusId.errored, e.toString());
         }
-    }
-
-    dispose(): void {
-        this.stop();
-        this.disposables.forEach(d => d.dispose());
     }
 }

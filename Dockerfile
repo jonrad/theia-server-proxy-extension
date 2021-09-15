@@ -32,6 +32,7 @@ COPY lerna.json .
 COPY package.json .
 COPY packages/theia-jupyter-extension/*.json ./packages/theia-jupyter-extension/
 COPY packages/theia-rstudio-extension/*.json ./packages/theia-rstudio-extension/
+COPY packages/theia-port-proxy-extension/*.json ./packages/theia-port-proxy-extension/
 COPY packages/theia-server-proxy-extension/*.json ./packages/theia-server-proxy-extension/
 COPY packages/theia-server-proxy-iframe-extension/*.json ./packages/theia-server-proxy-iframe-extension/
 COPY packages/theia-server-proxy-list-extension/*.json ./packages/theia-server-proxy-list-extension/
