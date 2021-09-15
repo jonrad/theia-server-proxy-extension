@@ -17,6 +17,7 @@
 import { injectable, inject } from 'inversify';
 import { ServerProxyContribution, ServerProxyCommand, BaseServerProxyInstanceBuilder } from 'theia-server-proxy-extension/lib/node/server-proxy-contribution';
 import * as path from 'path';
+import { environment } from '@theia/core';
 import { EnvVariablesServer } from '@theia/core/lib/common/env-variables';
 import { Extension } from '../common/const';
 import ServerProxyContext from '../common/server-proxy-context';
@@ -64,6 +65,10 @@ export class JupyterServerProxyInstanceBuilder extends BaseServerProxyInstanceBu
         } else {
             const jupyterPath = (await this.envVariablesServer.getValue(ENV_JUPYTER_PATH))?.value || "jupyter-notebook";
 
+            const tornadoSettings = environment.electron.is() ?
+                `{'headers': {'Content-Security-Policy': \"\"}}` :
+                `{'headers': {'Content-Security-Policy': \"frame-ancestors * 'self' \"}}`;
+
             const command = [
                 jupyterPath,
                 `--NotebookApp.ip=0.0.0.0`,
@@ -71,7 +76,7 @@ export class JupyterServerProxyInstanceBuilder extends BaseServerProxyInstanceBu
                 `--NotebookApp.notebook_dir=${workspacePath}`,
                 `--NotebookApp.base_url=${publicPath}`,
                 `--NotebookApp.token=`,
-                `--NotebookApp.tornado_settings={'headers': {'Content-Security-Policy': \"frame-ancestors * 'self' \"}}`,
+                `--NotebookApp.tornado_settings=${tornadoSettings}`,
                 '--NotebookApp.open_browser=False'
             ];
 
