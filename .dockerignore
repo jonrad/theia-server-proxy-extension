@@ -1,4 +1,5 @@
 .git
+.jonrad
 
 node_modules
 **/node_modules/

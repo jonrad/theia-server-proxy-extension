@@ -6,3 +6,4 @@ lib
 !*-app/package.json
 tmp
 **/src-gen
+.jonrad
