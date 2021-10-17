@@ -13,6 +13,10 @@
     "build:docker": "docker build . -t jonrad/theia-datascience",
     "publish:docker": "yarn build:docker && docker push jonrad/theia-datascience"
   },
+  "engines": {
+    "yarn": "1.0.x || >=1.2.1",
+    "node": ">=12.14.1 <13"
+  },
   "devDependencies": {
     "lerna": "2.4.0",
     "rimraf": "^2.6.1"

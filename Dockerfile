@@ -1,4 +1,4 @@
-FROM node:14
+FROM node:12
 # Generated using docker-diary: https://github.com/jonrad/docker-diary/
 # Note: This Dockerfile is more optimized for iteration rather than image size
 ENV DEBIAN_FRONTEND=noninteractive

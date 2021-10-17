@@ -1,16 +1,26 @@
+# git
 .git
-.jonrad
 
+# docker file itself
+Dockerfile
+
+# node/npm/yarn stuff
 node_modules
 **/node_modules/
 .browser_modules
 lib
 **/lib
 **/src-gen
-
-*.log
-
 yarn.lock
 
-Dockerfile
+# log files
+*.log
+
+# temp files
 tmp
+
+# jon's personal stuff
+.jonrad
+
+# currently don't support the electron app in docker
+packages/electron-app
