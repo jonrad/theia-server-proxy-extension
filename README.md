@@ -1,12 +1,13 @@
 # Theia Server Proxy Extension Monorepo
 
 This is a monorepo containing:
-* [Theia Server Proxy Extension](./theia-server-proxy-extension) - Library enabling third party web applications to be served via Theia
-* [Theia Server Proxy IFrame](./theia-server-proxy-iframe) - Widget/UI elements for generic iframe support in theia
-* [Theia Server Proxy List Extension](./theia-server-proxy-list-extension) - UI to show all running server proxies. Optional but useful
-* [Theia Jupyter Extension](./theia-jupyter-extension) - Jupyter Notebook extension for Theia
-* [Theia RStudio Extension](./theia-rstudio-extension) - RStudio extension for Theia
-* [Example](./browser-app) - Browser example
+* [Theia Server Proxy Extension](./packages/theia-server-proxy-extension) - Library enabling third party web applications to be served via Theia
+* [Theia Server Proxy IFrame](./packages/theia-server-proxy-iframe) - Widget/UI elements for generic iframe support in theia
+* [Theia Server Proxy List Extension](./packages/theia-server-proxy-list-extension) - UI to show all running server proxies. Optional but useful
+* [Theia Jupyter Extension](./packages/theia-jupyter-extension) - Jupyter Notebook extension for Theia
+* [Theia RStudio Extension](./packages/theia-rstudio-extension) - RStudio extension for Theia
+* [Theia Port Proxy Extension](./packages/theia-port-proxy-extension) - Port Proxy extension, enabling redirecting of traffic from an arbitrary port
+* [Example](./packages/browser-app) - Browser example
 
 ## Demo
 
@@ -28,8 +29,8 @@ Install [nvm](https://github.com/creationix/nvm#install-script).
 
 Install npm and node.
 
-    nvm install 10
-    nvm use 10
+    nvm install 12
+    nvm use 12
 
 Install yarn.
 
