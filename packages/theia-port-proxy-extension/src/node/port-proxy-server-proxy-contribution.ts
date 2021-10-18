@@ -21,7 +21,7 @@ import { ServerProxyInstance, AbstractServerProxyInstance } from 'theia-server-p
 import { ServerProxy, StatusId } from 'theia-server-proxy-extension/lib/common/server-proxy';
 import { Extension } from '../common/const';
 import ServerProxyContext from '../common/server-proxy-context';
-import { ServerProxyUrlManager } from "../../../theia-server-proxy-extension/lib/common/server-proxy-url-manager";
+import { ServerProxyUrlManager } from "theia-server-proxy-extension/lib/common/server-proxy-url-manager";
 
 class OpenPortServerProxyInstance extends AbstractServerProxyInstance {
     async stop(): Promise<boolean> {
@@ -67,7 +67,7 @@ export class PortProxyServerProxyContribution implements ServerProxyContribution
         const pathRewriter: { [key: string]: string } = {};
         pathRewriter[this.serverProxyUrlManager.getPathMatchRegex()] = '';
         baseOptions.pathRewrite = pathRewriter;
-        
+
         return createProxyMiddleware(basePath, baseOptions);
     }
 }
