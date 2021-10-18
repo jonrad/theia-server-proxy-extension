@@ -9,6 +9,11 @@ This is a monorepo containing:
 * [Theia Port Proxy Extension](./packages/theia-port-proxy-extension) - Port Proxy extension, enabling redirecting of traffic from an arbitrary port
 * [Example](./packages/browser-app) - Browser example
 
+## Screenshots
+
+![Jupyter](screenshots/theia-jupyter.png?raw=true)
+![RStudio](screenshots/theia-rstudio.png?raw=true)
+
 ## Demo
 
 Quick demo:
