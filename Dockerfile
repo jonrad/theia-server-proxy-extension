@@ -2,6 +2,9 @@ FROM node:12
 # Generated using docker-diary: https://github.com/jonrad/docker-diary/
 # Note: This Dockerfile is more optimized for iteration rather than image size
 ENV DEBIAN_FRONTEND=noninteractive
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+
 RUN apt-get update && \
     apt-get install -y apt-transport-https ca-certificates curl gnupg-agent software-properties-common yarn libsecret-1-dev && \
     apt-get clean autoclean && apt-get autoremove --yes
@@ -10,7 +13,7 @@ RUN apt-get update && \
 RUN apt-get update && apt-get install -y jupyter-notebook python3-pip && \
     apt-get clean autoclean && apt-get autoremove --yes
 
-# Jupyter nice to have modules
+# Jupyter demo modules
 RUN pip3 install matplotlib
 
 # RStudio
@@ -23,6 +26,9 @@ RUN apt-get install -y r-base gdebi-core && \
 # R package to allow remote control
 RUN R -e "install.packages('rstudioapi', repos='https://cran.rstudio.com/')"
 
+# mlflow ui
+RUN pip3 install mlflow
+
 # prepare for theia
 RUN mkdir -p /home/theia
 WORKDIR /home/theia
@@ -32,6 +38,7 @@ COPY lerna.json .
 COPY package.json .
 COPY packages/theia-jupyter-extension/*.json ./packages/theia-jupyter-extension/
 COPY packages/theia-rstudio-extension/*.json ./packages/theia-rstudio-extension/
+COPY packages/theia-mlflow-ui-extension/*.json ./packages/theia-mlflow-ui-extension/
 COPY packages/theia-port-proxy-extension/*.json ./packages/theia-port-proxy-extension/
 COPY packages/theia-server-proxy-extension/*.json ./packages/theia-server-proxy-extension/
 COPY packages/theia-server-proxy-iframe-extension/*.json ./packages/theia-server-proxy-iframe-extension/

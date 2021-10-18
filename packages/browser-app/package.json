@@ -20,12 +20,14 @@
     "theia-jupyter-extension": "^0.0.20",
     "theia-port-proxy-extension": "^0.0.20",
     "theia-rstudio-extension": "^0.0.20",
+    "theia-mlflow-ui-extension": "^0.0.20",
     "theia-server-proxy-list-extension": "^0.0.20"
   },
   "devDependencies": {
     "@theia/cli": "1.18.0"
   },
   "scripts": {
+    "rebuild:browser": "theia rebuild:browser",
     "prepare": "test -n \"$IGNORE_PREPARE\" || (theia generate --app-target=browser && theia build)",
     "start": "theia start --hostname 0.0.0.0",
     "watch": "theia build --watch --mode development"
