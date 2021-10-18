@@ -4,6 +4,9 @@
 # docker file itself
 Dockerfile
 
+# screenshots
+screenshots/
+
 # node/npm/yarn stuff
 node_modules
 **/node_modules/
