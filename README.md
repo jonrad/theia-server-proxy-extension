@@ -116,16 +116,3 @@ In this directory start up the container
 
 
 Now you can still develop locally and even run `yarn watch` but you'll have to start the main app in the docker container
-
-
-## Roadmap to Publish
-
-* Handle statuses/failures/etc on app start
-* Remove all todo 0 and 1s
-* Test with different port/url
-
-## Roadmap of nice to haves
-
-* Customizable loading logo
-* Do we really need to include src in the files?
-* Add cancellation to stop widget
