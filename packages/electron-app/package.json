@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "electron-app",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "license": "EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0",
   "homepage": "https://github.com/jonrad/theia-server-proxy-extension",
   "main": "src-gen/frontend/electron-main.js",
@@ -18,12 +18,12 @@
     "@theia/process": "1.18.0",
     "@theia/terminal": "1.18.0",
     "@theia/workspace": "1.18.0",
-    "theia-iframe-panels-extension": "^0.0.20",
-    "theia-jupyter-extension": "^0.0.20",
-    "theia-port-proxy-extension": "^0.0.20",
-    "theia-rstudio-extension": "^0.0.20",
-    "theia-mlflow-ui-extension": "^0.0.20",
-    "theia-server-proxy-list-extension": "^0.0.20"
+    "theia-iframe-panels-extension": "^0.0.21",
+    "theia-jupyter-extension": "^0.0.21",
+    "theia-mlflow-ui-extension": "^0.0.21",
+    "theia-port-proxy-extension": "^0.0.21",
+    "theia-rstudio-extension": "^0.0.21",
+    "theia-server-proxy-list-extension": "^0.0.21"
   },
   "devDependencies": {
     "@theia/cli": "1.18.0",
