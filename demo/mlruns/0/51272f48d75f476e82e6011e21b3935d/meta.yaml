@@ -1,0 +1,15 @@
+artifact_uri: file:///home/project/mlruns/0/51272f48d75f476e82e6011e21b3935d/artifacts
+end_time: 1634500754557
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+name: ''
+run_id: 51272f48d75f476e82e6011e21b3935d
+run_uuid: 51272f48d75f476e82e6011e21b3935d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1634500754542
+status: 3
+tags: []
+user_id: data-scientist1

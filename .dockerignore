@@ -3,6 +3,7 @@
 
 # docker file itself
 Dockerfile
+*.Dockerfile
 
 # screenshots
 screenshots/

@@ -22,13 +22,16 @@
     "theia-jupyter-extension": "^0.0.20",
     "theia-port-proxy-extension": "^0.0.20",
     "theia-rstudio-extension": "^0.0.20",
+    "theia-mlflow-ui-extension": "^0.0.20",
     "theia-server-proxy-list-extension": "^0.0.20"
   },
   "devDependencies": {
-    "@theia/cli": "1.18.0"
+    "@theia/cli": "1.18.0",
+    "electron-rebuild": "^3.2.3"
   },
   "scripts": {
     "prepare": "test -n \"$IGNORE_PREPARE\" || (theia generate --app-target=electron && theia build)",
+    "rebuild:electron": "theia rebuild:electron",
     "start": "theia start",
     "watch": "theia build --watch --mode development"
   },
