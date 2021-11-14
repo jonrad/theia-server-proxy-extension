@@ -19,10 +19,12 @@ import { CommandContribution } from '@theia/core';
 import { PortProxyCommandContribution } from './port-proxy-command-contribution';
 import { PortProxyOpenHandler } from './port-proxy-open-handler';
 import { OpenHandler } from '@theia/core/lib/browser';
+import { TabBarToolbarContribution } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
 
 export default new ContainerModule((bind: interfaces.Bind) => {
     bind(PortProxyCommandContribution).toSelf().inSingletonScope();
     bind(CommandContribution).toService(PortProxyCommandContribution);
+    bind(TabBarToolbarContribution).toService(PortProxyCommandContribution);
 
     bind(OpenHandler).to(PortProxyOpenHandler);
 });

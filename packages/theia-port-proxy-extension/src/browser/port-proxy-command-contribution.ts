@@ -23,9 +23,10 @@ import { ServerProxyOpenHandler } from 'theia-server-proxy-extension/lib/browser
 import { FileNavigatorContribution } from '@theia/navigator/lib/browser/navigator-contribution';
 import ServerProxyContext from '../common/server-proxy-context';
 import { QuickInputService } from '@theia/core/lib/browser';
+import { TabBarToolbarContribution } from '@theia/core/lib/browser/shell/tab-bar-toolbar';
 
 @injectable()
-export class PortProxyCommandContribution implements CommandContribution {
+export class PortProxyCommandContribution implements CommandContribution, TabBarToolbarContribution {
     @inject(ServerProxyInstanceManager)
     protected readonly serverProxyInstanceManager: ServerProxyInstanceManager;
 
@@ -77,6 +78,16 @@ export class PortProxyCommandContribution implements CommandContribution {
                     instance
                 );
             }
+        });
+    }
+
+    registerToolbarItems(): void {
+        this.fileNavigatorContribution.registerMoreToolbarItem({
+            id: Extension.ID,
+            command: Extension.ID,
+            tooltip: "Start Port Proxy",
+            group: "z Port Proxy",
+            priority: -100
         });
     }
 }
