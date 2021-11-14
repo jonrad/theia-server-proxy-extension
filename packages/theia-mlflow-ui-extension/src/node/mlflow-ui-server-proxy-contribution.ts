@@ -76,7 +76,6 @@ export class MlFlowUiServerProxyContribution implements ServerProxyContribution 
                 res.setHeader('Content-Length', Buffer.byteLength(text));
                 res.write(text);
                 res.end();
-                // onProxyReq?.(proxyReq, req, res);
             } else {
                 onProxyReq?.(proxyReq, req, res);
             }

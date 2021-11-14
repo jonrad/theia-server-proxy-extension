@@ -48,7 +48,6 @@ export class MlFlowUiCommandContribution implements CommandContribution {
             category: Extension.Name
         }, {
             execute: async (backendStoreUri: string) => {
-                console.log(`backend: ${backendStoreUri}`)
                 if (!backendStoreUri) {
                     return;
                 }
